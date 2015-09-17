@@ -27,7 +27,7 @@ public class RootLayoutController {
     @FXML
     private void handleLogin() {
         if( emailTextField.getText().length() == 0 || pswdTextField.getText().length() == 0 ) {
-            System.out.println("Nem töltöttél ki minen mez?t!");
+            System.out.println("Nem tï¿½ltï¿½ttï¿½l ki minen mez?t!");
             return;
         }
 
@@ -37,7 +37,7 @@ public class RootLayoutController {
         session.close();
 
         if( user == null || !user.getPassword().equals(pswdTextField.getText()) ) {
-            System.out.println("Rossz bejelentkezési adatok!");
+            System.out.println("Rossz bejelentkezï¿½si adatok!");
         } else {
             System.out.println("Be vagy jelentkezve");
         }
@@ -45,6 +45,22 @@ public class RootLayoutController {
 
     @FXML
     private void handleNewPassword() {
+        try {
+            Stage stage = new Stage();
+            stage.initOwner( Main.getPrimaryStage() );
+            stage.initModality(Modality.WINDOW_MODAL);
+
+            FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/NewPassword.fxml") );
+            AnchorPane pane = pane = (AnchorPane) loader.load();
+
+            Scene scene = new Scene(pane);
+            stage.setScene(scene);
+
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Error!");
+        }
 
     }
 
