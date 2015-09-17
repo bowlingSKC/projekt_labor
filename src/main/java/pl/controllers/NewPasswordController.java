@@ -17,7 +17,7 @@ public class NewPasswordController {
     @FXML
     private void handleSend() {
         if(mailField.getText() == "") {
-            System.out.println("Empty.");
+            System.out.println("Empty");
         }
     }
 
