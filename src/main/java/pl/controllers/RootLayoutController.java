@@ -13,6 +13,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import pl.Main;
 import pl.jpa.SessionUtil;
+import pl.model.Account;
 import pl.model.User;
 
 import java.io.IOException;
@@ -31,15 +32,22 @@ public class RootLayoutController {
             return;
         }
 
-        Session session = SessionUtil.getSession();
-        Criteria criteria = session.createCriteria(User.class);
-        User user = (User) criteria.add(Restrictions.eq("email", emailTextField.getText())).uniqueResult();
-        session.close();
+        try {
+            Session session = SessionUtil.getSession();
+            Criteria criteria = session.createCriteria(User.class);
+            User user = (User) criteria.add(Restrictions.eq("email", emailTextField.getText())).uniqueResult();
+            session.close();
 
-        if( user == null || !user.getPassword().equals(pswdTextField.getText()) ) {
-            System.out.println("Rossz bejelentkez�si adatok!");
-        } else {
-            System.out.println("Be vagy jelentkezve");
+            if( user == null || !(Main.getSHA512Hash( pswdTextField.getText(), user.getSalt() ).equals(user.getPassword())) ) {
+                System.out.println("Rossz bejelentkez�si adatok!");
+            } else {
+                System.out.println("Be vagy jelentkezve");
+                for(Account account : user.getAccounts()) {
+                    System.out.println("Szamlaszam: " + account.getAccountNumber());
+                }
+            }
+        } catch (Throwable ex) {
+            ex.printStackTrace();
         }
     }
 
@@ -73,6 +81,9 @@ public class RootLayoutController {
 
             FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/Registration.fxml") );
             AnchorPane pane = (AnchorPane) loader.load();
+
+            RegistrationController controller = loader.getController();
+            controller.setDialogStage(stage);
 
             Scene scene = new Scene(pane);
             stage.setScene(scene);

@@ -1,7 +1,11 @@
 package pl.model;
 
+import org.hibernate.annotations.IndexColumn;
+
 import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "user")
@@ -10,32 +14,47 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(name = "firstname", nullable = false, length = 50)
     private String firstname;
+
     @Column(name = "lastname", nullable = false, length = 50)
     private String lastname;
-    @Column(name = "email", nullable = false, length = 50)
+
+    @Column(name = "email", nullable = false, length = 50, unique = true)
     private String email;
-    @Column(name = "confirmedEmail", nullable = false)
-    private boolean confirmedEmail;
+
     @Column(name = "password", nullable = false)
     private String password;
+
     @Column(name = "salt", nullable = false, length = 20)
     private String salt;
+
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "last_login")
     private Date lastLogin;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name = "registred", nullable = false)
+    private Date registredDate;
+
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "owner")
+    private Set<Account> accounts;
+
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "owner")
+    private Set<MoneyGroup> moneyGroups;
 
     public User() {
 
     }
 
-    public User(String firstname, String lastname, String email, String password, String salt, Date lastLogin) {
+    public User(String firstname, String lastname, String email, String password, String salt, Date registredDate, Date lastLogin) {
         this.firstname = firstname;
         this.lastname = lastname;
         this.email = email;
         this.password = password;
         this.salt = salt;
+        this.registredDate = registredDate;
         this.lastLogin = lastLogin;
     }
 
@@ -71,14 +90,6 @@ public class User {
         this.email = email;
     }
 
-    public boolean isConfirmedEmail() {
-        return confirmedEmail;
-    }
-
-    public void setConfirmedEmail(boolean confirmedEmail) {
-        this.confirmedEmail = confirmedEmail;
-    }
-
     public String getPassword() {
         return password;
     }
@@ -101,6 +112,30 @@ public class User {
 
     public void setLastLogin(Date lastLogin) {
         this.lastLogin = lastLogin;
+    }
+
+    public Set<Account> getAccounts() {
+        return accounts;
+    }
+
+    public void setAccounts(Set<Account> accounts) {
+        this.accounts = accounts;
+    }
+
+    public Set<MoneyGroup> getMoneyGroups() {
+        return moneyGroups;
+    }
+
+    public void setMoneyGroups(Set<MoneyGroup> moneyGroups) {
+        this.moneyGroups = moneyGroups;
+    }
+
+    public Date getRegistredDate() {
+        return registredDate;
+    }
+
+    public void setRegistredDate(Date registredDate) {
+        this.registredDate = registredDate;
     }
 
     @Override

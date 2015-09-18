@@ -18,7 +18,9 @@
 
         <!-- Model classes -->
         <mapping class="pl.model.User" />
-
+        <mapping class="pl.model.Bank" />
+        <mapping class="pl.model.Account" />
+        <mapping class="pl.model.MoneyGroup" />
 
     </session-factory>
 </hibernate-configuration>

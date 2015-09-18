@@ -4,8 +4,14 @@ import javafx.fxml.FXML;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import pl.Main;
 import pl.MessageBox;
+import pl.jpa.SessionUtil;
+import pl.model.User;
 
+import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -22,14 +28,41 @@ public class RegistrationController {
     @FXML
     private PasswordField pswdCField;
 
+    private Stage dialogStage;
+
     @FXML
     private void handleRegistration() {
         try {
             checkFields();
-            System.out.println("Minden oké ...");
+
+            User newUser = creteUserFromFields();
+            Session session = SessionUtil.getSession();
+            Transaction tx = session.beginTransaction();
+            session.save(newUser);
+            tx.commit();
+            session.close();
+
+            dialogStage.close();
+            MessageBox.showInformationMessage("Regisztráció", "Sikeres regisztráció!", "Most már bejelentkezhetsz az E-mail címeddel és jelzavaddal.", false);
         } catch (Exception ex) {
             MessageBox.showErrorMessage("Hiba", "Nem töltöttél ki minden mez?t helyesen!", ex.getMessage(), false);
         }
+    }
+
+    private User creteUserFromFields() {
+        try {
+            User newUser = new User();
+            newUser.setFirstname( firstnameField.getText() );
+            newUser.setLastname(lastnameField.getText());
+            newUser.setEmail(emailField.getText());
+            newUser.setSalt( Main.getSalt() );
+            newUser.setPassword( Main.getSHA512Hash(pswdField.getText(), newUser.getSalt()) );
+            newUser.setRegistredDate(new Date());
+            return newUser;
+        } catch (Throwable ex) {
+            ex.printStackTrace();
+        }
+        return null;
     }
 
     private void checkFields() throws Exception {
@@ -47,7 +80,7 @@ public class RegistrationController {
             buffer.append("Nem töltötted ki a \'E-mail\' mez?t!\n");
         }
 
-        if( isValidEmail() ) {
+        if( !isValidEmail() ) {
             buffer.append("Helytelen E-mail cím formátumot adtál meg!\n");
         }
 
@@ -63,7 +96,7 @@ public class RegistrationController {
             buffer.append("A jelszónak 8 és 20 karakter közötti hosszúságúnak kell lennie!\n");
         }
 
-        if( !pswdField.equals(pswdCField) ) {
+        if( !(pswdField.getText().equals(pswdCField.getText())) ) {
             buffer.append("A két begépelt jelszó nem egyezik!");
         }
 
@@ -80,4 +113,7 @@ public class RegistrationController {
         return matcher.matches();
     }
 
+    public void setDialogStage(Stage dialogStage) {
+        this.dialogStage = dialogStage;
+    }
 }
