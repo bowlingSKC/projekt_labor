@@ -11,12 +11,12 @@ public class Bank {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "name", nullable = false, length = 100)
+    @Column(name = "name", nullable = false, length = 100, unique = true)
     private String name;
-    @Column(name = "address", nullable = false)
-    private String address;
-    @Column(name = "phoneNumber", nullable = false)
+    @Column(name = "phoneNumber", nullable = true)
     private String phoneNumber;
+    @Column(name = "giro", length = 3, nullable = false, updatable = false, unique = true)
+    private String giro;
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "bank")
     private Set<Account> accounts;
 
@@ -24,9 +24,8 @@ public class Bank {
 
     }
 
-    public Bank(String name, String address, String phoneNumber) {
+    public Bank(String name, String phoneNumber) {
         this.name = name;
-        this.address = address;
         this.phoneNumber = phoneNumber;
     }
 
@@ -46,14 +45,6 @@ public class Bank {
         this.name = name;
     }
 
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
     public String getPhoneNumber() {
         return phoneNumber;
     }
@@ -62,12 +53,32 @@ public class Bank {
         this.phoneNumber = phoneNumber;
     }
 
+    public String getGiro() {
+        return giro;
+    }
+
+    public void setGiro(String giro) {
+        this.giro = giro;
+    }
+
     public Set<Account> getAccounts() {
         return accounts;
     }
 
     public void setAccounts(Set<Account> accounts) {
         this.accounts = accounts;
+    }
+
+    public float getAccountNumber() {
+        return accounts.size();
+    }
+
+    public float getAllMoney() {
+        float sum = 0;
+        for(Account account : accounts) {
+            sum += account.getMoney();
+        }
+        return sum;
     }
 
     @Override
@@ -85,5 +96,10 @@ public class Bank {
     @Override
     public int hashCode() {
         return name.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }

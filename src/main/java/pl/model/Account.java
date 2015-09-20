@@ -14,6 +14,8 @@ public class Account {
     private Long id;
     @Column(name = "accountNumber", nullable = false, length = 24, updatable = false)
     private String accountNumber;
+    @Column(name = "name", nullable = false)
+    private String name;
     @Column(name = "money", nullable = false)
     private float money;
     @Temporal(TemporalType.DATE)
@@ -27,13 +29,16 @@ public class Account {
     private Bank bank;
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "account")
     private Set<MoneyGroup> moneyGroups;
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "from")
+    private Set<Transaction> fromTransactions;
 
     public Account() {
 
     }
 
-    public Account(String accountNumber, float money, Date createdDate, User owner, Bank bank) {
+    public Account(String accountNumber, String name, float money, Date createdDate, User owner, Bank bank) {
         this.accountNumber = accountNumber;
+        this.name = name;
         this.money = money;
         this.createdDate = createdDate;
         this.owner = owner;
@@ -54,6 +59,14 @@ public class Account {
 
     public void setAccountNumber(String accountNumber) {
         this.accountNumber = accountNumber;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public float getMoney() {
@@ -96,6 +109,14 @@ public class Account {
         this.moneyGroups = moneyGroups;
     }
 
+    public Set<Transaction> getFromTransactions() {
+        return fromTransactions;
+    }
+
+    public void setFromTransactions(Set<Transaction> fromTransactions) {
+        this.fromTransactions = fromTransactions;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -110,6 +131,13 @@ public class Account {
 
     @Override
     public int hashCode() {
-        return accountNumber.hashCode();
+        int result = accountNumber != null ? accountNumber.hashCode() : 0;
+        result = 31 * result + (money != +0.0f ? Float.floatToIntBits(money) : 0);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return name + " [" + accountNumber + "]";
     }
 }

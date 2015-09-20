@@ -1,10 +1,7 @@
 package pl.model;
 
-import org.hibernate.annotations.IndexColumn;
-
 import javax.persistence.*;
 import java.util.Date;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -30,13 +27,12 @@ public class User {
     @Column(name = "salt", nullable = false, length = 20)
     private String salt;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "last_login")
-    private Date lastLogin;
-
     @Temporal(TemporalType.DATE)
     @Column(name = "registred", nullable = false)
     private Date registredDate;
+
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "user")
+    private Set<Login> logins;
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "owner")
     private Set<Account> accounts;
@@ -48,14 +44,13 @@ public class User {
 
     }
 
-    public User(String firstname, String lastname, String email, String password, String salt, Date registredDate, Date lastLogin) {
+    public User(String firstname, String lastname, String email, String password, String salt, Date registredDate) {
         this.firstname = firstname;
         this.lastname = lastname;
         this.email = email;
         this.password = password;
         this.salt = salt;
         this.registredDate = registredDate;
-        this.lastLogin = lastLogin;
     }
 
     public Long getId() {
@@ -106,14 +101,6 @@ public class User {
         this.salt = salt;
     }
 
-    public Date getLastLogin() {
-        return lastLogin;
-    }
-
-    public void setLastLogin(Date lastLogin) {
-        this.lastLogin = lastLogin;
-    }
-
     public Set<Account> getAccounts() {
         return accounts;
     }
@@ -136,6 +123,35 @@ public class User {
 
     public void setRegistredDate(Date registredDate) {
         this.registredDate = registredDate;
+    }
+
+    public Set<Login> getLogins() {
+        return logins;
+    }
+
+    public void setLogins(Set<Login> logins) {
+        this.logins = logins;
+    }
+
+    public float getAllMoneyFromAccounts() {
+        float sum = 0;
+        for(Account acc : accounts) {
+            sum += acc.getMoney();
+        }
+        return sum;
+    }
+
+    public Date getLastLogin() {
+        Date date = null;
+        if( logins.size() != 0 ) {
+            date = logins.iterator().next().getDate();
+            for( Login login : logins ) {
+                if( date.before(login.getDate()) ) {
+                    date = login.getDate();
+                }
+            }
+        }
+        return date;
     }
 
     @Override

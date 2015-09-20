@@ -10,13 +10,16 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 import org.hibernate.criterion.Restrictions;
 import pl.Main;
 import pl.jpa.SessionUtil;
-import pl.model.Account;
+import pl.model.Login;
 import pl.model.User;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.util.Date;
 
 public class RootLayoutController {
 
@@ -36,16 +39,25 @@ public class RootLayoutController {
             Session session = SessionUtil.getSession();
             Criteria criteria = session.createCriteria(User.class);
             User user = (User) criteria.add(Restrictions.eq("email", emailTextField.getText())).uniqueResult();
-            session.close();
 
             if( user == null || !(Main.getSHA512Hash( pswdTextField.getText(), user.getSalt() ).equals(user.getPassword())) ) {
+                if( !(Main.getSHA512Hash( pswdTextField.getText(), user.getSalt() ).equals(user.getPassword())) ) {
+                    Login login = new Login(user, InetAddress.getLocalHost().getHostAddress(), new Date(), false);
+                    Transaction tx = session.beginTransaction();
+                    session.save(login);
+                    tx.commit();
+                }
                 System.out.println("Rossz bejelentkez�si adatok!");
             } else {
-                System.out.println("Be vagy jelentkezve");
-                for(Account account : user.getAccounts()) {
-                    System.out.println("Szamlaszam: " + account.getAccountNumber());
-                }
+                Login login = new Login(user, InetAddress.getLocalHost().getHostAddress(), new Date(), true);
+                Transaction tx = session.beginTransaction();
+                session.save(login);
+                tx.commit();
+                Main.login(user);
             }
+
+            session.close();
+
         } catch (Throwable ex) {
             ex.printStackTrace();
         }
@@ -58,7 +70,7 @@ public class RootLayoutController {
             stage.initOwner( Main.getPrimaryStage() );
             stage.initModality(Modality.WINDOW_MODAL);
 
-            FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/NewPassword.fxml") );
+            FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/ForgotPassword.fxml") );
             AnchorPane pane = pane = (AnchorPane) loader.load();
 
             Scene scene = new Scene(pane);

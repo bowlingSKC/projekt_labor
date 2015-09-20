@@ -1,34 +1,46 @@
 package pl;
 
 import javafx.application.Application;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
+import pl.controllers.LoggedController;
 import pl.controllers.RootLayoutController;
-import pl.jpa.SessionUtil;
-import pl.model.Account;
-import pl.model.Bank;
 import pl.model.User;
 
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.Date;
 
 public class Main extends Application {
 
     private static Stage primaryStage;
+    private static Scene logoutScene;
+    private static Scene loginScene;
+
+    private static ObjectProperty<User> loggedUser = new SimpleObjectProperty<>();
 
     @Override
     public void start(Stage primaryStage) throws Exception {
         this.primaryStage = primaryStage;
-        this.primaryStage.setTitle("Ide ki kéne találni valami jót ...");
+        this.primaryStage.getIcons().add( new Image("imgs/money_icon.png") );
+        this.primaryStage.setTitle(" --- CÍM --- ");
+
 
         initLayout();
+        loggedUser.addListener((obs, oldValue, newValue) -> {
+            if( newValue == null ) {
+                this.primaryStage.setScene(logoutScene);
+            } else {
+                this.primaryStage.setScene(loginScene);
+            }
+        });
     }
 
     private void initLayout() {
@@ -36,8 +48,8 @@ public class Main extends Application {
             FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/RootLayout.fxml") );
             AnchorPane pane = (AnchorPane) loader.load();
 
-            Scene scene = new Scene(pane);
-            this.primaryStage.setScene(scene);
+            logoutScene = new Scene(pane);
+            this.primaryStage.setScene(logoutScene);
 
             RootLayoutController rootLayoutController = loader.getController();
 
@@ -67,8 +79,33 @@ public class Main extends Application {
         return salt.toString();
     }
 
+    public static void login(User user) {
+        loggedUser.setValue(user);
+        try {
+            FXMLLoader loader2 = new FXMLLoader( Main.class.getResource("../layout/Logged.fxml") );
+            BorderPane loggedpane = (BorderPane) loader2.load();
+
+            LoggedController controller = loader2.getController();
+            controller.setLayout(loggedpane);
+
+            Scene scene = new Scene(loggedpane);
+            scene.getStylesheets().add("styles/menu_tree.css");
+            primaryStage.setScene(scene);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public static void logout() {
+        loggedUser.setValue(null);
+    }
+
     public static Stage getPrimaryStage() {
         return primaryStage;
+    }
+
+    public static User getLoggedUser() {
+        return loggedUser.get();
     }
 
     public static void main(String[] args) {

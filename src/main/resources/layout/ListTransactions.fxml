@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import impl.org.controlsfx.skin.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pl.controllers.ListTransactionController">
+   <children>
+      <Label layoutX="14.0" layoutY="14.0" text="Tranzakciók listázása">
+         <font>
+            <Font name="System Bold" size="15.0" />
+         </font>
+      </Label>
+      <TableView fx:id="transactionTableView" layoutX="32.0" layoutY="44.0" prefHeight="223.0" prefWidth="530.0" AnchorPane.leftAnchor="35.0" AnchorPane.rightAnchor="35.0">
+        <columns>
+          <TableColumn fx:id="accountTableColumn" prefWidth="75.0" text="Számlaszám" />
+          <TableColumn fx:id="moneyTableColumn" prefWidth="75.0" text="Összeg" />
+            <TableColumn fx:id="dateTableColumn" prefWidth="75.0" text="Dátum" />
+            <TableColumn fx:id="fromTableColumn" prefWidth="75.0" text="Feladó" />
+        </columns>
+         <columnResizePolicy>
+            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+         </columnResizePolicy>
+      </TableView>
+      <Label layoutX="35.0" layoutY="281.0" text="Szűrés">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font>
+      </Label>
+      <Label layoutX="54.0" layoutY="311.0" text="Intervallum kezdete:" />
+      <Label layoutX="54.0" layoutY="340.0" text="Intervallum vége:" />
+      <DatePicker fx:id="searchFromDate" layoutX="195.0" layoutY="307.0" />
+      <DatePicker fx:id="searchToDate" layoutX="195.0" layoutY="336.0" />
+      <TextField fx:id="searchCommentField" layoutX="195.0" layoutY="365.0" prefHeight="25.0" prefWidth="174.0" />
+      <Label layoutX="54.0" layoutY="369.0" text="Keresés az üzenetekben" />
+      <ScrollPane fx:id="scrollPane" layoutX="377.0" layoutY="308.0" prefHeight="82.0" prefWidth="209.0" />
+   </children>
+</AnchorPane>

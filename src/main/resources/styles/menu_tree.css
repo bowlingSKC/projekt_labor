@@ -1,0 +1,22 @@
+.tree-view, .tree-cell {
+     /*-fx-background-color: black; */ -fx-background-color: ghostwhite;
+    /* -fx-text-fill: white; */ -fx-text-fill: black;
+    -fx-font-size: 16px;
+}
+
+.tree-cell:expanded, .tree-cell:sub-tree-item {
+    /* -fx-background-color: #404040; */ -fx-background-color: lightgray;
+}
+
+.tree-cell:selected {
+    -fx-font-weight: bold;
+}
+
+.tree-cell:hover {
+    -fx-background-color: chartreuse;
+}
+
+.tree-cell:sub-tree-item {
+    -fx-padding: 0.25em;
+    -fx-font-size: 12px;
+}

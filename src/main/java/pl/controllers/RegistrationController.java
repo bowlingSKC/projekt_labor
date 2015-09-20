@@ -92,7 +92,7 @@ public class RegistrationController {
             buffer.append("Nem töltötted ki a \'Jelszó meger?sítése\' mez?t!\n");
         }
 
-        if( pswdField.getText().length() <= 8 || pswdField.getText().length() >= 20 ) {
+        if( pswdField.getText().length() < 8 || pswdField.getText().length() >= 20 ) {
             buffer.append("A jelszónak 8 és 20 karakter közötti hosszúságúnak kell lennie!\n");
         }
 
