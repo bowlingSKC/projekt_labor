@@ -24,10 +24,8 @@ public class ForgotPasswordController {
     @FXML
     private TextField mailField;
 
-    String username = "projekt.penzugy";                //our email address
-    String password = "projektlabor";                   //our password
     String recipiantEmail;                              //destination
-    String title = "Password remainder";                //subject
+    String title = "Ãšj jelszÃ³";                //subject
     String message;                                     //message
     private SecureRandom random;
     public String nextSessionId() {
@@ -36,10 +34,10 @@ public class ForgotPasswordController {
 
     @FXML
     private void handleSend() {
-        message = "Your new password: ";
+        message = "Ãšj jelszavad: ";
         recipiantEmail = mailField.getText();
         if(mailField.getText().length() == 0) {
-            System.out.println("Üres mez?.");
+            System.out.println("ï¿½res mez?.");
         }
         random = new SecureRandom();                    //generate random number
         String newpassword = nextSessionId();           //save password to a String
@@ -52,13 +50,13 @@ public class ForgotPasswordController {
             String newPass = Main.getSHA512Hash(newpassword, newSalt);
             changePassword(newPass, newSalt, recipiantEmail);
             System.out.println(message);
-            mailField.setText("Please wait!");
-            SendMail.Send(username, password, recipiantEmail, title, message);
-            mailField.setText("E-mail sent!");
+            //mailField.setText("KÃ©rlek vÃ¡rj!");
+            SendMail.Send(recipiantEmail, title, message);
+            mailField.setText("E-mail elkÃ¼ldve!");
         } catch (Throwable ex) {
             ex.printStackTrace();
-            MessageBox.showErrorMessage("Hiba", "A jelszóemlékeztet? elküldése sikertelen volt!",
-                    "Próbálja kés?bb.", false);
+            MessageBox.showErrorMessage("Hiba", "A jelszï¿½emlï¿½keztet? elkï¿½ldï¿½se sikertelen volt!",
+                    "Prï¿½bï¿½lja kï¿½s?bb.", false);
         }
 
     }

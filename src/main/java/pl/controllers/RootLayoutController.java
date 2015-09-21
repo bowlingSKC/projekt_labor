@@ -17,6 +17,8 @@ import pl.jpa.SessionUtil;
 import pl.model.Login;
 import pl.model.User;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Date;
@@ -41,6 +43,7 @@ public class RootLayoutController {
             User user = (User) criteria.add(Restrictions.eq("email", emailTextField.getText())).uniqueResult();
 
             if( user == null || !(Main.getSHA512Hash( pswdTextField.getText(), user.getSalt() ).equals(user.getPassword())) ) {
+
                 if( !(Main.getSHA512Hash( pswdTextField.getText(), user.getSalt() ).equals(user.getPassword())) ) {
                     Login login = new Login(user, InetAddress.getLocalHost().getHostAddress(), new Date(), false);
                     Transaction tx = session.beginTransaction();
@@ -62,6 +65,7 @@ public class RootLayoutController {
             ex.printStackTrace();
         }
     }
+
 
     @FXML
     private void handleNewPassword() {

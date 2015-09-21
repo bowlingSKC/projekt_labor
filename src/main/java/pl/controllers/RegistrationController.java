@@ -4,10 +4,13 @@ import javafx.fxml.FXML;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.hibernate.criterion.Restrictions;
 import pl.Main;
 import pl.MessageBox;
+import pl.SendMail;
 import pl.jpa.SessionUtil;
 import pl.model.User;
 
@@ -35,6 +38,7 @@ public class RegistrationController {
         try {
             checkFields();
 
+            SendMail.Send(emailField.getText(), "RegisztrÃ¡ciÃ³", "Sikeresen regisztrÃ¡ltÃ¡l a rendszerÃ¼nkbe.\n Jelszavad: " + pswdField.getText());
             User newUser = creteUserFromFields();
             Session session = SessionUtil.getSession();
             Transaction tx = session.beginTransaction();
@@ -43,9 +47,9 @@ public class RegistrationController {
             session.close();
 
             dialogStage.close();
-            MessageBox.showInformationMessage("Regisztráció", "Sikeres regisztráció!", "Most már bejelentkezhetsz az E-mail címeddel és jelzavaddal.", false);
+            MessageBox.showInformationMessage("Regisztrï¿½ciï¿½", "Sikeres regisztrï¿½ciï¿½!", "Most mï¿½r bejelentkezhetsz az E-mail cï¿½meddel ï¿½s jelzavaddal.", false);
         } catch (Exception ex) {
-            MessageBox.showErrorMessage("Hiba", "Nem töltöttél ki minden mez?t helyesen!", ex.getMessage(), false);
+            MessageBox.showErrorMessage("Hiba", "Nem tï¿½ltï¿½ttï¿½l ki minden mez?t helyesen!", ex.getMessage(), false);
         }
     }
 
@@ -69,35 +73,39 @@ public class RegistrationController {
         StringBuffer buffer = new StringBuffer();
 
         if( firstnameField.getText().length() == 0 ) {
-            buffer.append("Nem töltötted ki a \'Vezetéknév\' mez?t!\n");
+            buffer.append("Nem tï¿½ltï¿½tted ki a \'Vezetï¿½knï¿½v\' mez?t!\n");
         }
 
         if( lastnameField.getText().length() == 0 ) {
-            buffer.append("Nem töltötted ki a \'Keresztnév\' mez?t!\n");
+            buffer.append("Nem tï¿½ltï¿½tted ki a \'Keresztnï¿½v\' mez?t!\n");
         }
 
         if( emailField.getText().length() == 0 ) {
-            buffer.append("Nem töltötted ki a \'E-mail\' mez?t!\n");
+            buffer.append("Nem tï¿½ltï¿½tted ki a \'E-mail\' mez?t!\n");
         }
 
         if( !isValidEmail() ) {
-            buffer.append("Helytelen E-mail cím formátumot adtál meg!\n");
+            buffer.append("Helytelen E-mail cï¿½m formï¿½tumot adtï¿½l meg!\n");
+        }
+
+        if( existEmail()){
+            buffer.append("Ez az email cï¿½m mï¿½r regisztrï¿½lva van!\n");
         }
 
         if( pswdField.getText().length() == 0 ) {
-            buffer.append("Nem töltötted ki a \'Jelszó\' mez?t!\n");
+            buffer.append("Nem tï¿½ltï¿½tted ki a \'Jelszï¿½\' mez?t!\n");
         }
 
         if( pswdCField.getText().length() == 0 ) {
-            buffer.append("Nem töltötted ki a \'Jelszó meger?sítése\' mez?t!\n");
+            buffer.append("Nem tï¿½ltï¿½tted ki a \'Jelszï¿½ meger?sï¿½tï¿½se\' mez?t!\n");
         }
 
         if( pswdField.getText().length() < 8 || pswdField.getText().length() >= 20 ) {
-            buffer.append("A jelszónak 8 és 20 karakter közötti hosszúságúnak kell lennie!\n");
+            buffer.append("A jelszï¿½nak 8 ï¿½s 20 karakter kï¿½zï¿½tti hosszï¿½sï¿½gï¿½nak kell lennie!\n");
         }
 
         if( !(pswdField.getText().equals(pswdCField.getText())) ) {
-            buffer.append("A két begépelt jelszó nem egyezik!");
+            buffer.append("A kï¿½t begï¿½pelt jelszï¿½ nem egyezik!");
         }
 
         if( buffer.toString().length() != 0 ) {
@@ -111,6 +119,16 @@ public class RegistrationController {
         Pattern pattern = Pattern.compile(EMAIL_PATTERN);
         Matcher matcher = pattern.matcher(emailField.getText().trim());
         return matcher.matches();
+    }
+
+    private boolean existEmail() {
+        Session session = SessionUtil.getSession();
+        Criteria criteria = session.createCriteria(User.class);
+        User mailUser = (User) criteria.add(Restrictions.eq("email", emailField.getText())).uniqueResult();
+        if (mailUser == null) {
+            return false;
+        }
+        return true;
     }
 
     public void setDialogStage(Stage dialogStage) {
