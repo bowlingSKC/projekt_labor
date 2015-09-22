@@ -81,7 +81,7 @@ public class ListTransactionController {
                         setText(null);
                         setStyle("");
                     } else {
-                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd kk:mm:ss");
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd");
                         setText(sdf.format(item));
                     }
 
@@ -89,7 +89,7 @@ public class ListTransactionController {
             };
         });
 
-        // kereséhez számlaszámok kiválasztása
+        // keresï¿½hez szï¿½mlaszï¿½mok kivï¿½lasztï¿½sa
         VBox vbox = new VBox();
         for( Account acc : Main.getLoggedUser().getAccounts() ) {
             CheckBox checkBox = new CheckBox( acc.toString() );
@@ -99,9 +99,10 @@ public class ListTransactionController {
         }
         scrollPane.setContent(vbox);
 
-        // tranzakciók betöltése
+        // tranzakciï¿½k betï¿½ltï¿½se
         for(Account acc : Main.getLoggedUser().getAccounts()) {
             Set<Transaction> fromTransactions = acc.getFromTransactions();
+            System.out.println(fromTransactions.size());
             if( fromTransactions != null ) {
                 transactionTableView.getItems().addAll(fromTransactions);
             }
@@ -119,7 +120,7 @@ public class ListTransactionController {
             transactionTableView.getItems().clear();
             for(Account acc : Main.getLoggedUser().getAccounts()) {
                 if( acc.getFromTransactions() == null ) {
-                    return;
+                    continue;
                 }
                 transactionTableView.getItems().addAll( acc.getFromTransactions() );
             }

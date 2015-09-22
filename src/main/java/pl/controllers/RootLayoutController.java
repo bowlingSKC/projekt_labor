@@ -5,6 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -17,8 +18,6 @@ import pl.jpa.SessionUtil;
 import pl.model.Login;
 import pl.model.User;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Date;
@@ -65,7 +64,14 @@ public class RootLayoutController {
             ex.printStackTrace();
         }
     }
+    @FXML
+    public void handleEnter(KeyEvent e) {
+        if(!e.isAltDown() && !e.isShiftDown() && !e.isControlDown() && !e.isMetaDown()){
+            System.out.println("Enter pressed!");
+            handleLogin();
+        }
 
+    }
 
     @FXML
     private void handleNewPassword() {

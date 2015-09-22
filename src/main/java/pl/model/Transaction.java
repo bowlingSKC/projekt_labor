@@ -83,15 +83,19 @@ public class Transaction {
         this.comment = comment;
     }
 
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Transaction)) return false;
+        if (o == null || getClass() != o.getClass()) return false;
 
         Transaction that = (Transaction) o;
 
+        if (Float.compare(that.money, money) != 0) return false;
+        if (comment != null ? !comment.equals(that.comment) : that.comment != null) return false;
         if (!date.equals(that.date)) return false;
         if (!from.equals(that.from)) return false;
+        if (id != null ? !id.equals(that.id) : that.id != null) return false;
         if (!to.equals(that.to)) return false;
 
         return true;
