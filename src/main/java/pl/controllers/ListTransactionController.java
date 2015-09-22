@@ -155,7 +155,9 @@ public class ListTransactionController {
                 CheckBox checkBox = (CheckBox) node;
                 if( !checkBox.isSelected() ) {
                     String accNo = checkBox.getText().substring( checkBox.getText().indexOf("[") + 1, checkBox.getText().lastIndexOf("]") );
+                    System.out.println("accNo: " + accNo);
                     for(int i = 0; i < transactionTableView.getItems().size(); i++) {
+                        System.out.println(i+ ": " +transactionTableView.getItems().get(i).getFrom().getAccountNumber());
                         if( transactionTableView.getItems().get(i).getFrom().getAccountNumber().equals(accNo) ) {
                             transactionTableView.getItems().remove(i);
                         }

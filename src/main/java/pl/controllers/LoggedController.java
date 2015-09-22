@@ -35,7 +35,7 @@ public class LoggedController {
         String userName = Main.getLoggedUser().getFirstname() + " " + Main.getLoggedUser().getLastname();
         nameLabel.setText( userName );
 
-        // Men¸ lÈtrehoz·sa
+        // Men√º l√©trehoz√°sa
         menuTree.setShowRoot(false);
         TreeItem<String> root = new TreeItem<>("");
         menuTree.setRoot(root);
@@ -53,24 +53,24 @@ public class LoggedController {
             }
         };
 
-        TreeItem<String> accountsMenu = new TreeItem<>("Sz·ml·k");
+        TreeItem<String> accountsMenu = new TreeItem<>("Sz√°ml√°k");
         accountsMenu.expandedProperty().addListener(expandedListener);
 
-        TreeItem<String> newAccountsMenu = new TreeItem<>("⁄j sz·mla lÈtrehoz·sa");
-        TreeItem<String> listAccountsMenu = new TreeItem<>("Sz·ml·k list·z·as");
+        TreeItem<String> newAccountsMenu = new TreeItem<>("√öj sz√°mla l√©trehoz√°sa");
+        TreeItem<String> listAccountsMenu = new TreeItem<>("Sz√°ml√°k list√°z√°as");
         accountsMenu.getChildren().addAll(newAccountsMenu, listAccountsMenu);
 
-        TreeItem<String> orderMenu = new TreeItem<>("TranzakciÛk");
+        TreeItem<String> orderMenu = new TreeItem<>("Tranzakci√≥k");
         orderMenu.expandedProperty().addListener(expandedListener);
-        TreeItem<String> newHufOrderMenu = new TreeItem<>("⁄j forint megbÌz·s");
-        TreeItem<String> newDevOrderMenu = new TreeItem<>("⁄j deviza megbÌz·s");
-        TreeItem<String> listOrderMenu = new TreeItem<>("TranzakciÛk list·z·sa");
+        TreeItem<String> newHufOrderMenu = new TreeItem<>("√öj forint megb√≠z√°s");
+        TreeItem<String> newDevOrderMenu = new TreeItem<>("√öj deviza megb√≠z√°s");
+        TreeItem<String> listOrderMenu = new TreeItem<>("Tranzakci√≥k list√°z√°sa");
         orderMenu.getChildren().addAll(newHufOrderMenu, newDevOrderMenu, listOrderMenu);
 
-        TreeItem<String> statMenu = new TreeItem<>("Kimutat·s");
+        TreeItem<String> statMenu = new TreeItem<>("Kimutat√°s");
         statMenu.expandedProperty().addListener(expandedListener);
-        TreeItem<String> listMonthStatMenu = new TreeItem<>("Havi kimutat·s");
-        TreeItem<String> sysnStatMenu = new TreeItem<>("Szinkroniz·l·s webbanki adatokkal");
+        TreeItem<String> listMonthStatMenu = new TreeItem<>("Havi kimutat√°s");
+        TreeItem<String> sysnStatMenu = new TreeItem<>("Szinkroniz√°l√°s webbanki adatokkal");
         statMenu.getChildren().addAll(listMonthStatMenu, sysnStatMenu);
 
         root.getChildren().addAll(accountsMenu, orderMenu, statMenu);
@@ -125,17 +125,20 @@ public class LoggedController {
         public void changed(ObservableValue<? extends TreeItem<String>> observable, TreeItem<String> oldValue, TreeItem<String> newValue) {
             final String value = newValue.getValue();
             switch (value) {
-                case "Sz·ml·k list·z·as":
+                case "Sz√°ml√°k list√°z√°as":
                     readAccountListLayout();
                     break;
-                case "⁄j forint megbÌz·s":
+                case "√öj forint megb√≠z√°s":
                     readNewHufTransaction();
                     break;
-                case "⁄j sz·mla lÈtrehoz·sa":
+                case "√öj sz√°mla l√©trehoz√°sa":
                     readNewAccount();
                     break;
-                case "TranzakciÛk list·z·sa":
+                case "Tranzakci√≥k list√°z√°sa":
                     readListTransactions();
+                    break;
+                case "Szinkroniz√°l√°s webbanki adatokkal":
+                    readSyncData();
                     break;
             }
         }
@@ -143,6 +146,17 @@ public class LoggedController {
         private void readListTransactions() {
             try {
                 FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/ListTransactions.fxml") );
+                AnchorPane pane = (AnchorPane) loader.load();
+
+                layout.setCenter(pane);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+
+        private void readSyncData() {
+            try {
+                FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/SyncData.fxml") );
                 AnchorPane pane = (AnchorPane) loader.load();
 
                 layout.setCenter(pane);

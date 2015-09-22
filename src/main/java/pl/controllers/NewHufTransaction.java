@@ -52,11 +52,6 @@ public class NewHufTransaction {
             // 2. Tranzakci�t kell v�grehajtani
             // 3. Ha a kedvezm�nyezett szerepel a DB-ben akkor j�v� kell �rni sz�m�ra
 
-            //System.out.println(new Date().toString());
-            //Date mydate = Date.from(dateField.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
-            //System.out.println(mydate.toString());
-            //System.out.println(dateField.toString());
-
             Session session = SessionUtil.getSession();
             org.hibernate.Transaction tx = session.beginTransaction();
             try {
