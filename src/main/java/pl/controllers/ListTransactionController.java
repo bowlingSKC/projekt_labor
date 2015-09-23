@@ -8,13 +8,17 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
+import org.hibernate.Query;
+import org.hibernate.Session;
 import pl.Main;
+import pl.jpa.SessionUtil;
 import pl.model.Account;
 import pl.model.Transaction;
 
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 public class ListTransactionController {
@@ -44,9 +48,9 @@ public class ListTransactionController {
     public void initialize() {
 
         // TableView
-        accountTableColumn.setCellValueFactory(new PropertyValueFactory<>("from"));
+        accountTableColumn.setCellValueFactory(new PropertyValueFactory<>("account"));
         moneyTableColumn.setCellValueFactory(new PropertyValueFactory<>("money"));
-        fromTableColumn.setCellValueFactory(new PropertyValueFactory<>("to"));
+        fromTableColumn.setCellValueFactory(new PropertyValueFactory<>("anotherAccount"));
         dateTableColumn.setCellValueFactory(new PropertyValueFactory<>("date"));
 
         moneyTableColumn.setCellFactory(column -> {
@@ -89,7 +93,7 @@ public class ListTransactionController {
             };
         });
 
-        // keres�hez sz�mlasz�mok kiv�laszt�sa
+        // keres?hez sz?mlasz?mok kiv?laszt?sa
         VBox vbox = new VBox();
         for( Account acc : Main.getLoggedUser().getAccounts() ) {
             CheckBox checkBox = new CheckBox( acc.toString() );
@@ -99,18 +103,31 @@ public class ListTransactionController {
         }
         scrollPane.setContent(vbox);
 
-        // tranzakci�k bet�lt�se
-        for(Account acc : Main.getLoggedUser().getAccounts()) {
-            Set<Transaction> fromTransactions = acc.getFromTransactions();
-            System.out.println(fromTransactions.size());
-            if( fromTransactions != null ) {
-                transactionTableView.getItems().addAll(fromTransactions);
-            }
-        }
+        // tranzakci?k bet?lt?se
+        loadTransactionsToTable();
 
         searchFromDate.valueProperty().addListener(listener);
         searchToDate.valueProperty().addListener(listener);
         searchCommentField.textProperty().addListener(listener);
+    }
+
+    private void loadTransactionsToTable() {
+        Session session = SessionUtil.getSession();
+
+        Query outQuery = session.createQuery("from Transaction where account = :account ");
+        Query inQuery = session.createQuery("from Transaction where anotherAccount = :account ");
+        for( Account account : Main.getLoggedUser().getAccounts() ) {
+            outQuery.setParameter("account", account.getAccountNumber());
+            List<Transaction> tmpTransactionList = outQuery.list();
+            for(Transaction transaction : tmpTransactionList) {
+                transaction.setMoney( -transaction.getMoney() );
+            }
+            transactionTableView.getItems().addAll(tmpTransactionList);
+
+            inQuery.setParameter("account", account.getAccountNumber());
+            transactionTableView.getItems().addAll(inQuery.list());
+        }
+        session.close();
     }
 
     private class SearchListener implements ChangeListener {
@@ -118,12 +135,6 @@ public class ListTransactionController {
         public void changed(ObservableValue observable, Object oldValue, Object newValue) {
 
             transactionTableView.getItems().clear();
-            for(Account acc : Main.getLoggedUser().getAccounts()) {
-                if( acc.getFromTransactions() == null ) {
-                    continue;
-                }
-                transactionTableView.getItems().addAll( acc.getFromTransactions() );
-            }
 
             if( searchFromDate.getValue() != null ) {
                 Date date = Date.from(searchFromDate.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
@@ -154,11 +165,9 @@ public class ListTransactionController {
             for( Node node : ((VBox)scrollPane.getContent()).getChildren() ) {
                 CheckBox checkBox = (CheckBox) node;
                 if( !checkBox.isSelected() ) {
-                    String accNo = checkBox.getText().substring( checkBox.getText().indexOf("[") + 1, checkBox.getText().lastIndexOf("]") );
-                    System.out.println("accNo: " + accNo);
-                    for(int i = 0; i < transactionTableView.getItems().size(); i++) {
-                        System.out.println(i+ ": " +transactionTableView.getItems().get(i).getFrom().getAccountNumber());
-                        if( transactionTableView.getItems().get(i).getFrom().getAccountNumber().equals(accNo) ) {
+                    String acc = checkBox.getText().substring( checkBox.getText().indexOf("[") + 1, checkBox.getText().lastIndexOf("]") );
+                    for( int i = 0; i < transactionTableView.getItems().size(); i++ ) {
+                        if( transactionTableView.getItems().get(i).getAccount().equals(acc) ) {
                             transactionTableView.getItems().remove(i);
                         }
                     }

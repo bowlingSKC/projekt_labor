@@ -1,6 +1,8 @@
 package pl.controllers;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import org.hibernate.Query;
@@ -15,6 +17,7 @@ import pl.model.Transaction;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 public class NewAccountController {
 
@@ -38,6 +41,9 @@ public class NewAccountController {
 
         try {
             checkAllFields();
+            if( !checkGiroCode() ) {
+                return;
+            }
 
             Account account = new Account(accountNumberField.getText(), accountNameField.getText(), Float.valueOf(accountMoneyField.getText()), sdf.parse( accountCreatedField.getText() ),
                     Main.getLoggedUser(), bankComboBox.getSelectionModel().getSelectedItem());
@@ -53,6 +59,30 @@ public class NewAccountController {
         } catch (Throwable ex) {
             MessageBox.showErrorMessage("Hiba", "A számlát nem lehet létrehozni!", ex.getMessage(), false);
         }
+    }
+
+    private boolean checkGiroCode() {
+        if(accountNumberField.getText().length() > 3) {
+            String userGiro = accountNumberField.getText().substring(0, 3);
+            Session session = SessionUtil.getSession();
+            Query query = session.createQuery("from Bank where giro = :giro");
+            query.setParameter("giro", userGiro);
+            Bank bank = (Bank) query.uniqueResult();
+            session.close();
+            if( (bank != null) && (!accountNumberField.getText().substring(0, 2).equals(bankComboBox.getSelectionModel().getSelectedItem().getGiro())) ) {
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                alert.setTitle("Figyelmeztetés");
+                alert.setHeaderText("A kiválaszott bank és a megadott bankszámlaszám nem egyezik.\nBiztosan így akarja elmenteni?");
+                alert.setContentText("A rendszer ehhez a számlaszámhoz a " + bank.getName() + " bankot ajánlja.");
+
+                Optional<ButtonType> result = alert.showAndWait();
+                if( result.get() == ButtonType.OK ) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     private void checkAllFields() throws Exception {
@@ -95,7 +125,7 @@ public class NewAccountController {
 
         // Pénznemek feltöltése
         accountDevComboBox.getItems().add("HUF");
+        accountDevComboBox.getSelectionModel().select("HUF");
     }
-
 
 }

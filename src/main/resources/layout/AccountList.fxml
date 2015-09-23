@@ -23,6 +23,5 @@
             <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
          </columnResizePolicy>
       </TableView>
-      <Button layoutX="216.0" layoutY="361.0" mnemonicParsing="false" onAction="#handleAddNewAccount" prefHeight="25.0" prefWidth="168.0" text="Új számla hozzáadása" />
    </children>
 </AnchorPane>

@@ -16,9 +16,9 @@
       <TableView fx:id="transactionTableView" layoutX="32.0" layoutY="44.0" prefHeight="223.0" prefWidth="530.0" AnchorPane.leftAnchor="35.0" AnchorPane.rightAnchor="35.0">
         <columns>
           <TableColumn fx:id="accountTableColumn" prefWidth="75.0" text="Számlaszám" />
-          <TableColumn fx:id="moneyTableColumn"  prefWidth="75.0" text="Összeg" />
-            <TableColumn fx:id="dateTableColumn"  prefWidth="70.0" text="Dátum" />
-            <TableColumn fx:id="fromTableColumn" prefWidth="168.0" text="Feladó" />
+          <TableColumn fx:id="moneyTableColumn" prefWidth="75.0" text="Összeg" />
+            <TableColumn fx:id="dateTableColumn" prefWidth="70.0" text="Dátum" />
+            <TableColumn fx:id="fromTableColumn" prefWidth="168.0" text="Ellenoldai számlaszám" />
         </columns>
          <columnResizePolicy>
             <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />

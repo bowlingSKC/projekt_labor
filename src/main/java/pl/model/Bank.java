@@ -1,6 +1,7 @@
 package pl.model;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -13,7 +14,7 @@ public class Bank {
     private Long id;
     @Column(name = "name", nullable = false, length = 100, unique = true)
     private String name;
-    @Column(name = "phoneNumber", nullable = true)
+    @Column(name = "phone_number", nullable = true)
     private String phoneNumber;
     @Column(name = "giro", length = 3, nullable = false, updatable = false, unique = true)
     private String giro;

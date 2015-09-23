@@ -38,7 +38,7 @@ public class RegistrationController {
         try {
             checkFields();
 
-            SendMail.Send(emailField.getText(), "Regisztráció", "Sikeresen regisztráltál a rendszerünkbe.\n Jelszavad: " + pswdField.getText());
+            //SendMail.Send(emailField.getText(), "Regisztráció", "Sikeresen regisztráltál a rendszerünkbe.\n Jelszavad: " + pswdField.getText());
             User newUser = creteUserFromFields();
             Session session = SessionUtil.getSession();
             Transaction tx = session.beginTransaction();

@@ -7,11 +7,16 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.hibernate.Query;
+import org.hibernate.Session;
 import pl.Main;
+import pl.jpa.SessionUtil;
 import pl.model.Account;
+import pl.model.Transaction;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.List;
 
 public class PersonalSummaryController {
 
@@ -22,10 +27,6 @@ public class PersonalSummaryController {
     private Label numOfAccountLabel;
     @FXML
     private Label sumOfMoneyOnAccountsLabel;
-    @FXML
-    private Label lastOutTransactionDateLabel;
-    @FXML
-    private Label lastInTransactionDateLabel;
     @FXML
     private Label lastLoginDateLabel;
     @FXML
@@ -73,9 +74,9 @@ public class PersonalSummaryController {
 
         if( Main.getLoggedUser().getLastLogin() != null ) {
             lastLoginDateLabel.setText( yyyyMMddkkmmss.format(Main.getLoggedUser().getLastLogin()) );
+        } else {
+            lastLoginDateLabel.setText( "Még nem történt bejegyzett bejelentkezés" );
         }
-
-
     }
 
 

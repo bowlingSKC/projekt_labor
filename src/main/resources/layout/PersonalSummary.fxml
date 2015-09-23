@@ -21,25 +21,19 @@
         <rowConstraints>
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
             <Label text="Folyószámlák száma" />
             <Label text="Folyószámlákon lévő összes pénz" GridPane.rowIndex="1" />
-            <Label text="Utolsó kimenő tranzakció időpontja" GridPane.rowIndex="2" />
-            <Label text="Utolsó bejövő tranzakció időpontja" GridPane.rowIndex="3" />
-            <Label text="Utolsó bejelentkezés időpontja" GridPane.rowIndex="4" />
-            <Button mnemonicParsing="false" onAction="#handleShowLogins" text="Bejelentkezések" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER" />
-            <Label text="Regisztráció időpontja" GridPane.rowIndex="5" />
+            <Label text="Utolsó bejelentkezés időpontja" GridPane.rowIndex="2" />
+            <Button mnemonicParsing="false" onAction="#handleShowLogins" text="Bejelentkezések" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
+            <Label text="Regisztráció időpontja" GridPane.rowIndex="3" />
             <Label fx:id="numOfAccountLabel" text="Label" GridPane.columnIndex="1" />
             <Label fx:id="sumOfMoneyOnAccountsLabel" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-            <Label fx:id="lastOutTransactionDateLabel" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-            <Label fx:id="lastInTransactionDateLabel" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-            <Label fx:id="lastLoginDateLabel" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-            <Label fx:id="registartionLabel" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+            <Label fx:id="lastLoginDateLabel" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            <Label fx:id="registartionLabel" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="3" />
          </children>
       </GridPane>
       <Button layoutX="443.0" layoutY="361.0" mnemonicParsing="false" onAction="#handleChangePassword" text="Jelszó megváltoztatása" />

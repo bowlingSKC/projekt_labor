@@ -2,6 +2,7 @@ package pl.model;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -12,25 +13,30 @@ public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "accountNumber", nullable = false, length = 24, updatable = false)
+
+    @Column(name = "account_number", nullable = false, length = 24, updatable = false)
     private String accountNumber;
+
     @Column(name = "name", nullable = false)
     private String name;
+
     @Column(name = "money", nullable = false)
     private float money;
+
     @Temporal(TemporalType.DATE)
     @Column(name = "created", nullable = false)
     private Date createdDate;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
+
     @ManyToOne
     @JoinColumn(name = "bank_id", nullable = false)
     private Bank bank;
+
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "account")
     private Set<MoneyGroup> moneyGroups;
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "from")
-    private Set<Transaction> fromTransactions;
 
     public Account() {
 
@@ -107,14 +113,6 @@ public class Account {
 
     public void setMoneyGroups(Set<MoneyGroup> moneyGroups) {
         this.moneyGroups = moneyGroups;
-    }
-
-    public Set<Transaction> getFromTransactions() {
-        return fromTransactions;
-    }
-
-    public void setFromTransactions(Set<Transaction> fromTransactions) {
-        this.fromTransactions = fromTransactions;
     }
 
     @Override

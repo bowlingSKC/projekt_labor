@@ -10,29 +10,32 @@ public class Transaction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "from_id", nullable = false)
-    private Account from;
-    @Column(name = "to_account", nullable = false, updatable = false, length = 24)
-    private String to;
+    @Column(name = "account_no", nullable = true, updatable = false, length = 24)
+    private String account;
+    @Column(name = "another_account_no", nullable = true, updatable = false, length = 24)
+    private String anotherAccount;
     @Column(name = "money", nullable = false, updatable = false)
     private float money;
-    @Temporal(TemporalType.TIMESTAMP)
+    @Temporal(TemporalType.DATE)
     @Column(name = "date", nullable = false, updatable = false)
     private Date date;
     @Column(name = "comment")
     private String comment;
+    @ManyToOne
+    @JoinColumn(name = "type_id", nullable = false, updatable = false)
+    private TransactionType type;
 
     public Transaction() {
 
     }
 
-    public Transaction(Account from, String to, float money, Date date, String comment) {
-        this.from = from;
-        this.to = to;
+    public Transaction(String account, String anotherAccount, float money, Date date, String comment, TransactionType type) {
+        this.account = account;
+        this.anotherAccount = anotherAccount;
         this.money = money;
         this.date = date;
         this.comment = comment;
+        this.type = type;
     }
 
     public Long getId() {
@@ -43,20 +46,20 @@ public class Transaction {
         this.id = id;
     }
 
-    public Account getFrom() {
-        return from;
+    public String getAccount() {
+        return account;
     }
 
-    public void setFrom(Account from) {
-        this.from = from;
+    public void setAccount(String from) {
+        this.account = from;
     }
 
-    public String getTo() {
-        return to;
+    public String getAnotherAccount() {
+        return anotherAccount;
     }
 
-    public void setTo(String to) {
-        this.to = to;
+    public void setAnotherAccount(String to) {
+        this.anotherAccount = to;
     }
 
     public float getMoney() {
@@ -83,29 +86,40 @@ public class Transaction {
         this.comment = comment;
     }
 
+    public TransactionType getType() {
+        return type;
+    }
+
+    public void setType(TransactionType type) {
+        this.type = type;
+    }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof Transaction)) return false;
 
         Transaction that = (Transaction) o;
 
         if (Float.compare(that.money, money) != 0) return false;
+        if (account != null ? !account.equals(that.account) : that.account != null) return false;
+        if (anotherAccount != null ? !anotherAccount.equals(that.anotherAccount) : that.anotherAccount != null)
+            return false;
         if (comment != null ? !comment.equals(that.comment) : that.comment != null) return false;
         if (!date.equals(that.date)) return false;
-        if (!from.equals(that.from)) return false;
-        if (id != null ? !id.equals(that.id) : that.id != null) return false;
-        if (!to.equals(that.to)) return false;
+        if (!type.equals(that.type)) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        int result = from.hashCode();
-        result = 31 * result + to.hashCode();
+        int result = account != null ? account.hashCode() : 0;
+        result = 31 * result + (anotherAccount != null ? anotherAccount.hashCode() : 0);
+        result = 31 * result + (money != +0.0f ? Float.floatToIntBits(money) : 0);
         result = 31 * result + date.hashCode();
+        result = 31 * result + (comment != null ? comment.hashCode() : 0);
+        result = 31 * result + type.hashCode();
         return result;
     }
 }

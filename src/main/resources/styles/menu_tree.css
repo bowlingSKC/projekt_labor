@@ -1,22 +1,27 @@
 .tree-view, .tree-cell {
-     /*-fx-background-color: black; */ -fx-background-color: ghostwhite;
-    /* -fx-text-fill: white; */ -fx-text-fill: black;
+    -fx-background-color: rgb(43, 87, 154);
+    -fx-text-fill: rgb(255, 255, 255);
     -fx-font-size: 16px;
 }
 
 .tree-cell:expanded, .tree-cell:sub-tree-item {
-    /* -fx-background-color: #404040; */ -fx-background-color: lightgray;
+    -fx-background-color: rgb(62, 109, 181);
 }
 
 .tree-cell:selected {
+    -fx-background-color: rgb(62, 109, 181);
     -fx-font-weight: bold;
 }
 
 .tree-cell:hover {
-    -fx-background-color: chartreuse;
+    -fx-background-color: rgb(25, 71, 138);
 }
 
 .tree-cell:sub-tree-item {
     -fx-padding: 0.25em;
     -fx-font-size: 12px;
+}
+
+.tree-cell:empty {
+    -fx-background-color: transparent;
 }

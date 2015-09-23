@@ -2,6 +2,7 @@ package pl.model;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -32,10 +33,10 @@ public class User {
     private Date registredDate;
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "user")
-    private Set<Login> logins;
+    private Set<Login> logins = new HashSet<>(0);
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "owner")
-    private Set<Account> accounts;
+    private Set<Account> accounts = new HashSet<>(0);
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "owner")
     private Set<MoneyGroup> moneyGroups;

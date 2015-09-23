@@ -12,6 +12,7 @@ import pl.jpa.SessionUtil;
 import pl.model.Account;
 import pl.model.Bank;
 import pl.model.Transaction;
+import pl.model.TransactionType;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -42,42 +43,30 @@ public class NewHufTransaction {
         try {
             checkAllFields();
         } catch (Throwable ex) {
-            MessageBox.showErrorMessage("Hiba", "A megbï¿½zï¿½st nem lehet lï¿½trehotni!", ex.getMessage(), false);
+            MessageBox.showErrorMessage("Hiba", "A megb?z?st nem lehet l?trehotni!", ex.getMessage(), false);
             return;
         }
 
         if( confirmSendMoney() ) {
-
-            // 1. Le kell vonni a szï¿½mlï¿½rï¿½l az ï¿½sszeget
-            // 2. Tranzakciï¿½t kell vï¿½grehajtani
-            // 3. Ha a kedvezmï¿½nyezett szerepel a DB-ben akkor jï¿½vï¿½ kell ï¿½rni szï¿½mï¿½ra
-
-            Session session = SessionUtil.getSession();
+                        Session session = SessionUtil.getSession();
             org.hibernate.Transaction tx = session.beginTransaction();
+
             try {
-
+                // Számla kiválasztása
                 Account account = accountComboBox.getSelectionModel().getSelectedItem();
-
-                Date mydate = Date.from(dateField.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
-                Transaction transaction = new Transaction(account, toAccountField.getText(), -Float.valueOf(moneyField.getText()), mydate, commentField.getText());
-                session.save(transaction);
-
-                Query query = session.createQuery("from Account where accountNumber = :toAccNum");
-                query.setParameter("toAccNum", toAccountField.getText());
-                Account toAccount = (Account) query.uniqueResult();
-                if( toAccount != null ) {
-                    Date mydate2 = Date.from(dateField.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
-                    Transaction transaction1 = new Transaction(account, account.getAccountNumber(), Float.valueOf(moneyField.getText()), mydate2, commentField.getText());
-                    session.save(transaction1);
-                    toAccount.setMoney(toAccount.getMoney() + Float.valueOf(moneyField.getText()));
-                    toAccount.getFromTransactions().add(transaction1);
-                    session.update(toAccount);
-                }
-
-                account.setMoney( account.getMoney() - Float.valueOf(moneyField.getText()) );
-                account.getFromTransactions().add(transaction);
+                account.setMoney(account.getMoney() - Float.valueOf(moneyField.getText()));
                 session.update(account);
 
+                // Tranzakció létrehozása a belépett felhasználónak
+                Date myTransactionDate = Date.from(dateField.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+                Query query = session.createQuery("from TransactionType where id = :id");
+                query.setParameter("id", 2);
+                TransactionType transactionType = (TransactionType) query.uniqueResult();
+                Transaction myTransaction = new Transaction(account.getAccountNumber(), toAccountField.getText().trim(), Float.valueOf(moneyField.getText()),
+                        myTransactionDate, commentField.getText().trim(), transactionType);
+
+                session.save(myTransaction);
                 tx.commit();
                 //System.out.println("OK");
 
@@ -85,18 +74,18 @@ public class NewHufTransaction {
                 tx.rollback();
                 ex.printStackTrace();
             }
+            session.flush();
             session.close();
-
         }
 
     }
 
     private boolean confirmSendMoney() {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Meger?sï¿½tï¿½s");
-        alert.setHeaderText("Biztosan vï¿½gre akarod hajtani a tranzakciï¿½t?");
-        alert.setContentText("Kedvezmï¿½nyezett: " + toAccountField.getText() + "\nï¿½sszeg: " + moneyField.getText() + " forint\n" +
-                "Tranzakciï¿½ utï¿½n maradï¿½ ï¿½sszeg: " + (accountComboBox.getSelectionModel().getSelectedItem().getMoney() - Float.valueOf(moneyField.getText())) + " forint");
+        alert.setTitle("Meger?s?t?s");
+        alert.setHeaderText("Biztosan v?gre akarod hajtani a tranzakci?t?");
+        alert.setContentText("Kedvezm?nyezett: " + toAccountField.getText() + "\n?sszeg: " + moneyField.getText() + " forint\n" +
+                "Tranzakci? ut?n marad? ?sszeg: " + (accountComboBox.getSelectionModel().getSelectedItem().getMoney() - Float.valueOf(moneyField.getText())) + " forint");
         Optional<ButtonType> result = alert.showAndWait();
         if( result.get() == ButtonType.OK ) {
             return true;
@@ -108,23 +97,23 @@ public class NewHufTransaction {
         StringBuffer buffer = new StringBuffer();
 
         if( accountComboBox.getSelectionModel().getSelectedItem() == null ) {
-            buffer.append("Nem vï¿½lasztottï¿½l ki szï¿½mlï¿½t!\n");
+            buffer.append("Nem v?lasztott?l ki sz?ml?t!\n");
         }
 
         if( toAccountField.getText().length() != 24 ) {
-            buffer.append("A bankszï¿½mlaszï¿½mnak 24 szï¿½mnak kell lennie!\n");
+            buffer.append("A banksz?mlasz?mnak 24 sz?mnak kell lennie!\n");
         }
 
         try {
             float money = Float.valueOf(moneyField.getText());
             if( money < 0 ) {
-                buffer.append("Nem kï¿½ldhetsz 0-nï¿½l kisebb ï¿½sszeget!\n");
+                buffer.append("Nem k?ldhetsz 0-n?l kisebb ?sszeget!\n");
             }
             if( accountComboBox.getSelectionModel().getSelectedItem() != null && money > accountComboBox.getSelectionModel().getSelectedItem().getMoney()  ) {
-                buffer.append("Nincs elï¿½g pï¿½nz a szï¿½mlï¿½don!\n");
+                buffer.append("Nincs el?g p?nz a sz?ml?don!\n");
             }
         } catch (NumberFormatException ex) {
-            buffer.append("Csak szï¿½mot ï¿½rhatsz a bankszï¿½mlaszï¿½mhoz!\n");
+            buffer.append("Csak sz?mot ?rhatsz a banksz?mlasz?mhoz!\n");
         }
 
         if( buffer.toString().length() != 0 ) {
@@ -136,35 +125,37 @@ public class NewHufTransaction {
     @FXML
     public void initialize() {
 
-        // Bankok lekï¿½rdezï¿½se
+        // Bankok lek?rdez?se
         Session session = SessionUtil.getSession();
         Query query = session.createQuery("from Bank");
         banks = query.list();
         session.close();
 
-        //Mai dÃ¡tum beÃ¡llÃ­tÃ¡sa
+        //Mai dátum beállítása
         dateField.setValue(LocalDate.now());
 
-        // Szï¿½mlï¿½k lekï¿½rdezï¿½se
+        // Sz?ml?k lek?rdez?se
         accountComboBox.getItems().setAll(Main.getLoggedUser().getAccounts() );
 
-        // Bank felismerï¿½se
+        // Bank felismer?se
         bankLabel.setText("");
         toAccountField.focusedProperty().addListener(new ChangeListener<Boolean>() {
             @Override
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                if( !newValue ) {
-                    boolean found = false;
-                    String giro = toAccountField.getText().substring(0, 3);
-                    for( Bank bank : banks ) {
-                        if( giro.equals(bank.getGiro()) ) {
-                            bankLabel.setText( bank.getName() );
-                            found = true;
-                            return;
+                if( toAccountField.getText().length() >= 3 ) {
+                    if( !newValue ) {
+                        boolean found = false;
+                        String giro = toAccountField.getText().substring(0, 3);
+                        for( Bank bank : banks ) {
+                            if( giro.equals(bank.getGiro()) ) {
+                                bankLabel.setText( bank.getName() );
+                                found = true;
+                                return;
+                            }
                         }
-                    }
-                    if( !found ) {
-                        bankLabel.setText( "Ismeretlen bank" );
+                        if( !found ) {
+                            bankLabel.setText( "Ismeretlen bank" );
+                        }
                     }
                 }
             }

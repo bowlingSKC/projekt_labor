@@ -98,6 +98,7 @@ public class RootLayoutController {
     private void handleRegistration() {
         try {
             Stage stage = new Stage();
+            stage.setTitle("Regisztráció");
             stage.initOwner( Main.getPrimaryStage() );
             stage.initModality(Modality.WINDOW_MODAL);
 
