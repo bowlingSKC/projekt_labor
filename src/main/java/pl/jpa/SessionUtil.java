@@ -4,6 +4,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
+import pl.MessageBox;
 
 public class SessionUtil {
 
@@ -15,6 +16,7 @@ public class SessionUtil {
             StandardServiceRegistryBuilder builder = new StandardServiceRegistryBuilder().applySettings(configuration.getProperties());
             return configuration.buildSessionFactory(builder.build());
         } catch (Throwable ex) {
+            MessageBox.showErrorMessage("Hiba", "Nem lehet csatlakozni a távoli adatbázis szerverhez!","Próbálja meg kés?bb", false);
             throw new ExceptionInInitializerError(ex);
         }
     }

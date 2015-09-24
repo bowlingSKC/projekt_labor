@@ -61,7 +61,7 @@ public class NewHufTransaction {
                 Date myTransactionDate = Date.from(dateField.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
 
                 Query query = session.createQuery("from TransactionType where id = :id");
-                query.setParameter("id", 2);
+                query.setParameter("id", 1);
                 TransactionType transactionType = (TransactionType) query.uniqueResult();
                 Transaction myTransaction = new Transaction(account.getAccountNumber(), toAccountField.getText().trim(), Float.valueOf(moneyField.getText()),
                         myTransactionDate, commentField.getText().trim(), transactionType);

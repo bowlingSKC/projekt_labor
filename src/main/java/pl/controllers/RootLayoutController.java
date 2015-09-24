@@ -14,6 +14,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Restrictions;
 import pl.Main;
+import pl.MessageBox;
 import pl.jpa.SessionUtil;
 import pl.model.Login;
 import pl.model.User;
@@ -41,23 +42,22 @@ public class RootLayoutController {
             Criteria criteria = session.createCriteria(User.class);
             User user = (User) criteria.add(Restrictions.eq("email", emailTextField.getText())).uniqueResult();
 
-            if( user == null || !(Main.getSHA512Hash( pswdTextField.getText(), user.getSalt() ).equals(user.getPassword())) ) {
-
-                if( !(Main.getSHA512Hash( pswdTextField.getText(), user.getSalt() ).equals(user.getPassword())) ) {
-                    Login login = new Login(user, InetAddress.getLocalHost().getHostAddress(), new Date(), false);
-                    Transaction tx = session.beginTransaction();
-                    session.save(login);
-                    tx.commit();
-                }
-                System.out.println("Rossz bejelentkezï¿½si adatok!");
+            Login login = null;
+            if( user == null ) {
+                login = new Login(null, InetAddress.getLocalHost().getHostAddress(), new Date(), false);
+                MessageBox.showErrorMessage("Hiba", "Rossz bejelentkezési adatok", "Ilyen E-mail cím nem található a rendszerben!", false);
             } else {
-                Login login = new Login(user, InetAddress.getLocalHost().getHostAddress(), new Date(), true);
-                Transaction tx = session.beginTransaction();
-                session.save(login);
-                tx.commit();
-                Main.login(user);
+                if( !(Main.getSHA512Hash( pswdTextField.getText(), user.getSalt() ).equals(user.getPassword())) ) {
+                    login = new Login(user, InetAddress.getLocalHost().getHostAddress(), new Date(), false);
+                    MessageBox.showErrorMessage("Hiba", "Rossz bejelentkezési adatok", "Hibás E-mail cím és jelszó páros!", false);
+                } else {
+                    login = new Login(user, InetAddress.getLocalHost().getHostAddress(), new Date(), true);
+                    Main.login(user);
+                }
             }
-
+            Transaction tx = session.beginTransaction();
+            session.save(login);
+            tx.commit();
             session.close();
 
         } catch (Throwable ex) {
