@@ -15,6 +15,7 @@ import org.hibernate.Transaction;
 import org.hibernate.criterion.Restrictions;
 import pl.Main;
 import pl.MessageBox;
+import pl.bundles.Bundles;
 import pl.jpa.SessionUtil;
 import pl.model.Login;
 import pl.model.User;
@@ -22,6 +23,7 @@ import pl.model.User;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Date;
+import java.util.ResourceBundle;
 
 public class RootLayoutController {
 
@@ -102,7 +104,7 @@ public class RootLayoutController {
             stage.initOwner( Main.getPrimaryStage() );
             stage.initModality(Modality.WINDOW_MODAL);
 
-            FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/Registration.fxml") );
+            FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/Registration.fxml"), Bundles.getBundle() );
             AnchorPane pane = (AnchorPane) loader.load();
 
             RegistrationController controller = loader.getController();

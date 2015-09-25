@@ -5,10 +5,9 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="234.0" prefWidth="365.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pl.controllers.RegistrationController">
    <children>
-      <Label layoutX="14.0" layoutY="14.0" text="Regisztráció">
+      <Label layoutX="14.0" layoutY="14.0" text="%registration.label">
          <font>
             <Font name="System Bold" size="22.0" />
          </font>
@@ -27,17 +26,17 @@
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <Label text="Keresztnév" />
-            <Label text="Vezetéknév" GridPane.rowIndex="1" />
-            <Label text="E-mail cím" GridPane.rowIndex="2" />
-            <Label text="Jelszó" GridPane.rowIndex="3" />
+            <Label text="%registration.firstname" />
+            <Label text="%registartion.lastname" GridPane.rowIndex="1" />
+            <Label text="%registartion.email" GridPane.rowIndex="2" />
+            <Label text="%registartion.password" GridPane.rowIndex="3" />
             <TextField fx:id="firstnameField" GridPane.columnIndex="1" />
             <TextField fx:id="lastnameField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
             <TextField fx:id="emailField" GridPane.columnIndex="1" GridPane.rowIndex="2" />
             <PasswordField fx:id="pswdField" GridPane.columnIndex="1" GridPane.rowIndex="3" />
             <PasswordField fx:id="pswdCField" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-            <Label text="Jelszó mégegyszer" GridPane.rowIndex="4" />
-            <Button defaultButton="true" mnemonicParsing="false" onAction="#handleRegistration" prefHeight="25.0" prefWidth="110.0" text="Regisztráció" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="5" />
+            <Label text="%registartion.password_again" GridPane.rowIndex="4" />
+            <Button defaultButton="true" mnemonicParsing="false" onAction="#handleRegistration" prefHeight="25.0" prefWidth="110.0" text="%registration.submit" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="5" />
          </children>
       </GridPane>
    </children>
