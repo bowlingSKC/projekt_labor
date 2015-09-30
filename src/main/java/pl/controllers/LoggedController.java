@@ -32,9 +32,9 @@ public class LoggedController {
     private Button resizeButton;
     @FXML
     private Button fullscreenButton;
+
     private Rectangle2D rec2;
     private Double w,h;
-
     private Stage dialogStage;
 
     @FXML
