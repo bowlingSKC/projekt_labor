@@ -54,7 +54,7 @@ public class LoggedController {
     @FXML
     public void initialize() {
 
-        // Ablakot vezérl? gombokhoz
+        // Ablakot vezï¿½rl? gombokhoz
         rec2 = Screen.getPrimary().getVisualBounds();
         w = 0.1;
         h = 0.1;
@@ -65,14 +65,14 @@ public class LoggedController {
             resizeButton.setVisible(false);
         });
 
-        // Felhasználó nevének kiírása
+        // Felhasznï¿½lï¿½ nevï¿½nek kiï¿½rï¿½sa
         String userName = Main.getLoggedUser().getFirstname() + " " + Main.getLoggedUser().getLastname();
         nameLabel.setText( userName );
 
-        // Icon beolvasása
+        // Icon beolvasï¿½sa
         //newTransactionButton.setGraphic( new ImageView( new Image( Main.class.getResourceAsStream("../imgs/new_transaction.png") )));
 
-        // Menü létrehozása
+        // MenÃ¼ lÃ©trehozÃ¡sa
         menuTree.setShowRoot(false);
         TreeItem<String> root = new TreeItem<>("");
         menuTree.setRoot(root);
@@ -90,24 +90,24 @@ public class LoggedController {
             }
         };
 
-        TreeItem<String> accountsMenu = new TreeItem<>("Számlák");
+        TreeItem<String> accountsMenu = new TreeItem<>("Szï¿½mlï¿½k");
         accountsMenu.expandedProperty().addListener(expandedListener);
 
-        TreeItem<String> newAccountsMenu = new TreeItem<>("Új számla létrehozása");
-        TreeItem<String> listAccountsMenu = new TreeItem<>("Számlák listázáas");
+        TreeItem<String> newAccountsMenu = new TreeItem<>("ï¿½j szï¿½mla lï¿½trehozï¿½sa");
+        TreeItem<String> listAccountsMenu = new TreeItem<>("Szï¿½mlï¿½k listï¿½zï¿½as");
         accountsMenu.getChildren().addAll(newAccountsMenu, listAccountsMenu);
 
-        TreeItem<String> orderMenu = new TreeItem<>("Tranzakciók");
+        TreeItem<String> orderMenu = new TreeItem<>("Tranzakciï¿½k");
         orderMenu.expandedProperty().addListener(expandedListener);
-        TreeItem<String> newHufOrderMenu = new TreeItem<>("Új forint megbízás");
-        TreeItem<String> newDevOrderMenu = new TreeItem<>("Új deviza megbízás");
-        TreeItem<String> listOrderMenu = new TreeItem<>("Tranzakciók listázása");
+        TreeItem<String> newHufOrderMenu = new TreeItem<>("ï¿½j forint megbï¿½zï¿½s");
+        TreeItem<String> newDevOrderMenu = new TreeItem<>("ï¿½j deviza megbï¿½zï¿½s");
+        TreeItem<String> listOrderMenu = new TreeItem<>("Tranzakciï¿½k listï¿½zï¿½sa");
         orderMenu.getChildren().addAll(newHufOrderMenu, newDevOrderMenu, listOrderMenu);
 
-        TreeItem<String> statMenu = new TreeItem<>("Kimutatás");
+        TreeItem<String> statMenu = new TreeItem<>("Kimutatï¿½s");
         statMenu.expandedProperty().addListener(expandedListener);
-        TreeItem<String> listMonthStatMenu = new TreeItem<>("Havi kimutatás");
-        TreeItem<String> sysnStatMenu = new TreeItem<>("Szinkronizálás webbanki adatokkal");
+        TreeItem<String> listMonthStatMenu = new TreeItem<>("Havi kimutatï¿½s");
+        TreeItem<String> sysnStatMenu = new TreeItem<>("Szinkronizï¿½lï¿½s webbanki adatokkal");
         statMenu.getChildren().addAll(listMonthStatMenu, sysnStatMenu);
 
         root.getChildren().addAll(accountsMenu, orderMenu, statMenu);
@@ -210,19 +210,19 @@ public class LoggedController {
         public void changed(ObservableValue<? extends TreeItem<String>> observable, TreeItem<String> oldValue, TreeItem<String> newValue) {
             final String value = newValue.getValue();
             switch (value) {
-                case "Számlák listázáas":
+                case "Szï¿½mlï¿½k listï¿½zï¿½as":
                     readAccountListLayout();
                     break;
-                case "Új forint megbízás":
+                case "ï¿½j forint megbï¿½zï¿½s":
                     readNewHufTransaction();
                     break;
-                case "Új számla létrehozása":
+                case "ï¿½j szï¿½mla lï¿½trehozï¿½sa":
                     readNewAccount();
                     break;
-                case "Tranzakciók listázása":
+                case "Tranzakciï¿½k listï¿½zï¿½sa":
                     readListTransactions();
                     break;
-                case "Szinkronizálás webbanki adatokkal":
+                case "Szinkronizï¿½lï¿½s webbanki adatokkal":
                     readSyncData();
                     break;
             }
