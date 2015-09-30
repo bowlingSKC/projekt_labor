@@ -1,14 +1,18 @@
 package pl.controllers;
 
+import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.css.PseudoClass;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
+import javafx.stage.Screen;
+import javafx.stage.Stage;
 import pl.Main;
 
 import java.io.IOException;
@@ -16,6 +20,22 @@ import java.io.IOException;
 public class LoggedController {
 
     private final TreeSelectionListener listener = new TreeSelectionListener();
+
+    // Ablakot kezelik
+    @FXML
+    private Button closeButton;
+    @FXML
+    private Button maximizeButton;
+    @FXML
+    private Button minimizeButton;
+    @FXML
+    private Button resizeButton;
+    @FXML
+    private Button fullscreenButton;
+    private Rectangle2D rec2;
+    private Double w,h;
+
+    private Stage dialogStage;
 
     @FXML
     private Hyperlink nameLabel;
@@ -33,6 +53,17 @@ public class LoggedController {
 
     @FXML
     public void initialize() {
+
+        // Ablakot vezérl? gombokhoz
+        rec2 = Screen.getPrimary().getVisualBounds();
+        w = 0.1;
+        h = 0.1;
+        Platform.runLater(() -> {
+            dialogStage.setMaximized(true);
+            dialogStage.setHeight(rec2.getHeight());
+            maximizeButton.getStylesheets().add("decoration-button-restore");
+            resizeButton.setVisible(false);
+        });
 
         // Felhasználó nevének kiírása
         String userName = Main.getLoggedUser().getFirstname() + " " + Main.getLoggedUser().getLastname();
@@ -125,6 +156,49 @@ public class LoggedController {
     @FXML
     private void handleNewTransaction() {
 
+    }
+
+    @FXML
+    private void handleClose() {
+        Platform.exit();
+        System.exit(0);
+    }
+
+    @FXML
+    private void handleMaximize() {
+
+    }
+
+    @FXML
+    private void handleMinimize() {
+        if( dialogStage.isMaximized() ) {
+            if( w == rec2.getWidth() && h == rec2.getHeight() ) {
+                dialogStage.setMaximized(false);
+                dialogStage.setHeight(450);
+                dialogStage.setWidth(750);
+                dialogStage.centerOnScreen();
+                maximizeButton.getStylesheets().remove("decoration-button-restore");
+                resizeButton.setVisible(true);
+            } else {
+                dialogStage.setMaximized(false);
+                maximizeButton.getStylesheets().remove("decoration-button-restore");
+                resizeButton.setVisible(true);
+            }
+        }
+    }
+
+    @FXML
+    private void handleResize() {
+
+    }
+
+    @FXML
+    private void handleFullScreen() {
+
+    }
+
+    public void setDialogStage(Stage dialogStage) {
+        this.dialogStage = dialogStage;
     }
 
     public void setLayout(BorderPane layout) {

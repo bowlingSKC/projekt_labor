@@ -3,14 +3,24 @@ package pl;
 import javafx.application.Application;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Service;
+import javafx.concurrent.Task;
+import javafx.concurrent.WorkerStateEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
+import org.hibernate.Session;
+import pl.bundles.Bundles;
 import pl.controllers.LoggedController;
 import pl.controllers.RootLayoutController;
+import pl.controllers.SplashController;
+import pl.jpa.SessionUtil;
 import pl.model.User;
 
 import java.io.IOException;
@@ -28,39 +38,68 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        this.primaryStage = primaryStage;
-        this.primaryStage.getIcons().add( new Image("imgs/money_icon.png") );
-        this.primaryStage.setTitle(" --- CÍM --- ");
+        Main.primaryStage = primaryStage;
+        Main.primaryStage.getIcons().add( new Image("imgs/money_icon.png") );
+        Main.primaryStage.setTitle(" --- CÍM --- ");
 
 
         initLayout();
         loggedUser.addListener((obs, oldValue, newValue) -> {
             if( newValue == null ) {
-                this.primaryStage.setScene(logoutScene);
+                Main.primaryStage.setScene(logoutScene);
             } else {
-                this.primaryStage.setScene(loginScene);
+                Main.primaryStage.setScene(loginScene);
             }
         });
     }
 
     private void initLayout() {
         try {
-            FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/RootLayout.fxml") );
-            AnchorPane pane = (AnchorPane) loader.load();
+            FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/Splash.fxml"), Bundles.getBundle());
+            AnchorPane pane = loader.load();
 
-            logoutScene = new Scene(pane);
-            this.primaryStage.setScene(logoutScene);
+            Scene scene = new Scene(pane);
+            primaryStage.setScene(scene);
+            primaryStage.setScene(scene);
+            primaryStage.initStyle(StageStyle.UNDECORATED);
 
-            RootLayoutController rootLayoutController = loader.getController();
+            primaryStage.sceneProperty().addListener((observable, oldValue, newValue) -> primaryStage.centerOnScreen());
 
-            this.primaryStage.show();
+            primaryStage.show();
         } catch (IOException ex) {
             ex.printStackTrace();
         }
+
+        Service service = new Service() {
+            @Override
+            protected Task createTask() {
+                return new Task() {
+                    @Override
+                    protected Object call() throws Exception {
+                        Session session = SessionUtil.getSession();
+                        session.close();
+
+                        System.out.println("Hibernate ok");
+
+                        FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/RootLayout.fxml"), Bundles.getBundle() );
+                        AnchorPane pane = loader.load();
+
+                        logoutScene = new Scene(pane);
+                        return null;
+                    }
+                };
+            }
+        };
+
+        service.start();
+        service.setOnSucceeded(event -> {
+            System.out.println("Successed");
+            primaryStage.setScene(logoutScene);
+        });
     }
 
     public static String getSHA512Hash(String pswd, String salt) throws NoSuchAlgorithmException {
-        String generatedPassword = null;
+        String generatedPassword;
         MessageDigest md = MessageDigest.getInstance("SHA-512");
         md.update(salt.getBytes());
         byte[] bytes = md.digest(pswd.getBytes());
@@ -83,13 +122,13 @@ public class Main extends Application {
         loggedUser.setValue(user);
         try {
             FXMLLoader loader2 = new FXMLLoader( Main.class.getResource("../layout/Logged.fxml") );
-            BorderPane loggedpane = (BorderPane) loader2.load();
+            BorderPane loggedpane = loader2.load();
 
             LoggedController controller = loader2.getController();
             controller.setLayout(loggedpane);
+            controller.setDialogStage(primaryStage);
 
             Scene scene = new Scene(loggedpane);
-            scene.getStylesheets().add("styles/menu_tree.css");
             primaryStage.setScene(scene);
         } catch (IOException ex) {
             ex.printStackTrace();

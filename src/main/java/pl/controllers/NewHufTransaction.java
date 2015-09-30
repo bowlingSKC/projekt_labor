@@ -9,10 +9,7 @@ import org.hibernate.Session;
 import pl.Main;
 import pl.MessageBox;
 import pl.jpa.SessionUtil;
-import pl.model.Account;
-import pl.model.Bank;
-import pl.model.Transaction;
-import pl.model.TransactionType;
+import pl.model.*;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -68,7 +65,6 @@ public class NewHufTransaction {
 
                 session.save(myTransaction);
                 tx.commit();
-                //System.out.println("OK");
 
             } catch (Throwable ex) {
                 tx.rollback();

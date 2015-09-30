@@ -1,20 +1,28 @@
 package pl.controllers;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Restrictions;
 import pl.Main;
 import pl.MessageBox;
+import pl.animations.FadeInLeftTransition;
+import pl.animations.FadeInLeftTransition1;
+import pl.animations.FadeInRightTransition;
 import pl.bundles.Bundles;
 import pl.jpa.SessionUtil;
 import pl.model.Login;
@@ -28,9 +36,41 @@ import java.util.ResourceBundle;
 public class RootLayoutController {
 
     @FXML
+    private Label titleLabel;
+    @FXML
+    private Label emailLabel;
+    @FXML
+    private Label pswdLabel;
+    @FXML
     private TextField emailTextField;
     @FXML
     private PasswordField pswdTextField;
+    @FXML
+    private Label windowCloseLabel;
+    @FXML
+    private Button loginButton;
+    @FXML
+    private Button regButton;
+    @FXML
+    private Button forgetPswd;
+
+    @FXML
+    public void initialize() {
+        Platform.runLater(() -> {
+            new FadeInRightTransition(emailLabel).play();
+            new FadeInLeftTransition(titleLabel).play();
+            new FadeInLeftTransition1(pswdLabel).play();
+            new FadeInLeftTransition1(emailTextField).play();
+            new FadeInLeftTransition1(pswdTextField).play();
+            new FadeInRightTransition(loginButton).play();
+            new FadeInRightTransition(regButton).play();
+            new FadeInLeftTransition1(forgetPswd).play();
+            windowCloseLabel.setOnMouseClicked((MouseEvent event) -> {
+                Platform.exit();
+                System.exit(0);
+            });
+        });
+    }
 
     @FXML
     private void handleLogin() {
@@ -66,14 +106,6 @@ public class RootLayoutController {
             ex.printStackTrace();
         }
     }
-    @FXML
-    public void handleEnter(KeyEvent e) {
-        if(!e.isAltDown() && !e.isShiftDown() && !e.isControlDown() && !e.isMetaDown()){
-            System.out.println("Enter pressed!");
-            handleLogin();
-        }
-
-    }
 
     @FXML
     private void handleNewPassword() {
@@ -81,12 +113,16 @@ public class RootLayoutController {
             Stage stage = new Stage();
             stage.initOwner( Main.getPrimaryStage() );
             stage.initModality(Modality.WINDOW_MODAL);
+            stage.initStyle(StageStyle.UNDECORATED);
 
             FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/ForgotPassword.fxml") );
-            AnchorPane pane = pane = (AnchorPane) loader.load();
+            AnchorPane pane = loader.load();
 
             Scene scene = new Scene(pane);
             stage.setScene(scene);
+
+            ForgotPasswordController controller = loader.getController();
+            controller.setDialogStage(stage);
 
             stage.show();
         } catch (IOException e) {
@@ -103,6 +139,7 @@ public class RootLayoutController {
             stage.setTitle("Regisztráció");
             stage.initOwner( Main.getPrimaryStage() );
             stage.initModality(Modality.WINDOW_MODAL);
+            stage.initStyle(StageStyle.UNDECORATED);
 
             FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/Registration.fxml"), Bundles.getBundle() );
             AnchorPane pane = (AnchorPane) loader.load();

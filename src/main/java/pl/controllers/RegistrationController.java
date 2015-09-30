@@ -1,8 +1,10 @@
 package pl.controllers;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
@@ -12,6 +14,7 @@ import pl.Main;
 import pl.MessageBox;
 import pl.SendMail;
 import pl.jpa.SessionUtil;
+import pl.model.ReadyCash;
 import pl.model.User;
 
 import java.util.Date;
@@ -30,26 +33,37 @@ public class RegistrationController {
     private PasswordField pswdField;
     @FXML
     private PasswordField pswdCField;
+    @FXML
+    private Label closeStageLabel;
 
     private Stage dialogStage;
+
+    @FXML
+    public void initialize() {
+        closeStageLabel.setOnMouseClicked((MouseEvent event) -> dialogStage.close());
+    }
 
     @FXML
     private void handleRegistration() {
         try {
             checkFields();
 
-            SendMail.Send(emailField.getText(), "RegisztrÃ¡ciÃ³", "Sikeresen regisztrÃ¡ltÃ¡l a rendszerÃ¼nkbe.\n Jelszavad: " + pswdField.getText());
+            SendMail.Send(emailField.getText(), "Regisztráció", "Sikeresen regisztráltál a rendszerünkbe.\n Jelszavad: " + pswdField.getText());
+
             User newUser = creteUserFromFields();
+            ReadyCash readyCash = new ReadyCash(newUser, 0.0f);
+            newUser.setReadycash(readyCash);
             Session session = SessionUtil.getSession();
             Transaction tx = session.beginTransaction();
+            session.save(readyCash);
             session.save(newUser);
             tx.commit();
             session.close();
 
             dialogStage.close();
-            MessageBox.showInformationMessage("Regisztrï¿½ciï¿½", "Sikeres regisztrï¿½ciï¿½!", "Most mï¿½r bejelentkezhetsz az E-mail cï¿½meddel ï¿½s jelzavaddal.", false);
+            MessageBox.showInformationMessage("Regisztr?ci?", "Sikeres regisztr?ci?!", "Most m?r bejelentkezhetsz az E-mail c?meddel ?s jelzavaddal.", false);
         } catch (Exception ex) {
-            MessageBox.showErrorMessage("Hiba", "Nem tï¿½ltï¿½ttï¿½l ki minden mez?t helyesen!", ex.getMessage(), false);
+            MessageBox.showErrorMessage("Hiba", "Nem t?lt?tt?l ki minden mez?t helyesen!", ex.getMessage(), false);
         }
     }
 
@@ -73,39 +87,39 @@ public class RegistrationController {
         StringBuffer buffer = new StringBuffer();
 
         if( firstnameField.getText().length() == 0 ) {
-            buffer.append("Nem tï¿½ltï¿½tted ki a \'Vezetï¿½knï¿½v\' mez?t!\n");
+            buffer.append("Nem t?lt?tted ki a \'Vezet?kn?v\' mez?t!\n");
         }
 
         if( lastnameField.getText().length() == 0 ) {
-            buffer.append("Nem tï¿½ltï¿½tted ki a \'Keresztnï¿½v\' mez?t!\n");
+            buffer.append("Nem t?lt?tted ki a \'Keresztn?v\' mez?t!\n");
         }
 
         if( emailField.getText().length() == 0 ) {
-            buffer.append("Nem tï¿½ltï¿½tted ki a \'E-mail\' mez?t!\n");
+            buffer.append("Nem t?lt?tted ki a \'E-mail\' mez?t!\n");
         }
 
         if( !isValidEmail() ) {
-            buffer.append("Helytelen E-mail cï¿½m formï¿½tumot adtï¿½l meg!\n");
+            buffer.append("Helytelen E-mail c?m form?tumot adt?l meg!\n");
         }
 
         if( existEmail()){
-            buffer.append("Ez az email cï¿½m mï¿½r regisztrï¿½lva van!\n");
+            buffer.append("Ez az email c?m m?r regisztr?lva van!\n");
         }
 
         if( pswdField.getText().length() == 0 ) {
-            buffer.append("Nem tï¿½ltï¿½tted ki a \'Jelszï¿½\' mez?t!\n");
+            buffer.append("Nem t?lt?tted ki a \'Jelsz?\' mez?t!\n");
         }
 
         if( pswdCField.getText().length() == 0 ) {
-            buffer.append("Nem tï¿½ltï¿½tted ki a \'Jelszï¿½ meger?sï¿½tï¿½se\' mez?t!\n");
+            buffer.append("Nem t?lt?tted ki a \'Jelsz? meger?s?t?se\' mez?t!\n");
         }
 
         if( pswdField.getText().length() < 8 || pswdField.getText().length() >= 20 ) {
-            buffer.append("A jelszï¿½nak 8 ï¿½s 20 karakter kï¿½zï¿½tti hosszï¿½sï¿½gï¿½nak kell lennie!\n");
+            buffer.append("A jelsz?nak 8 ?s 20 karakter k?z?tti hossz?s?g?nak kell lennie!\n");
         }
 
         if( !(pswdField.getText().equals(pswdCField.getText())) ) {
-            buffer.append("A kï¿½t begï¿½pelt jelszï¿½ nem egyezik!");
+            buffer.append("A k?t beg?pelt jelsz? nem egyezik!");
         }
 
         if( buffer.toString().length() != 0 ) {

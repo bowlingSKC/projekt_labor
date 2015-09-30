@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.image.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="327.0" prefWidth="493.0" style="-fx-background-color: #2b579a;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pl.controllers.SplashController">
+   <children>
+      <ImageView fitHeight="16.0" fitWidth="179.0" layoutX="157.0" layoutY="164.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../imgs/loading.GIF" />
+         </image>
+      </ImageView>
+      <Label fx:id="closeAppLabel" layoutX="466.0" layoutY="14.0" text="X" textFill="WHITE">
+         <font>
+            <Font name="Arial Black" size="16.0" />
+         </font>
+      </Label>
+      <Label layoutX="14.0" layoutY="14.0" text="%splash.title" textFill="WHITE">
+         <font>
+            <Font name="Segoe UI Light" size="48.0" />
+         </font>
+      </Label>
+      <Label layoutX="14.0" layoutY="296.0" text="%splash.name.pa" textFill="WHITE">
+         <font>
+            <Font name="Segoe UI Light" size="14.0" />
+         </font>
+      </Label>
+      <Label layoutX="210.0" layoutY="296.0" text="%splash.name.la" textFill="WHITE">
+         <font>
+            <Font name="Segoe UI Light" size="14.0" />
+         </font>
+      </Label>
+      <Label layoutX="400.0" layoutY="296.0" text="%splash.name.lb" textFill="WHITE">
+         <font>
+            <Font name="Segoe UI Light" size="14.0" />
+         </font>
+      </Label>
+   </children>
+</AnchorPane>

@@ -24,6 +24,8 @@
         <mapping class="pl.model.Login" />
         <mapping class="pl.model.Transaction" />
         <mapping class="pl.model.TransactionType" />
+        <mapping class="pl.model.Currency" />
+        <mapping class="pl.model.ReadyCash" />
 
     </session-factory>
 </hibernate-configuration>

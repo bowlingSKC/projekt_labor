@@ -12,6 +12,7 @@ import pl.MessageBox;
 import pl.jpa.SessionUtil;
 import pl.model.Account;
 import pl.model.Bank;
+import pl.model.Currency;
 import pl.model.Transaction;
 
 import java.text.SimpleDateFormat;
@@ -44,13 +45,18 @@ public class NewAccountController {
             if( !checkGiroCode() ) {
                 return;
             }
-
-            Account account = new Account(accountNumberField.getText(), accountNameField.getText(), Float.valueOf(accountMoneyField.getText()), sdf.parse( accountCreatedField.getText() ),
-                    Main.getLoggedUser(), bankComboBox.getSelectionModel().getSelectedItem());
-            Main.getLoggedUser().getAccounts().add(account);
-
             Session session = SessionUtil.getSession();
             org.hibernate.Transaction tx = session.beginTransaction();
+
+            Query currencyQuery = session.createQuery("from Currency where code = :code");
+            currencyQuery.setParameter("code", "HUF");
+            Currency currency = (Currency) currencyQuery.uniqueResult();
+
+            Account account = new Account(accountNumberField.getText(), accountNameField.getText(), Float.valueOf(accountMoneyField.getText()), sdf.parse( accountCreatedField.getText() ),
+                    Main.getLoggedUser(), bankComboBox.getSelectionModel().getSelectedItem(), currency);
+
+            Main.getLoggedUser().getAccounts().add(account);
+
             session.save(account);
             tx.commit();
             session.close();

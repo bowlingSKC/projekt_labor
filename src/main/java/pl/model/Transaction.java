@@ -11,16 +11,16 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(name = "account_no", nullable = true, updatable = false, length = 24)
-    private String account;
+    private String account = "";
     @Column(name = "another_account_no", nullable = true, updatable = false, length = 24)
-    private String anotherAccount;
+    private String anotherAccount = "";
     @Column(name = "money", nullable = false, updatable = false)
-    private float money;
+    private float money = 0.0f;
     @Temporal(TemporalType.DATE)
     @Column(name = "date", nullable = false, updatable = false)
     private Date date;
     @Column(name = "comment")
-    private String comment;
+    private String comment = "";
     @ManyToOne
     @JoinColumn(name = "type_id", nullable = false, updatable = false)
     private TransactionType type;
@@ -36,6 +36,16 @@ public class Transaction {
         this.date = date;
         this.comment = comment;
         this.type = type;
+    }
+
+    // konstuktor a TreeTableView-hoz
+    public Transaction(Date date) {
+        this.date = date;
+        this.account = "";
+        this.anotherAccount = "";
+        this.money = 0.0f;
+        this.comment = "";
+        this.type = new TransactionType("");
     }
 
     public Long getId() {

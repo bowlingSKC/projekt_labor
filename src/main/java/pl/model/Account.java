@@ -35,6 +35,10 @@ public class Account {
     @JoinColumn(name = "bank_id", nullable = false)
     private Bank bank;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "currency_id", nullable = false)
+    private Currency currency;
+
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "account")
     private Set<MoneyGroup> moneyGroups;
 
@@ -42,13 +46,14 @@ public class Account {
 
     }
 
-    public Account(String accountNumber, String name, float money, Date createdDate, User owner, Bank bank) {
+    public Account(String accountNumber, String name, float money, Date createdDate, User owner, Bank bank, Currency currency) {
         this.accountNumber = accountNumber;
         this.name = name;
         this.money = money;
         this.createdDate = createdDate;
         this.owner = owner;
         this.bank = bank;
+        this.currency = currency;
     }
 
     public Long getId() {
@@ -113,6 +118,15 @@ public class Account {
 
     public void setMoneyGroups(Set<MoneyGroup> moneyGroups) {
         this.moneyGroups = moneyGroups;
+    }
+
+
+    public Currency getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(Currency currency) {
+        this.currency = currency;
     }
 
     @Override

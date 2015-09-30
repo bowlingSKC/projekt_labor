@@ -32,6 +32,9 @@ public class User {
     @Column(name = "registred", nullable = false)
     private Date registredDate;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    private ReadyCash readycash;
+
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "user")
     private Set<Login> logins = new HashSet<>(0);
 
@@ -134,12 +137,24 @@ public class User {
         this.logins = logins;
     }
 
+    public ReadyCash getReadycash() {
+        return readycash;
+    }
+
+    public void setReadycash(ReadyCash readycash) {
+        this.readycash = readycash;
+    }
+
     public float getAllMoneyFromAccounts() {
         float sum = 0;
         for(Account acc : accounts) {
             sum += acc.getMoney();
         }
         return sum;
+    }
+
+    public float getAllMoney() {
+        return getAllMoneyFromAccounts() + readycash.getMoney();
     }
 
     public Date getLastLogin() {

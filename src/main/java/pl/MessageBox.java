@@ -1,6 +1,7 @@
 package pl;
 
 import javafx.scene.control.Alert;
+import javafx.stage.StageStyle;
 
 public class MessageBox {
 
@@ -9,6 +10,7 @@ public class MessageBox {
         alert.setTitle(title);
         alert.setHeaderText(header);
         alert.setContentText(content);
+        alert.initStyle(StageStyle.UTILITY);
         alert.show();
 
         if( wait ) {

@@ -5,7 +5,10 @@ package pl.controllers;
  */
 
 import javafx.fxml.FXML;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.input.MouseEvent;
+import javafx.stage.Stage;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
@@ -21,8 +24,12 @@ import java.security.SecureRandom;
 
 public class ForgotPasswordController {
 
+    private Stage dialogStage;
+
     @FXML
     private TextField mailField;
+    @FXML
+    private Label stageCloseLabel;
 
     String recipiantEmail;                              //destination
     String title = "Új jelszó";                //subject
@@ -30,6 +37,11 @@ public class ForgotPasswordController {
     private SecureRandom random;
     public String nextSessionId() {
         return new BigInteger(130, random).toString(32);
+    }
+
+    @FXML
+    public void initialize() {
+        stageCloseLabel.setOnMouseClicked((MouseEvent event) -> dialogStage.close());
     }
 
     @FXML
@@ -72,7 +84,9 @@ public class ForgotPasswordController {
         session.update(mailUser);
         tx.commit();
         session.close();
-
     }
 
+    public void setDialogStage(Stage dialogStage) {
+        this.dialogStage = dialogStage;
+    }
 }
