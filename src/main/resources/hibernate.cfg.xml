@@ -19,6 +19,8 @@
         <!-- Model classes -->
         <mapping class="pl.model.User" />
         <mapping class="pl.model.Bank" />
+        <mapping class="pl.model.Pocket" />
+        <mapping class="pl.model.myCategory" />
         <mapping class="pl.model.Account" />
         <mapping class="pl.model.MoneyGroup" />
         <mapping class="pl.model.Login" />
@@ -26,6 +28,7 @@
         <mapping class="pl.model.TransactionType" />
         <mapping class="pl.model.Currency" />
         <mapping class="pl.model.ReadyCash" />
+
 
     </session-factory>
 </hibernate-configuration>

@@ -4,10 +4,16 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import pl.Main;
@@ -29,6 +35,9 @@ public class SyncDataController {
     private ListView<File> fileList;
 
     @FXML
+    private ComboBox<String> fileTypes;
+
+    @FXML
     private ListView<String> transactionList;
 
     private ArrayList<Transaction> myTransactions;
@@ -38,7 +47,7 @@ public class SyncDataController {
         fileList.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
-                if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
+                if (mouseEvent.getButton().equals(MouseButton.PRIMARY) && !fileList.getSelectionModel().isEmpty()) {
                     handleProcess();
                 }
             }
@@ -46,12 +55,15 @@ public class SyncDataController {
         transactionList.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
-                if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
+                if (mouseEvent.getButton().equals(MouseButton.PRIMARY) && !transactionList.getSelectionModel().isEmpty()) {
                     handleSelect();
                 }
             }
         });
         myTransactions = new ArrayList<>();
+        //fileTypes.setValue("OTP - CSV");
+        fileTypes.getItems().add("OTP - CSV");
+        fileTypes.getItems().add("Coming soon...");
     }
 
     @FXML
@@ -69,90 +81,30 @@ public class SyncDataController {
     @FXML
     private void handleProcess(){
         try {
-
-            String csvFile = fileList.getSelectionModel().getSelectedItem().getAbsolutePath();
-            BufferedReader br = null;
-            String line = "";
-            String cvsSplitBy = ",";
-
-            try {
-                ObservableList<String> items =FXCollections.observableArrayList ();
-                br = new BufferedReader(new FileReader(csvFile));
-                while ((line = br.readLine()) != null) {
-
-                    // use comma as separator
-                    String[] transaction = line.split(";");
-                    items.add("Számlaszám: " + transaction[0] + "  Összeg:  " + transaction[2] +
-                            "   Pénznem: " + transaction[3] + "   Dátum: " + transaction[4] +
-                            "   Könyvelt egyenleg: " + transaction[6] + " " + transaction[3] +
-                            "   Ellenoldali számlaszám: " + transaction[7] + "   Ellenoldali név: " + transaction[8] +
-                            "   Közlemény: " + transaction[9] + " " + transaction[10] + " " + transaction[12]);
-                    transactionList.setItems(items);
-
-                    //Parse to transaction
-                    transaction[0] = checkSzamla(transaction[0]);   //számlaszám helyes formátumra hozása
-                    transaction[7] = checkSzamla(transaction[7]);
-                    DateFormat format = new SimpleDateFormat("yyyyMMdd", Locale.ENGLISH);       //dátum helyes formátumra hozása
-                    Date date = format.parse(transaction[4]);
-                    myTransactions.add(new Transaction(transaction[0], transaction[7], Float.valueOf(transaction[2]),
-                            date, transaction[9] + " " + transaction[10] + " " + transaction[12], new TransactionType()));
-                }
-
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                if (br != null) {
-                    try {
-                        br.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
+            switch (fileTypes.getSelectionModel().getSelectedItem()) {
+                case "OTP - CSV":
+                    processOTPCSV();
+                    break;
             }
-        }catch(Exception e){
-            System.out.println("Hiba!");
+        }catch (NullPointerException e){
         }
+
     }
     @FXML
     private void handleSelect(){
         int index = transactionList.getSelectionModel().getSelectedIndex();
-        String compare = myTransactions.get(index).getAccount();
-
-        if( confirmTransaction() ) {
-            Session session = SessionUtil.getSession();
-            org.hibernate.Transaction tx = session.beginTransaction();
-
-            try {
-                // Számla kiválasztása
-
-                //Account account = Main.getLoggedUser().getAccounts();
-                for( Account acc : Main.getLoggedUser().getAccounts() ) {
-                    if(compare.equals(acc.getAccountNumber())){
-                        System.out.println("OK");
-                        acc.setMoney(acc.getMoney() + myTransactions.get(index).getMoney());
-                        session.update(acc);
-
-                        // Tranzakció létrehozása a belépett felhasználónak
-                        Query query = session.createQuery("from TransactionType where id = :id");
-                        query.setParameter("id", 2);
-                        TransactionType transactionType = (TransactionType) query.uniqueResult();
-                        Transaction myTransaction = myTransactions.get(index);
-                        myTransaction.setType(transactionType);
-
-                        session.save(myTransaction);
-                        tx.commit();
-                        System.out.println("OK");
-                    }
-                }
-
-            } catch (Throwable ex) {
-                tx.rollback();
-                ex.printStackTrace();
-            }
-            session.flush();
-            session.close();
+        try {
+            Stage dialogStage = new Stage();
+            FXMLLoader loader = new FXMLLoader(Main.class.getResource("../layout/ShowTransaction.fxml"));
+            BorderPane pane = loader.load();
+            Scene scene = new Scene(pane);
+            dialogStage.setScene(scene);
+            ShowTransactionController showTransactionController = loader.getController();
+            showTransactionController.setTransaction(myTransactions.get(index));
+            dialogStage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Sikertelen művelet!");
         }
 
     }
@@ -238,4 +190,91 @@ public class SyncDataController {
         return szamla;
     }
 
+    private void processOTPCSV(){
+        try {
+            String csvFile = fileList.getSelectionModel().getSelectedItem().getAbsolutePath();
+            BufferedReader br = null;
+            String line = "";
+            String cvsSplitBy = ",";
+
+            try {
+                ObservableList<String> items = FXCollections.observableArrayList();
+                br = new BufferedReader(new FileReader(csvFile));
+                while ((line = br.readLine()) != null) {
+
+                    // use comma as separator
+                    String[] transaction = line.split(";");
+                    items.add("Számlaszám: " + transaction[0] + "  Összeg:  " + transaction[2] +
+                            "   Pénznem: " + transaction[3] + "   Dátum: " + transaction[4] +
+                            "   Könyvelt egyenleg: " + transaction[6] + " " + transaction[3] +
+                            "   Ellenoldali számlaszám: " + transaction[7] + "   Ellenoldali név: " + transaction[8] +
+                            "   Közlemény: " + transaction[9] + " " + transaction[10] + " " + transaction[12]);
+                    transactionList.setItems(items);
+
+                    //Parse to transaction
+                    transaction[0] = checkSzamla(transaction[0]);   //számlaszám helyes formátumra hozása
+                    transaction[7] = checkSzamla(transaction[7]);
+                    DateFormat format = new SimpleDateFormat("yyyyMMdd", Locale.ENGLISH);       //dátum helyes formátumra hozása
+                    Date date = format.parse(transaction[4]);
+                    myTransactions.add(new Transaction(transaction[0], transaction[7], Float.valueOf(transaction[2]),
+                            date, transaction[9] + " " + transaction[10] + " " + transaction[12], new TransactionType()));
+                }
+
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (br != null) {
+                    try {
+                        br.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Hiba!");
+        }
+    }
+
+    //OLD
+    /*@FXML
+    private void handleSelect() {
+        int index = transactionList.getSelectionModel().getSelectedIndex();
+        String compare = myTransactions.get(index).getAccount();
+
+        if( confirmTransaction() ) {
+            Session session = SessionUtil.getSession();
+            org.hibernate.Transaction tx = session.beginTransaction();
+
+            try {
+                // Számla kiválasztása
+                for( Account acc : Main.getLoggedUser().getAccounts() ) {
+                    if(compare.equals(acc.getAccountNumber())){
+                        System.out.println("OK");
+                        acc.setMoney(acc.getMoney() + myTransactions.get(index).getMoney());
+                        session.update(acc);
+
+                        // Tranzakció létrehozása a belépett felhasználónak
+                        Query query = session.createQuery("from TransactionType where id = :id");
+                        query.setParameter("id", 2);
+                        TransactionType transactionType = (TransactionType) query.uniqueResult();
+                        Transaction myTransaction = myTransactions.get(index);
+                        myTransaction.setType(transactionType);
+
+                        session.save(myTransaction);
+                        tx.commit();
+                        System.out.println("OK");
+                    }
+                }
+
+            } catch (Throwable ex) {
+                tx.rollback();
+                ex.printStackTrace();
+            }
+            session.flush();
+            session.close();
+        }
+    }*/
 }

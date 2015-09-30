@@ -95,7 +95,8 @@ public class LoggedController {
 
         TreeItem<String> newAccountsMenu = new TreeItem<>("�j sz�mla l�trehoz�sa");
         TreeItem<String> listAccountsMenu = new TreeItem<>("Sz�ml�k list�z�as");
-        accountsMenu.getChildren().addAll(newAccountsMenu, listAccountsMenu);
+        TreeItem<String> listPocketsMenu = new TreeItem<>("Zsebek");
+        accountsMenu.getChildren().addAll(newAccountsMenu, listAccountsMenu, listPocketsMenu);
 
         TreeItem<String> orderMenu = new TreeItem<>("Tranzakci�k");
         orderMenu.expandedProperty().addListener(expandedListener);
@@ -213,6 +214,9 @@ public class LoggedController {
                 case "Sz�ml�k list�z�as":
                     readAccountListLayout();
                     break;
+                case "Zsebek":
+                    readListPockets();
+                    break;
                 case "�j forint megb�z�s":
                     readNewHufTransaction();
                     break;
@@ -221,6 +225,9 @@ public class LoggedController {
                     break;
                 case "Tranzakci�k list�z�sa":
                     readListTransactions();
+                    break;
+                case "Havi kimutat�s":
+                    readListMonth();
                     break;
                 case "Szinkroniz�l�s webbanki adatokkal":
                     readSyncData();
@@ -239,9 +246,31 @@ public class LoggedController {
             }
         }
 
+        private void readListPockets() {
+            try {
+                FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/Pocket.fxml") );
+                AnchorPane pane = (AnchorPane) loader.load();
+
+                layout.setCenter(pane);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+
         private void readSyncData() {
             try {
                 FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/SyncData.fxml") );
+                AnchorPane pane = (AnchorPane) loader.load();
+
+                layout.setCenter(pane);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+
+        private void readListMonth() {
+            try {
+                FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/ListMonth.fxml") );
                 AnchorPane pane = (AnchorPane) loader.load();
 
                 layout.setCenter(pane);
