@@ -9,8 +9,8 @@ import java.util.ResourceBundle;
 public class Bundles {
 
     private static ResourceBundle bundle;
-//    private static Locale locale = new Locale(Locale.getDefault().getLanguage(), Locale.getDefault().getCountry());
-    private static Locale locale = new Locale("en", "EN");        // ha az angol lokaliz�ci�t szeretn�nk tesztelni
+    private static Locale locale = new Locale(Locale.getDefault().getLanguage(), Locale.getDefault().getCountry());
+//    private static Locale locale = new Locale("en", "EN");        // ha az angol lokaliz�ci�t szeretn�nk tesztelni
 //    private static Locale locale = new Locale("hu", "HU");        // ha a magyar lokaliz�ci�t szeretn�nk tesztelni
 
     public static String getString(String key) {

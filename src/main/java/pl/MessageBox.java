@@ -11,7 +11,6 @@ public class MessageBox {
         alert.setHeaderText(header);
         alert.setContentText(content);
         alert.initStyle(StageStyle.UTILITY);
-        alert.show();
 
         if( wait ) {
             alert.showAndWait();
@@ -25,7 +24,6 @@ public class MessageBox {
         alert.setTitle(title);
         alert.setHeaderText(header);
         alert.setContentText(content);
-        alert.show();
 
         if( wait ) {
             alert.showAndWait();
@@ -39,7 +37,6 @@ public class MessageBox {
         alert.setTitle(title);
         alert.setHeaderText(header);
         alert.setContentText(content);
-        alert.show();
 
         if( wait ) {
             alert.showAndWait();

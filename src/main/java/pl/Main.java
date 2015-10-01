@@ -1,6 +1,7 @@
 package pl;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -9,6 +10,7 @@ import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
@@ -31,26 +33,20 @@ import java.security.SecureRandom;
 public class Main extends Application {
 
     private static Stage primaryStage;
-    private static Scene logoutScene;
-    private static Scene loginScene;
+    private static Stage loginStage;
+
+    private Scene splashScene;
+    private Scene loginScene;
 
     private static ObjectProperty<User> loggedUser = new SimpleObjectProperty<>();
 
     @Override
     public void start(Stage primaryStage) throws Exception {
         Main.primaryStage = primaryStage;
-        Main.primaryStage.getIcons().add( new Image("imgs/money_icon.png") );
-        Main.primaryStage.setTitle(" --- C�M --- ");
-
+        Main.primaryStage.getIcons().add(new Image("imgs/money_icon.png"));
+        Main.primaryStage.setTitle( Bundles.getString("splash.title") );
 
         initLayout();
-        loggedUser.addListener((obs, oldValue, newValue) -> {
-            if( newValue == null ) {
-                Main.primaryStage.setScene(logoutScene);
-            } else {
-                Main.primaryStage.setScene(loginScene);
-            }
-        });
     }
 
     private void initLayout() {
@@ -58,9 +54,8 @@ public class Main extends Application {
             FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/Splash.fxml"), Bundles.getBundle());
             AnchorPane pane = loader.load();
 
-            Scene scene = new Scene(pane);
-            primaryStage.setScene(scene);
-            primaryStage.setScene(scene);
+            splashScene = new Scene(pane);
+            primaryStage.setScene(splashScene);
             primaryStage.initStyle(StageStyle.UNDECORATED);
 
             primaryStage.sceneProperty().addListener((observable, oldValue, newValue) -> primaryStage.centerOnScreen());
@@ -79,12 +74,10 @@ public class Main extends Application {
                         Session session = SessionUtil.getSession();
                         session.close();
 
-                        System.out.println("Hibernate ok");
-
                         FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/RootLayout.fxml"), Bundles.getBundle() );
                         AnchorPane pane = loader.load();
+                        loginScene = new Scene(pane);
 
-                        logoutScene = new Scene(pane);
                         return null;
                     }
                 };
@@ -93,8 +86,13 @@ public class Main extends Application {
 
         service.start();
         service.setOnSucceeded(event -> {
-            System.out.println("Successed");
-            primaryStage.setScene(logoutScene);
+            primaryStage.setScene(loginScene);
+        });
+
+        service.setOnFailed(event -> {
+            MessageBox.showErrorMessage("Hiba", "Hiba a program betöltése közben!", "Próbálja később!", true);
+            Platform.exit();
+            System.exit(0);
         });
     }
 
@@ -120,27 +118,35 @@ public class Main extends Application {
 
     public static void login(User user) {
         loggedUser.setValue(user);
-        try {
-            FXMLLoader loader2 = new FXMLLoader( Main.class.getResource("../layout/Logged.fxml") );
-            BorderPane loggedpane = loader2.load();
+        primaryStage.hide();
 
-            LoggedController controller = loader2.getController();
-            controller.setLayout(loggedpane);
-            controller.setDialogStage(primaryStage);
+        try {
+            loginStage = new Stage();
+
+            FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/Logged.fxml"), Bundles.getBundle() );
+            Parent loggedpane = loader.load();
+            LoggedController controller = loader.getController();
+            controller.setDialogStage(loginStage);
 
             Scene scene = new Scene(loggedpane);
-            primaryStage.setScene(scene);
-        } catch (IOException ex) {
-            ex.printStackTrace();
+            loginStage.setScene(scene);
+            loginStage.initStyle(StageStyle.UNDECORATED);
+            loginStage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
+
     public static void logout() {
         loggedUser.setValue(null);
+
+        loginStage.close();
+        primaryStage.show();
     }
 
     public static Stage getPrimaryStage() {
-        return primaryStage;
+        return loginStage;
     }
 
     public static User getLoggedUser() {

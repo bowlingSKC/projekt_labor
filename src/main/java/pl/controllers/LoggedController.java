@@ -14,6 +14,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import pl.Main;
+import pl.bundles.Bundles;
 
 import java.io.IOException;
 
@@ -38,18 +39,11 @@ public class LoggedController {
     private Stage dialogStage;
 
     @FXML
-    private Hyperlink nameLabel;
-    @FXML
     private TreeView<String> menuTree;
     @FXML
     private BorderPane layout;
     @FXML
-    private Button newTransactionButton;
-
-    @FXML
-    private void handleLogout() {
-        Main.logout();
-    }
+    private Label nameLabel;
 
     @FXML
     public void initialize() {
@@ -58,19 +52,9 @@ public class LoggedController {
         rec2 = Screen.getPrimary().getVisualBounds();
         w = 0.1;
         h = 0.1;
-        Platform.runLater(() -> {
-            dialogStage.setMaximized(true);
-            dialogStage.setHeight(rec2.getHeight());
-            maximizeButton.getStylesheets().add("decoration-button-restore");
-            resizeButton.setVisible(false);
-        });
 
-        // Felhaszn�l� nev�nek ki�r�sa
-        String userName = Main.getLoggedUser().getFirstname() + " " + Main.getLoggedUser().getLastname();
-        nameLabel.setText( userName );
-
-        // Icon beolvas�sa
-        //newTransactionButton.setGraphic( new ImageView( new Image( Main.class.getResourceAsStream("../imgs/new_transaction.png") )));
+        String username = Main.getLoggedUser().getFirstname() + " " + Main.getLoggedUser().getLastname();
+        nameLabel.setText( username );
 
         // Menü létrehozása
         menuTree.setShowRoot(false);
@@ -82,36 +66,36 @@ public class LoggedController {
             if( isNowExpanded ) {
                 ReadOnlyProperty<?> expandedProperty = (ReadOnlyProperty<?>) obs;
                 Object itemThatWasJustExpanded = expandedProperty.getBean();
-                for( TreeItem<String> item : menuTree.getRoot().getChildren() ) {
-                    if( item != itemThatWasJustExpanded ) {
-                        item.setExpanded(false);
-                    }
-                }
+                menuTree.getRoot().getChildren().stream().filter(item -> item != itemThatWasJustExpanded).forEach(item -> item.setExpanded(false));
             }
         };
 
-        TreeItem<String> accountsMenu = new TreeItem<>("Sz�ml�k");
-        accountsMenu.expandedProperty().addListener(expandedListener);
+        TreeItem<String> cashMenu = new TreeItem<>(Bundles.getString("menu.cash"));
+        cashMenu.expandedProperty().addListener(expandedListener);
 
-        TreeItem<String> newAccountsMenu = new TreeItem<>("�j sz�mla l�trehoz�sa");
-        TreeItem<String> listAccountsMenu = new TreeItem<>("Sz�ml�k list�z�as");
-        TreeItem<String> listPocketsMenu = new TreeItem<>("Zsebek");
-        accountsMenu.getChildren().addAll(newAccountsMenu, listAccountsMenu, listPocketsMenu);
+        TreeItem<String> readyMenu = new TreeItem<>(Bundles.getString("menu.cash.ready"));
+        TreeItem<String> accountsMenu = new TreeItem<>(Bundles.getString("menu.cash.account"));
+        TreeItem<String> propertiesMenu = new TreeItem<>(Bundles.getString("menu.cash.property"));
+        TreeItem<String> listPocketsMenu = new TreeItem<>(Bundles.getString("menu.cash.pocket"));
+        cashMenu.getChildren().addAll(readyMenu, accountsMenu, propertiesMenu, listPocketsMenu);
 
-        TreeItem<String> orderMenu = new TreeItem<>("Tranzakci�k");
+        TreeItem<String> orderMenu = new TreeItem<>(Bundles.getString("menu.transaction"));
         orderMenu.expandedProperty().addListener(expandedListener);
-        TreeItem<String> newHufOrderMenu = new TreeItem<>("�j forint megb�z�s");
-        TreeItem<String> newDevOrderMenu = new TreeItem<>("�j deviza megb�z�s");
-        TreeItem<String> listOrderMenu = new TreeItem<>("Tranzakci�k list�z�sa");
-        orderMenu.getChildren().addAll(newHufOrderMenu, newDevOrderMenu, listOrderMenu);
+        TreeItem<String> orderMenuItem = new TreeItem<>(Bundles.getString("menu.transaction.transactions"));
+        TreeItem<String> listOrderMenu = new TreeItem<>(Bundles.getString("menu.transaction.report"));
+        orderMenu.getChildren().addAll(orderMenuItem, listOrderMenu);
 
-        TreeItem<String> statMenu = new TreeItem<>("Kimutat�s");
-        statMenu.expandedProperty().addListener(expandedListener);
-        TreeItem<String> listMonthStatMenu = new TreeItem<>("Havi kimutat�s");
-        TreeItem<String> sysnStatMenu = new TreeItem<>("Szinkroniz�l�s webbanki adatokkal");
-        statMenu.getChildren().addAll(listMonthStatMenu, sysnStatMenu);
+        TreeItem<String> importExportMenu = new TreeItem<>(Bundles.getString("menu.importexport"));
+        importExportMenu.expandedProperty().addListener(expandedListener);
+        TreeItem<String> sysWebbank = new TreeItem<>(Bundles.getString("menu.importexport.syn"));
+        importExportMenu.getChildren().addAll(sysWebbank);
 
-        root.getChildren().addAll(accountsMenu, orderMenu, statMenu);
+        TreeItem<String> settingsMenu = new TreeItem<>(Bundles.getString("menu.settings"));
+        settingsMenu.expandedProperty().addListener(expandedListener);
+        TreeItem<String> personalSettings = new TreeItem<>(Bundles.getString("menu.settings.personal"));
+        settingsMenu.getChildren().addAll(personalSettings);
+
+        root.getChildren().addAll(cashMenu, orderMenu, importExportMenu, settingsMenu);
 
         PseudoClass subElementPseudoClass = PseudoClass.getPseudoClass("sub-tree-item");
 
@@ -150,16 +134,6 @@ public class LoggedController {
     }
 
     @FXML
-    private void handleShowPersonalSummary() {
-        listener.readPersonalDataLayout();
-    }
-
-    @FXML
-    private void handleNewTransaction() {
-
-    }
-
-    @FXML
     private void handleClose() {
         Platform.exit();
         System.exit(0);
@@ -167,11 +141,6 @@ public class LoggedController {
 
     @FXML
     private void handleMaximize() {
-
-    }
-
-    @FXML
-    private void handleMinimize() {
         if( dialogStage.isMaximized() ) {
             if( w == rec2.getWidth() && h == rec2.getHeight() ) {
                 dialogStage.setMaximized(false);
@@ -185,21 +154,58 @@ public class LoggedController {
                 maximizeButton.getStylesheets().remove("decoration-button-restore");
                 resizeButton.setVisible(true);
             }
+        } else {
+            dialogStage.setMaximized(true);
+            dialogStage.setHeight(rec2.getHeight());
+            maximizeButton.getStylesheets().add("decoration-button-restore");
+            resizeButton.setVisible(false);
+        }
+    }
+
+    @FXML
+    private void handleMinimize() {
+        if( dialogStage.isMaximized() ) {
+            w = rec2.getWidth();
+            h = rec2.getHeight();
+            dialogStage.setMaximized(false);
+            dialogStage.setHeight(h);
+            dialogStage.setWidth(w);
+            dialogStage.centerOnScreen();
+            Platform.runLater(() -> {
+                dialogStage.setIconified(true);
+            });
+        } else {
+            dialogStage.setIconified(true);
         }
     }
 
     @FXML
     private void handleResize() {
-
+        // TODO
     }
 
     @FXML
     private void handleFullScreen() {
+        if( dialogStage.isFullScreen() ) {
+            dialogStage.setFullScreen(false);
+        } else {
+            dialogStage.setFullScreen(true);
+        }
+    }
 
+    @FXML
+    private void handleLogout() {
+        Main.logout();
     }
 
     public void setDialogStage(Stage dialogStage) {
         this.dialogStage = dialogStage;
+        Platform.runLater(() -> {
+            dialogStage.setMaximized(true);
+            dialogStage.setHeight(rec2.getHeight());
+            maximizeButton.getStylesheets().add("decoration-button-restore");
+            resizeButton.setVisible(false);
+        });
     }
 
     public void setLayout(BorderPane layout) {
@@ -210,28 +216,16 @@ public class LoggedController {
         @Override
         public void changed(ObservableValue<? extends TreeItem<String>> observable, TreeItem<String> oldValue, TreeItem<String> newValue) {
             final String value = newValue.getValue();
-            switch (value) {
-                case "Sz�ml�k list�z�as":
-                    readAccountListLayout();
-                    break;
-                case "Zsebek":
-                    readListPockets();
-                    break;
-                case "�j forint megb�z�s":
-                    readNewHufTransaction();
-                    break;
-                case "�j sz�mla l�trehoz�sa":
-                    readNewAccount();
-                    break;
-                case "Tranzakci�k list�z�sa":
-                    readListTransactions();
-                    break;
-                case "Havi kimutat�s":
-                    readListMonth();
-                    break;
-                case "Szinkroniz�l�s webbanki adatokkal":
-                    readSyncData();
-                    break;
+            if( value.equals(Bundles.getString("menu.cash.account")) ) {
+                readAccountListLayout();
+            } else if( value.equals(Bundles.getString("menu.cash.pocket")) ) {
+                readListPockets();
+            } else if( value.equals(Bundles.getString("menu.transaction.transactions")) ) {
+                readListTransactions();
+            } else if( value.equals(Bundles.getString("menu.transaction.report")) ) {
+                readListMonth();
+            } else if( value.equals(Bundles.getString("menu.importexport.syn")) ) {
+                readSyncData();
             }
         }
 

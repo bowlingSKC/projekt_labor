@@ -28,6 +28,8 @@
         <mapping class="pl.model.TransactionType" />
         <mapping class="pl.model.Currency" />
         <mapping class="pl.model.ReadyCash" />
+        <mapping class="pl.model.Property" />
+        <mapping class="pl.model.Depriciation" />
 
 
     </session-factory>

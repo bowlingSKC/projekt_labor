@@ -44,6 +44,10 @@ public class User {
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "owner")
     private Set<MoneyGroup> moneyGroups;
 
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "owner")
+    private Set<Property> properties;
+
+
     public User() {
 
     }
@@ -143,6 +147,14 @@ public class User {
 
     public void setReadycash(ReadyCash readycash) {
         this.readycash = readycash;
+    }
+
+    public Set<Property> getProperties() {
+        return properties;
+    }
+
+    public void setProperties(Set<Property> properties) {
+        this.properties = properties;
     }
 
     public float getAllMoneyFromAccounts() {

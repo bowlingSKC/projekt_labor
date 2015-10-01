@@ -1,47 +1,58 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.image.*?>
+<?import javafx.scene.text.*?>
 <?import java.lang.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane fx:id="layout" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="450.0" minWidth="750.0" prefHeight="450.0" prefWidth="750.0" style="-fx-border-color: white;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pl.controllers.LoggedController">
-   <left>
-      <TreeView fx:id="menuTree" prefHeight="450.0" prefWidth="167.0" stylesheets="@../styles/menu_tree.css" BorderPane.alignment="CENTER">
-         <BorderPane.margin>
-            <Insets bottom="2.0" left="2.0" />
-         </BorderPane.margin></TreeView>
-   </left>
-   <top>
-      <VBox>
-         <children>
-            <HBox alignment="BASELINE_RIGHT" stylesheets="@../styles/windows.css">
+<AnchorPane prefHeight="450.0" prefWidth="750.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pl.controllers.LoggedController">
+   <children>
+      <Label fx:id="nameLabel" alignment="CENTER" stylesheets="@../styles/buttonCircle.css" text="Ide jön a bejelentkezett felhasználó neve" textFill="#a1a1a1" AnchorPane.leftAnchor="1.0" AnchorPane.rightAnchor="-1.0" AnchorPane.topAnchor="3.0">
+         <font>
+            <Font name="Segoe UI Semibold" size="14.0" />
+         </font>
+      </Label>
+      <BorderPane fx:id="layout" style="-fx-border-color: white;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <left>
+            <VBox alignment="CENTER" prefHeight="448.0" prefWidth="195.0" style="-fx-background-color: rgb(43, 87, 154);" BorderPane.alignment="TOP_CENTER">
                <children>
-                  <Button fx:id="fullscreenButton" mnemonicParsing="false" prefHeight="30.0" prefWidth="34.0" styleClass="decoration-button-fullscreen" />
-                  <Button fx:id="minimizeButton" mnemonicParsing="false" prefHeight="30.0" prefWidth="34.0" styleClass="decoration-button-minimize" />
-                  <Button fx:id="maximizeButton" mnemonicParsing="false" prefHeight="30.0" prefWidth="34.0" styleClass="decoration-button-maximize" />
-                  <Button fx:id="closeButton" mnemonicParsing="false" prefHeight="30.0" prefWidth="34.0" styleClass="decoration-button-close" />
-               </children>
-            </HBox>
-            <HBox alignment="CENTER_LEFT" prefHeight="27.0" prefWidth="650.0" styleClass="hbox" stylesheets="@../styles/login.css" BorderPane.alignment="CENTER">
-               <children>
-                  <Label prefHeight="17.0" prefWidth="95.0" text="Üdvözöllek, ">
-                     <HBox.margin>
-                        <Insets left="10.0" />
-                     </HBox.margin>
-                  </Label>
-                  <Hyperlink fx:id="nameLabel" onAction="#handleShowPersonalSummary" prefHeight="23.0" prefWidth="114.0" text="Hyperlink" />
-                  <Pane prefHeight="200.0" prefWidth="200.0" HBox.hgrow="ALWAYS" />
-                  <Button fx:id="newTransactionButton" mnemonicParsing="false" onAction="#handleNewTransaction" prefHeight="30.0" prefWidth="165.0" text="Új tranzakció" />
-                  <Pane prefHeight="200.0" prefWidth="200.0" HBox.hgrow="ALWAYS" />
-                  <Button mnemonicParsing="false" onAction="#handleLogout" prefHeight="30.0" prefWidth="121.0" text="Kilépés">
-                     <HBox.margin>
-                        <Insets bottom="3.0" right="5.0" top="3.0" />
-                     </HBox.margin>
+                  <Button mnemonicParsing="false" onAction="#handleLogout" prefHeight="40.0" prefWidth="40.0" stylesheets="@../styles/buttonCircle.css">
+                     <graphic>
+                        <ImageView fitHeight="16.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../imgs/arrowLeft.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                     <VBox.margin>
+                        <Insets bottom="10.0" top="10.0" />
+                     </VBox.margin>
                   </Button>
+                  <TreeView fx:id="menuTree" prefHeight="450.0" prefWidth="167.0" style="-fx-background-color: rgb(43, 87, 154);" stylesheets="@../styles/menu_tree.css" BorderPane.alignment="CENTER">
+                     <BorderPane.margin>
+                        <Insets bottom="2.0" left="2.0" top="2.0" />
+                     </BorderPane.margin>
+                     <VBox.margin>
+                        <Insets left="2.0" right="2.0" />
+                     </VBox.margin>
+                  </TreeView>
                </children>
-            </HBox>
+               <BorderPane.margin>
+                  <Insets />
+               </BorderPane.margin>
+            </VBox>
+         </left>
+      </BorderPane>
+      <Button fx:id="resizeButton" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="10.0" prefWidth="10.0" styleClass="decoration-button-resize" stylesheets="@../styles/windows.css" AnchorPane.bottomAnchor="2.0" AnchorPane.rightAnchor="2.0" />
+      <HBox stylesheets="@../styles/windows.css" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <Button fx:id="fullscreenButton" mnemonicParsing="false" onAction="#handleFullScreen" prefHeight="30.0" prefWidth="34.0" styleClass="decoration-button-fullscreen" />
+            <Button fx:id="minimizeButton" mnemonicParsing="false" onAction="#handleMinimize" prefHeight="30.0" prefWidth="34.0" styleClass="decoration-button-minimize" />
+            <Button fx:id="maximizeButton" mnemonicParsing="false" onAction="#handleMaximize" prefHeight="30.0" prefWidth="34.0" styleClass="decoration-button-maximize" />
+            <Button fx:id="closeButton" mnemonicParsing="false" onAction="#handleClose" prefHeight="30.0" prefWidth="34.0" styleClass="decoration-button-close" />
          </children>
-      </VBox>
-   </top>
-</BorderPane>
+      </HBox>
+   </children>
+</AnchorPane>
