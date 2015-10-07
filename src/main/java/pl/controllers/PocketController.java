@@ -18,9 +18,7 @@ import pl.jpa.SessionUtil;
 import pl.model.*;
 
 import java.time.ZoneId;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 public class PocketController {
 
@@ -39,17 +37,23 @@ public class PocketController {
 
     private float sumMoney;
     private float allMoney;
+    private List<Account> accounts;
+    private Dictionary<String, Float> accountMoney;
     private List<myCategory> categories;
     private List<Pocket> pockets;
 
     @FXML
     public void initialize() {
         //Számlák lekérdezése
+        //accounts = new ArrayList<>();
         for (Account acc : Main.getLoggedUser().getAccounts()) {
+            //accountMoney.put(acc.getAccountNumber(), acc.getMoney());
             szamlaCombo.getItems().add(acc);
             sumMoney += acc.getMoney();
             allMoney += acc.getMoney();
+            //accounts.add(acc);
         }
+
         // Kategóriák lekérdezése
         Session session = SessionUtil.getSession();
         Query query = session.createQuery("from myCategory");
@@ -58,28 +62,48 @@ public class PocketController {
         for(myCategory cat : categories){
             pocketCombo.getItems().add(cat);
         }
+
+        // Számlák lekérdezése
+        session = SessionUtil.getSession();
+        query = session.createQuery("from Account");
+        accounts = query.list();
+
         // Zsebek lekérdezése
         session = SessionUtil.getSession();
         query = session.createQuery("from Pocket");
+        List<Pocket> segedPockets = new ArrayList<>();
         pockets = query.list();
         session.close();
         for(Pocket poc : pockets){
-            boolean pocWas = false;
-            for(int i = 0; i < pocketPie.getData().size(); i++){
-                if(poc.getCategory().toString() == pocketPie.getData().get(i).getName()){
-                    pocketPie.getData().get(i).setPieValue((pocketPie.getData().get(i).getPieValue() + poc.getMoney()));
-                    sumMoney -= poc.getMoney();
-                    pocWas = true;
+            if(poc.getOwner().getId() == Main.getLoggedUser().getId()){
+                boolean pocWas = false;
+                for(int i = 0; i < pocketPie.getData().size(); i++){
+                    if(poc.getCategory().toString() == pocketPie.getData().get(i).getName()){
+                        pocketPie.getData().get(i).setPieValue((pocketPie.getData().get(i).getPieValue() + poc.getMoney()));
+                        sumMoney -= poc.getMoney();
+                        pocWas = true;
+                    }
                 }
-            }
-            if(pocWas == false){
-                pocketPie.getData().add(new PieChart.Data(poc.getCategory().getName(), poc.getMoney()));
-                sumMoney -= poc.getMoney();
+                if(pocWas == false){
+                    pocketPie.getData().add(new PieChart.Data(poc.getCategory().getName(), poc.getMoney()));
+                    sumMoney -= poc.getMoney();
+                }
+                //NEW
+                /*for (Account acc : accounts) {
+                    if(acc.getAccountNumber() == poc.getAccount().getAccountNumber()){
+                        acc.setMoney(acc.getMoney() - poc.getMoney());
+                        System.out.println("-"+acc.getMoney());
+                    }
+                    System.out.println(acc.getAccountNumber() + " " +acc.getMoney());
+                }*/
+                segedPockets.add(poc);
             }
         }
+        pockets = segedPockets;
 
         pocketPie.getData().add(new PieChart.Data("Fentmaradó", sumMoney));
 
+        if(pockets != null)
         updateArea();
 
         //Placing tooltips
@@ -106,54 +130,79 @@ public class PocketController {
         boolean wasPocket = false;
         boolean wasPie = false;
         try {
-            if(sumMoney >= Float.valueOf(moneyText.getText())) {
-                for (int i = 0; i < pocketPie.getData().size(); i++) {
-                    if (pocketPie.getData().get(i).getName().equals(pocketCombo.getSelectionModel().getSelectedItem().toString())) {
-                        wasPie = true;
-                        for (Pocket poc : pockets) {
-                            if(poc.getAccount().toString().equals(szamlaCombo.getSelectionModel().getSelectedItem().toString())
-                                    && poc.getCategory().toString().equals(pocketPie.getData().get(i).getName())
-                                    && poc.getCategory().toString().equals(pocketCombo.getSelectionModel().getSelectedItem().toString())){
-                                wasPocket = true;
-                                pocketPie.getData().get(i).setPieValue(pocketPie.getData().get(i).getPieValue() + Double.valueOf(moneyText.getText()));
-                                sumMoney -= Float.valueOf(moneyText.getText());
-                                System.out.println("1");
-                                //if (poc.getCategory().toString() == pocketPie.getData().get(i).getName()) {
-                                    poc.setMoney(poc.getMoney() + Float.valueOf(moneyText.getText()));
-                                    session.update(poc);
-                                //}
+            //NEW
+            //for (Account acc0 : accounts) {
+            //    if(acc0.getAccountNumber() == szamlaCombo.getSelectionModel().getSelectedItem().getAccountNumber() &&
+            //           acc0.getMoney() >= Float.valueOf(moneyText.getText())){
+                    if(sumMoney >= Float.valueOf(moneyText.getText())) {
+                        for (int i = 0; i < pocketPie.getData().size(); i++) {
+                            if (pocketPie.getData().get(i).getName().equals(pocketCombo.getSelectionModel().getSelectedItem().toString())) {
+                                wasPie = true;
+                                for (Pocket poc : pockets) {
+                                    if(poc.getAccount().toString().equals(szamlaCombo.getSelectionModel().getSelectedItem().toString())
+                                            && poc.getCategory().toString().equals(pocketPie.getData().get(i).getName())
+                                            && poc.getCategory().toString().equals(pocketCombo.getSelectionModel().getSelectedItem().toString())){
+                                        wasPocket = true;
+                                        pocketPie.getData().get(i).setPieValue(pocketPie.getData().get(i).getPieValue() + Double.valueOf(moneyText.getText()));
+                                        sumMoney -= Float.valueOf(moneyText.getText());
+                                        System.out.println("1");
+                                        //if (poc.getCategory().toString() == pocketPie.getData().get(i).getName()) {
+                                        poc.setMoney(poc.getMoney() + Float.valueOf(moneyText.getText()));
+                                        session.update(poc);
+                                        //}
+                                        //NEW
+                                        /*for (Account acc : accounts) {
+                                            if(acc.getAccountNumber() == poc.getAccount().getAccountNumber()){
+                                                acc.setMoney(acc.getMoney()-Float.valueOf(moneyText.getText()));
+                                            }
+                                        }*/
+                                    }
+                                }
                             }
                         }
-                    }
-                }
-                //Nincs ilyen a diagrammon, nincs ilyen az adatbázisban
-                if (!wasPie) {
-                    Pocket pocket = new Pocket(Float.valueOf(moneyText.getText()), Main.getLoggedUser(), pocketCombo.getSelectionModel().getSelectedItem(), szamlaCombo.getSelectionModel().getSelectedItem());
-                    pockets.add(0, pocket);
-                    pocketPie.getData().add(new PieChart.Data(pocketCombo.getSelectionModel().getSelectedItem().toString(), Float.valueOf(moneyText.getText())));
-                    sumMoney -= Float.valueOf(moneyText.getText());
-                    session.save(pocket);
-                    System.out.println("2");
-                }
-                //Van ilyen a diagrammon, de nincsa az adatbázisban
-                if(wasPie && !wasPocket){
-                    Pocket pocket = new Pocket(Float.valueOf(moneyText.getText()), Main.getLoggedUser(), pocketCombo.getSelectionModel().getSelectedItem(), szamlaCombo.getSelectionModel().getSelectedItem());
-                    pockets.add(0,pocket);
-                    for(int i = 0; i < pocketPie.getData().size(); i++){
-                        if(pocketCombo.getSelectionModel().getSelectedItem().toString() == pocketPie.getData().get(i).getName()){
-                            pocketPie.getData().get(i).setPieValue((pocketPie.getData().get(i).getPieValue() + Double.valueOf(moneyText.getText())));
-
+                        //Nincs ilyen a diagrammon, nincs ilyen az adatbázisban
+                        if (!wasPie) {
+                            Pocket pocket = new Pocket(Float.valueOf(moneyText.getText()), Main.getLoggedUser(), pocketCombo.getSelectionModel().getSelectedItem(), szamlaCombo.getSelectionModel().getSelectedItem());
+                            pockets.add(0, pocket);
+                            pocketPie.getData().add(new PieChart.Data(pocketCombo.getSelectionModel().getSelectedItem().toString(), Float.valueOf(moneyText.getText())));
+                            sumMoney -= Float.valueOf(moneyText.getText());
+                            session.save(pocket);
+                            System.out.println("2");
+                            //NEW
+                            /*for (Account acc : accounts) {
+                                if(acc.getAccountNumber() == pocket.getAccount().getAccountNumber()){
+                                    acc.setMoney(acc.getMoney()-Float.valueOf(moneyText.getText()));
+                                }
+                            }*/
                         }
+                        //Van ilyen a diagrammon, de nincsa az adatbázisban
+                        if(wasPie && !wasPocket){
+                            Pocket pocket = new Pocket(Float.valueOf(moneyText.getText()), Main.getLoggedUser(), pocketCombo.getSelectionModel().getSelectedItem(), szamlaCombo.getSelectionModel().getSelectedItem());
+                            pockets.add(0,pocket);
+                            for(int i = 0; i < pocketPie.getData().size(); i++){
+                                if(pocketCombo.getSelectionModel().getSelectedItem().toString() == pocketPie.getData().get(i).getName()){
+                                    pocketPie.getData().get(i).setPieValue((pocketPie.getData().get(i).getPieValue() + Double.valueOf(moneyText.getText())));
+
+                                }
+                            }
+                            sumMoney -= Float.valueOf(moneyText.getText());
+                            session.save(pocket);
+                            System.out.println("3");
+                            //NEW
+                            /*for (Account acc : accounts) {
+                                if(acc.getAccountNumber() == pocket.getAccount().getAccountNumber()){
+                                    acc.setMoney(acc.getMoney()-Float.valueOf(moneyText.getText()));
+                                }
+                            }*/
+                        }
+                        tx.commit();
+                        session.close();
+                    }else{
+                        System.out.println("A műveletet nem lehet végrehajtani!");
                     }
-                    sumMoney -= Float.valueOf(moneyText.getText());
-                    session.save(pocket);
-                    System.out.println("3");
-                }
-                tx.commit();
-                session.close();
-            }else{
-                System.out.println("A műveletet nem lehet végrehajtani!");
-            }
+
+                //}
+            //}
 
         } catch (Throwable ex) {
             tx.rollback();

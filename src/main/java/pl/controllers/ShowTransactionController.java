@@ -94,7 +94,7 @@ public class ShowTransactionController {
 
     public  void setTransaction(Transaction trans){
         myTransaction = trans;
-        //szamlaText.setText(myTransaction.getAccount());
+        szamlaText.setText(myTransaction.getAccount().toString().substring(0,24));
         moneyText.setText(String.valueOf(myTransaction.getMoney()));
         datumText.setValue(myTransaction.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
         ellSzamlaText.setText(myTransaction.getAnotherAccount());
@@ -110,7 +110,7 @@ public class ShowTransactionController {
     }
 
     public void updateData(){
-        //myTransaction.setAccount(checkSzamla(szamlaText.getText()));
+        myTransaction.setAccount(new Account(checkSzamla(szamlaText.getText())));
         myTransaction.setMoney(Float.valueOf(moneyText.getText()));
         Date mydate = Date.from(datumText.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
         System.out.println(mydate.toString());
@@ -122,9 +122,10 @@ public class ShowTransactionController {
 
     @FXML
     private void sendTransaction(){
-        /*
+
         updateData();
-        //String compare = myTransaction.getAccount();
+        String compare = myTransaction.getAccount().toString();
+        compare = compare.substring(0,24);
         Session session = SessionUtil.getSession();
         org.hibernate.Transaction tx = session.beginTransaction();
 
@@ -138,12 +139,11 @@ public class ShowTransactionController {
 
                     // Tranzakció létrehozása a belépett felhasználónak
                     Query query = session.createQuery("from TransactionType where id = :id");
-                    query.setParameter("id", 2);
+                    query.setParameter("id", 1);
                     TransactionType transactionType = (TransactionType) query.uniqueResult();
                     myTransaction.setType(transactionType);
 
                     session.save(myTransaction);
-                    tx.commit();
                     System.out.println("OK");
                 }
             }
@@ -152,9 +152,10 @@ public class ShowTransactionController {
             tx.rollback();
             ex.printStackTrace();
         }
+        tx.commit();
         session.flush();
         session.close();
-        */
+
     }
 
     private String checkSzamla(String szamla){

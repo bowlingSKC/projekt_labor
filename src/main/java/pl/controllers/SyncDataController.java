@@ -111,17 +111,16 @@ public class SyncDataController {
 
     @FXML
     private void handleAll(){
-        /*
+        List<TransactionType> types;
         if( confirmAll() ) {
             Session session = SessionUtil.getSession();
             org.hibernate.Transaction tx = session.beginTransaction();
-            System.out.println(myTransactions.size());
 
             for (int index = 0; index < myTransactions.size(); index++){
-                String compare = myTransactions.get(index).getAccount();
+                String compare = myTransactions.get(index).getAccount().toString();
+                compare = compare.substring(0, 24);
                 try {
                     // Számla kiválasztása
-
                     //Account account = Main.getLoggedUser().getAccounts();
                     for (Account acc : Main.getLoggedUser().getAccounts()) {
                         if (compare.equals(acc.getAccountNumber())) {
@@ -131,15 +130,17 @@ public class SyncDataController {
 
                             // Tranzakció létrehozása a belépett felhasználónak
                             Query query = session.createQuery("from TransactionType where id = :id");
-                            query.setParameter("id", 2);
+                            query.setParameter("id", 1);
                             TransactionType transactionType = (TransactionType) query.uniqueResult();
                             Transaction myTransaction = myTransactions.get(index);
                             myTransaction.setType(transactionType);
 
                             session.save(myTransaction);
                             System.out.println("OK!");
+
                         }
                     }
+
 
                 } catch (Throwable ex) {
                     tx.rollback();
@@ -151,7 +152,7 @@ public class SyncDataController {
             session.flush();
             session.close();
         }
-        */
+
     }
 
     private boolean confirmTransaction(){
@@ -193,7 +194,7 @@ public class SyncDataController {
     }
 
     private void processOTPCSV(){
-        /*
+
         try {
             String csvFile = fileList.getSelectionModel().getSelectedItem().getAbsolutePath();
             BufferedReader br = null;
@@ -219,8 +220,9 @@ public class SyncDataController {
                     transaction[7] = checkSzamla(transaction[7]);
                     DateFormat format = new SimpleDateFormat("yyyyMMdd", Locale.ENGLISH);       //dátum helyes formátumra hozása
                     Date date = format.parse(transaction[4]);
-                    myTransactions.add(new Transaction(transaction[0], transaction[7], Float.valueOf(transaction[2]),
-                            date, transaction[9] + " " + transaction[10] + " " + transaction[12], new TransactionType()));
+                    myTransactions.add(new Transaction(new Account(transaction[0]), transaction[7], Float.valueOf(transaction[6]),
+                            Float.valueOf(transaction[2]), date,
+                            transaction[9] + " " + transaction[10] + " " + transaction[12], new TransactionType()));
                 }
 
             } catch (FileNotFoundException e) {
@@ -240,7 +242,7 @@ public class SyncDataController {
             System.out.println("Hiba!");
         }
     }
-    */
+
     //OLD
     /*@FXML
     private void handleSelect() {
@@ -280,5 +282,5 @@ public class SyncDataController {
             session.close();
         }
         */
-    }
+   // }
 }
