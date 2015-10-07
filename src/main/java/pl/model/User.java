@@ -32,7 +32,7 @@ public class User {
     @Column(name = "registred", nullable = false)
     private Date registredDate;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     private ReadyCash readycash;
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "user")
@@ -45,7 +45,7 @@ public class User {
     private Set<MoneyGroup> moneyGroups;
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "owner")
-    private Set<Property> properties;
+    private Set<Property> properties = new HashSet<>(0);
 
 
     public User() {

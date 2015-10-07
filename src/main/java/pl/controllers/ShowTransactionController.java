@@ -94,7 +94,7 @@ public class ShowTransactionController {
 
     public  void setTransaction(Transaction trans){
         myTransaction = trans;
-        szamlaText.setText(myTransaction.getAccount());
+        //szamlaText.setText(myTransaction.getAccount());
         moneyText.setText(String.valueOf(myTransaction.getMoney()));
         datumText.setValue(myTransaction.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
         ellSzamlaText.setText(myTransaction.getAnotherAccount());
@@ -110,7 +110,7 @@ public class ShowTransactionController {
     }
 
     public void updateData(){
-        myTransaction.setAccount(checkSzamla(szamlaText.getText()));
+        //myTransaction.setAccount(checkSzamla(szamlaText.getText()));
         myTransaction.setMoney(Float.valueOf(moneyText.getText()));
         Date mydate = Date.from(datumText.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
         System.out.println(mydate.toString());
@@ -122,8 +122,9 @@ public class ShowTransactionController {
 
     @FXML
     private void sendTransaction(){
+        /*
         updateData();
-        String compare = myTransaction.getAccount();
+        //String compare = myTransaction.getAccount();
         Session session = SessionUtil.getSession();
         org.hibernate.Transaction tx = session.beginTransaction();
 
@@ -153,6 +154,7 @@ public class ShowTransactionController {
         }
         session.flush();
         session.close();
+        */
     }
 
     private String checkSzamla(String szamla){

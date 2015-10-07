@@ -10,17 +10,27 @@ public class Transaction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "account_no", nullable = true, updatable = false, length = 24)
-    private String account = "";
+
+    @ManyToOne
+    @JoinColumn(name = "account_id", nullable = true)
+    private Account account;
+
     @Column(name = "another_account_no", nullable = true, updatable = false, length = 24)
-    private String anotherAccount = "";
+    private String anotherAccount;
+
     @Column(name = "money", nullable = false, updatable = false)
-    private float money = 0.0f;
+    private float money;
+
+    @Column(name = "before_money", nullable = false, updatable = false)
+    private float beforeMoney;
+
     @Temporal(TemporalType.DATE)
     @Column(name = "date", nullable = false, updatable = false)
-    private Date date;
+    private Date date = new Date();
+
     @Column(name = "comment")
-    private String comment = "";
+    private String comment;
+
     @ManyToOne
     @JoinColumn(name = "type_id", nullable = false, updatable = false)
     private TransactionType type;
@@ -29,10 +39,11 @@ public class Transaction {
 
     }
 
-    public Transaction(String account, String anotherAccount, float money, Date date, String comment, TransactionType type) {
+    public Transaction(Account account, String anotherAccount, float before, float money, Date date, String comment, TransactionType type) {
         this.account = account;
         this.anotherAccount = anotherAccount;
         this.money = money;
+        this.beforeMoney = before;
         this.date = date;
         this.comment = comment;
         this.type = type;
@@ -41,9 +52,9 @@ public class Transaction {
     // konstuktor a TreeTableView-hoz
     public Transaction(Date date) {
         this.date = date;
-        this.account = "";
         this.anotherAccount = "";
         this.money = 0.0f;
+        this.beforeMoney = 0.0f;
         this.comment = "";
         this.type = new TransactionType("");
     }
@@ -56,11 +67,11 @@ public class Transaction {
         this.id = id;
     }
 
-    public String getAccount() {
+    public Account getAccount() {
         return account;
     }
 
-    public void setAccount(String from) {
+    public void setAccount(Account from) {
         this.account = from;
     }
 
@@ -102,6 +113,14 @@ public class Transaction {
 
     public void setType(TransactionType type) {
         this.type = type;
+    }
+
+    public float getBeforeMoney() {
+        return beforeMoney;
+    }
+
+    public void setBeforeMoney(float beforeMoney) {
+        this.beforeMoney = beforeMoney;
     }
 
     @Override

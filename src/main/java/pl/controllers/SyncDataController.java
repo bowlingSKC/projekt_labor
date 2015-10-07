@@ -111,6 +111,7 @@ public class SyncDataController {
 
     @FXML
     private void handleAll(){
+        /*
         if( confirmAll() ) {
             Session session = SessionUtil.getSession();
             org.hibernate.Transaction tx = session.beginTransaction();
@@ -150,6 +151,7 @@ public class SyncDataController {
             session.flush();
             session.close();
         }
+        */
     }
 
     private boolean confirmTransaction(){
@@ -191,6 +193,7 @@ public class SyncDataController {
     }
 
     private void processOTPCSV(){
+        /*
         try {
             String csvFile = fileList.getSelectionModel().getSelectedItem().getAbsolutePath();
             BufferedReader br = null;
@@ -237,7 +240,7 @@ public class SyncDataController {
             System.out.println("Hiba!");
         }
     }
-
+    */
     //OLD
     /*@FXML
     private void handleSelect() {
@@ -276,5 +279,6 @@ public class SyncDataController {
             session.flush();
             session.close();
         }
-    }*/
+        */
+    }
 }

@@ -22,7 +22,10 @@ public class Bank {
     private Set<Account> accounts;
 
     public Bank() {
+    }
 
+    public Bank(String name) {
+        this.name = name;
     }
 
     public Bank(String name, String phoneNumber) {
@@ -89,7 +92,8 @@ public class Bank {
 
         Bank bank = (Bank) o;
 
-        if (!name.equals(bank.name)) return false;
+        if (giro != null ? !giro.equals(bank.giro) : bank.giro != null) return false;
+        if (name != null ? !name.equals(bank.name) : bank.name != null) return false;
 
         return true;
     }

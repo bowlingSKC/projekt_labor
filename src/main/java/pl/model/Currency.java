@@ -13,6 +13,8 @@ public class Currency {
     private String code;
     @Column(name = "name", nullable = false, updatable = false, length = 50)
     private String name;
+    @Column(name = "eng_name", nullable = false, updatable = false, length = 50)
+    private String engName;
 
     public Currency() {
 
@@ -62,5 +64,10 @@ public class Currency {
     @Override
     public int hashCode() {
         return code.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return code;
     }
 }

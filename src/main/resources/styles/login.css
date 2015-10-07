@@ -43,6 +43,16 @@
     -fx-alignment: CENTER_LEFT;
     -fx-border-insets: 0;
 }
+
+.table-cell.money-cell {
+    -fx-padding: 0.5em 0.5em 0.1em 0.3em;
+    -fx-border-color: -fx-box-border -fx-box-border transparent transparent;
+    -fx-font: 12px "Segoe UI";
+    -fx-text-fill: #212121;
+    -fx-alignment:  CENTER-RIGHT;
+    -fx-border-insets: 0;
+}
+
 .table-view {
     -fx-table-header-border-color: #959595;
     -fx-table-cell-border-color: -fx-box-border;

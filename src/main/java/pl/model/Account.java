@@ -42,8 +42,16 @@ public class Account {
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "account")
     private Set<MoneyGroup> moneyGroups;
 
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "account")
+    private Set<Transaction> transactions = new HashSet<>(0);
+
     public Account() {
 
+    }
+
+    // Készpénz tárolásának
+    public Account(String name) {
+        this.name = name;
     }
 
     public Account(String accountNumber, String name, float money, Date createdDate, User owner, Bank bank, Currency currency) {
@@ -127,6 +135,14 @@ public class Account {
 
     public void setCurrency(Currency currency) {
         this.currency = currency;
+    }
+
+    public Set<Transaction> getTransactions() {
+        return transactions;
+    }
+
+    public void setTransactions(Set<Transaction> transactions) {
+        this.transactions = transactions;
     }
 
     @Override

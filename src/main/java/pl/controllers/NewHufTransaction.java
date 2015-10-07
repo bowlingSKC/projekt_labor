@@ -49,21 +49,21 @@ public class NewHufTransaction {
             org.hibernate.Transaction tx = session.beginTransaction();
 
             try {
-                // Számla kiválasztása
+                // Szï¿½mla kivï¿½lasztï¿½sa
                 Account account = accountComboBox.getSelectionModel().getSelectedItem();
                 account.setMoney(account.getMoney() - Float.valueOf(moneyField.getText()));
                 session.update(account);
 
-                // Tranzakció létrehozása a belépett felhasználónak
+                // Tranzakciï¿½ lï¿½trehozï¿½sa a belï¿½pett felhasznï¿½lï¿½nak
                 Date myTransactionDate = Date.from(dateField.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
 
                 Query query = session.createQuery("from TransactionType where id = :id");
                 query.setParameter("id", 1);
                 TransactionType transactionType = (TransactionType) query.uniqueResult();
-                Transaction myTransaction = new Transaction(account.getAccountNumber(), toAccountField.getText().trim(), Float.valueOf(moneyField.getText()),
-                        myTransactionDate, commentField.getText().trim(), transactionType);
+                //Transaction myTransaction = new Transaction(account.getAccountNumber(), toAccountField.getText().trim(), Float.valueOf(moneyField.getText()),
+                //        myTransactionDate, commentField.getText().trim(), transactionType);
 
-                session.save(myTransaction);
+               // session.save(myTransaction);
                 tx.commit();
 
             } catch (Throwable ex) {
@@ -127,7 +127,7 @@ public class NewHufTransaction {
         banks = query.list();
         session.close();
 
-        //Mai dátum beállítása
+        //Mai dï¿½tum beï¿½llï¿½tï¿½sa
         dateField.setValue(LocalDate.now());
 
         // Sz?ml?k lek?rdez?se

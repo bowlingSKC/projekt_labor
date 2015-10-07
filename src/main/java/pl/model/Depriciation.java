@@ -72,6 +72,4 @@ public abstract class Depriciation {
         this.type = type;
     }
 
-
-
 }

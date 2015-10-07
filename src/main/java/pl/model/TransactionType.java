@@ -10,7 +10,7 @@ public class TransactionType  implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    @Column(name = "name", nullable = false, length = 20, updatable = false)
+    @Column(name = "name", nullable = false, length = 50, updatable = false)
     private String name;
 
     public TransactionType() {
@@ -52,5 +52,10 @@ public class TransactionType  implements Serializable {
     @Override
     public int hashCode() {
         return name.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }

@@ -5,38 +5,54 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pl.controllers.PersonalSummaryController">
+<AnchorPane prefHeight="454.0" prefWidth="734.0" stylesheets="@../styles/login.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pl.controllers.PersonalSummaryController">
    <children>
-      <Label layoutX="14.0" layoutY="14.0" text="Személyes összefoglaló">
+      <Label layoutX="14.0" layoutY="14.0" text="Személyes összefoglaló" textFill="#2b579a">
          <font>
-            <Font name="System Bold" size="15.0" />
+            <Font name="Segoe UI Semilight" size="36.0" />
          </font>
       </Label>
-      <GridPane layoutX="52.0" layoutY="62.0" prefHeight="172.0" prefWidth="500.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0">
+      <HBox alignment="BASELINE_CENTER" layoutX="242.0" layoutY="182.0" spacing="10.0">
+         <children>
+            <Label text="Önnek jelenleg">
+               <font>
+                  <Font size="15.0" />
+               </font>
+            </Label>
+            <Label fx:id="sumOfMoneyLabel" text="Label">
+               <font>
+                  <Font size="22.0" />
+               </font>
+            </Label>
+            <Label text="forintja van.">
+               <font>
+                  <Font size="15.0" />
+               </font>
+            </Label>
+         </children>
+      </HBox>
+      <GridPane layoutX="192.0" layoutY="227.0" prefHeight="90.0" prefWidth="350.0" AnchorPane.leftAnchor="192.0">
         <columnConstraints>
-          <ColumnConstraints hgrow="SOMETIMES" maxWidth="245.0" minWidth="10.0" prefWidth="209.0" />
-            <ColumnConstraints hgrow="SOMETIMES" maxWidth="294.0" minWidth="10.0" prefWidth="172.0" />
-          <ColumnConstraints hgrow="SOMETIMES" maxWidth="294.0" minWidth="10.0" prefWidth="123.0" />
+          <ColumnConstraints hgrow="SOMETIMES" maxWidth="151.0" minWidth="10.0" prefWidth="149.0" />
+          <ColumnConstraints hgrow="SOMETIMES" maxWidth="184.0" minWidth="10.0" prefWidth="147.0" />
+            <ColumnConstraints hgrow="SOMETIMES" maxWidth="184.0" minWidth="10.0" prefWidth="53.0" />
         </columnConstraints>
         <rowConstraints>
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <Label text="Folyószámlák száma" />
-            <Label text="Folyószámlákon lévő összes pénz" GridPane.rowIndex="1" />
-            <Label text="Utolsó bejelentkezés időpontja" GridPane.rowIndex="2" />
-            <Button mnemonicParsing="false" onAction="#handleShowLogins" text="Bejelentkezések" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
-            <Label text="Regisztráció időpontja" GridPane.rowIndex="3" />
-            <Label fx:id="numOfAccountLabel" text="Label" GridPane.columnIndex="1" />
-            <Label fx:id="sumOfMoneyOnAccountsLabel" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-            <Label fx:id="lastLoginDateLabel" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-            <Label fx:id="registartionLabel" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+            <Label text="készpénz" />
+            <Label text="bankszámlá(ko)n" GridPane.rowIndex="1" />
+            <Label text="vagyontárgyakban" GridPane.rowIndex="2" />
+            <Label fx:id="inReadyCashLabel" text="Label" GridPane.columnIndex="1" />
+            <Label fx:id="inAccountsLabel" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <Label fx:id="inPropertiesLabel" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            <Label text="Ft" GridPane.columnIndex="2" />
+            <Label text="Ft" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+            <Label text="Ft" GridPane.columnIndex="2" GridPane.rowIndex="2" />
          </children>
       </GridPane>
-      <Button layoutX="443.0" layoutY="361.0" mnemonicParsing="false" onAction="#handleChangePassword" text="Jelszó megváltoztatása" />
-      <Button layoutX="353.0" layoutY="361.0" mnemonicParsing="false" onAction="#handleDeleteUser" text="Profil törlése" />
    </children>
 </AnchorPane>

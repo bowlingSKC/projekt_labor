@@ -1,10 +1,7 @@
 package pl.controllers;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.PasswordField;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
 import org.hibernate.Session;
 import pl.Main;
@@ -19,6 +16,8 @@ public class NewPasswordController {
     private Stage dialogStage;
 
     @FXML
+    private Label closeDialogLabel;
+    @FXML
     private PasswordField newPasswordField;
     @FXML
     private PasswordField newPasswordConfirmField;
@@ -30,10 +29,10 @@ public class NewPasswordController {
     @FXML
     private void handleSave() {
         if( !newPasswordField.getText().equals(newPasswordConfirmField.getText()) ) {
-            MessageBox.showErrorMessage("Hiba", "A két jelszó nem egyezik!", "", false);
+            MessageBox.showErrorMessage("Hiba", "A kï¿½t jelszï¿½ nem egyezik!", "", false);
         } else if( newPasswordField.getText().length() < 8 || newPasswordField.getText().length() > 20 ) {
-            MessageBox.showErrorMessage("Hiba", "Az új jelszó nem felel meg a feltételeknek!",
-                    "A jelszavaknak 8 és 20 karakter közötti hosszúságúnak kell lennie.", false);
+            MessageBox.showErrorMessage("Hiba", "Az ï¿½j jelszï¿½ nem felel meg a feltï¿½teleknek!",
+                    "A jelszavaknak 8 ï¿½s 20 karakter kï¿½zï¿½tti hosszï¿½sï¿½gï¿½nak kell lennie.", false);
         } else if( confirm() ) {
             try {
                 String newSalt = Main.getSalt();
@@ -41,8 +40,8 @@ public class NewPasswordController {
                 changePassword(newPass, newSalt);
             } catch (Throwable ex) {
                 ex.printStackTrace();
-                MessageBox.showErrorMessage("Hiba", "Bels? hiba miatt nem lehetett megváltozatatni a jelszót!",
-                        "Próbálja kés?bb.", false);
+                MessageBox.showErrorMessage("Hiba", "Bels? hiba miatt nem lehetett megvï¿½ltozatatni a jelszï¿½t!",
+                        "Prï¿½bï¿½lja kï¿½s?bb.", false);
             }
         }
     }
@@ -57,16 +56,16 @@ public class NewPasswordController {
         tx.commit();
         session.close();
 
-        MessageBox.showInformationMessage("Jelszó megváltoztatása", "A jelszó sikeresen megváltozott!",
-                "Legközelebb az új jelszóval léphet be. Az új jelszó ki lett küldve a regisztrált E-mail címre.", false);
+        MessageBox.showInformationMessage("Jelszï¿½ megvï¿½ltoztatï¿½sa", "A jelszï¿½ sikeresen megvï¿½ltozott!",
+                "Legkï¿½zelebb az ï¿½j jelszï¿½val lï¿½phet be. Az ï¿½j jelszï¿½ ki lett kï¿½ldve a regisztrï¿½lt E-mail cï¿½mre.", false);
 
         dialogStage.close();
     }
 
     private boolean confirm() {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Jelszó megváltoztatása");
-        alert.setHeaderText("Biztosan meg szeretnéd változtatni a jelenlegi jelszavad?");
+        alert.setTitle("Jelszï¿½ megvï¿½ltoztatï¿½sa");
+        alert.setHeaderText("Biztosan meg szeretnï¿½d vï¿½ltoztatni a jelenlegi jelszavad?");
         Optional<ButtonType> result = alert.showAndWait();
         if( result.get() == ButtonType.OK ) {
             return true;
@@ -89,7 +88,7 @@ public class NewPasswordController {
             }
         });
 
-
+        closeDialogLabel.setOnMouseClicked(event -> dialogStage.close());
     }
 
     public void setDialogStage(Stage dialogStage) {

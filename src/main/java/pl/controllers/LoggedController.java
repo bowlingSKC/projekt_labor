@@ -8,6 +8,7 @@ import javafx.css.PseudoClass;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;
+import javafx.scene.Cursor;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
@@ -48,7 +49,7 @@ public class LoggedController {
     @FXML
     public void initialize() {
 
-        // Ablakot vez�rl? gombokhoz
+        // Ablak vezérléséhez
         rec2 = Screen.getPrimary().getVisualBounds();
         w = 0.1;
         h = 0.1;
@@ -56,6 +57,45 @@ public class LoggedController {
         String username = Main.getLoggedUser().getFirstname() + " " + Main.getLoggedUser().getLastname();
         nameLabel.setText( username );
 
+        createMenu();
+
+        try {
+            FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/PersonalSummary.fxml") );
+            AnchorPane pane = (AnchorPane) loader.load();
+
+            layout.setCenter(pane);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
+        /*
+        // ablak mozgatása
+        final Delta dragDelta = new Delta();
+        nameLabel.setOnMousePressed(event -> {
+            dragDelta.x = dialogStage.getX() - event.getScreenX();
+            dragDelta.y = dialogStage.getY() - event.getScreenY();
+            dialogStage.getScene().setCursor(Cursor.MOVE);
+        });
+        nameLabel.setOnMouseReleased(event -> dialogStage.getScene().setCursor(Cursor.HAND));
+        nameLabel.setOnMouseDragged(event -> {
+            dialogStage.setX( event.getSceneX() +  dragDelta.x);
+            dialogStage.setY( event.getSceneY() +  dragDelta.y);
+        });
+        nameLabel.setOnMouseEntered(event -> {
+            if( !event.isPrimaryButtonDown() ) {
+                dialogStage.getScene().setCursor(Cursor.HAND);
+            }
+        });
+        nameLabel.setOnMouseExited(event -> {
+            if( !event.isPrimaryButtonDown() ) {
+                dialogStage.getScene().setCursor(Cursor.DEFAULT);
+            }
+        });
+        */
+
+    }
+
+    private void createMenu() {
         // Menü létrehozása
         menuTree.setShowRoot(false);
         TreeItem<String> root = new TreeItem<>("");
@@ -121,16 +161,6 @@ public class LoggedController {
 
             return cell;
         });
-
-        try {
-            FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/PersonalSummary.fxml") );
-            AnchorPane pane = (AnchorPane) loader.load();
-
-            layout.setCenter(pane);
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-
     }
 
     @FXML
@@ -226,6 +256,19 @@ public class LoggedController {
                 readListMonth();
             } else if( value.equals(Bundles.getString("menu.importexport.syn")) ) {
                 readSyncData();
+            } else if( value.equals(Bundles.getString("menu.cash.property")) ) {
+                readPropertiesPanel();
+            }
+        }
+
+        private void readPropertiesPanel() {
+            try {
+                FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/Properties.fxml") );
+                AnchorPane pane = loader.load();
+
+                layout.setCenter(pane);
+            } catch (IOException ex) {
+                ex.printStackTrace();
             }
         }
 
@@ -254,7 +297,7 @@ public class LoggedController {
         private void readSyncData() {
             try {
                 FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/SyncData.fxml") );
-                AnchorPane pane = (AnchorPane) loader.load();
+                AnchorPane pane = loader.load();
 
                 layout.setCenter(pane);
             } catch (IOException ex) {
@@ -297,8 +340,8 @@ public class LoggedController {
 
         private void readAccountListLayout() {
             try {
-                FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/AccountList.fxml") );
-                AnchorPane pane = (AnchorPane) loader.load();
+                FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/AccountList.fxml"), Bundles.getBundle() );
+                AnchorPane pane = loader.load();
 
                 layout.setCenter(pane);
             } catch (IOException ex) {
@@ -316,5 +359,9 @@ public class LoggedController {
                 ex.printStackTrace();
             }
         }
+    }
+
+    private class Delta {
+        double x, y;
     }
 }

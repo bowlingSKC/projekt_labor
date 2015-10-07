@@ -7,8 +7,10 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import pl.Constant;
 import pl.Main;
 import pl.jpa.SessionUtil;
 import pl.model.Account;
@@ -20,64 +22,37 @@ import java.util.List;
 
 public class PersonalSummaryController {
 
-    private static final SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyy. MM. dd");
-    private static final SimpleDateFormat yyyyMMddkkmmss = new SimpleDateFormat("yyy. MM. dd kk:mm:ss");
-
     @FXML
-    private Label numOfAccountLabel;
+    private Label sumOfMoneyLabel;
     @FXML
-    private Label sumOfMoneyOnAccountsLabel;
+    private Label inReadyCashLabel;
     @FXML
-    private Label lastLoginDateLabel;
+    private Label inAccountsLabel;
     @FXML
-    private Label registartionLabel;
-
-    @FXML
-    private void handleShowLogins() {
-        System.out.println("Majd mutatom ...");
-    }
-
-    @FXML
-    private void handleDeleteUser() {
-        System.out.println("Delete ...");
-    }
-
-    @FXML
-    private void handleChangePassword() {
-        try {
-            Stage dialogStage = new Stage();
-
-            FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/NewPassword.fxml") );
-            AnchorPane pane = (AnchorPane) loader.load();
-
-            Scene scene = new Scene(pane);
-            dialogStage.setScene(scene);
-
-            NewPasswordController controller = loader.getController();
-            controller.setDialogStage(dialogStage);
-
-            dialogStage.initOwner(Main.getPrimaryStage());
-            dialogStage.initModality(Modality.WINDOW_MODAL);
-
-            dialogStage.show();
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-    }
+    private Label inPropertiesLabel;
 
     @FXML
     public void initialize() {
-
-        numOfAccountLabel.setText(Integer.toString(Main.getLoggedUser().getAccounts().size()));
-        sumOfMoneyOnAccountsLabel.setText( Float.toString(Main.getLoggedUser().getAllMoneyFromAccounts()) );
-        registartionLabel.setText( yyyyMMdd.format(Main.getLoggedUser().getRegistredDate()) );
-
-        if( Main.getLoggedUser().getLastLogin() != null ) {
-            lastLoginDateLabel.setText( yyyyMMddkkmmss.format(Main.getLoggedUser().getLastLogin()) );
-        } else {
-            lastLoginDateLabel.setText( "Még nem történt bejegyzett bejelentkezés" );
-        }
+        computeSumOfMoney();
+        computePropertyCash();
+        computeReadyCash();
+        computeAccountsLabel();
     }
 
+    private void computeSumOfMoney() {
+        sumOfMoneyLabel.setText( Constant.getNumberFormat().format(Main.getLoggedUser().getAllMoney()) );
+    }
+
+    private void computeAccountsLabel() {
+        inAccountsLabel.setText( Constant.getNumberFormat().format(Main.getLoggedUser().getAllMoneyFromAccounts()) );
+    }
+
+    private void computeReadyCash() {
+        inReadyCashLabel.setText(Constant.getNumberFormat().format(Main.getLoggedUser().getReadycash().getMoney()));
+    }
+
+    private void computePropertyCash() {
+        inPropertiesLabel.setText("0");
+    }
 
 }

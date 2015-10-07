@@ -71,8 +71,7 @@ public class Main extends Application {
                 return new Task() {
                     @Override
                     protected Object call() throws Exception {
-                        Session session = SessionUtil.getSession();
-                        session.close();
+                        Constant.init();
 
                         FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/RootLayout.fxml"), Bundles.getBundle() );
                         AnchorPane pane = loader.load();
