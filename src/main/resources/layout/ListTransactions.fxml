@@ -48,7 +48,7 @@
                   <TextField fx:id="newTransactionCommentField" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                </children>
             </GridPane>
-            <Button layoutX="579.0" layoutY="455.0" mnemonicParsing="false" text="Mentés" AnchorPane.bottomAnchor="14.0" AnchorPane.rightAnchor="14.0" />
+            <Button layoutX="579.0" layoutY="455.0" mnemonicParsing="false" onAction="#handleSaveTransaction" text="Mentés" AnchorPane.bottomAnchor="14.0" AnchorPane.rightAnchor="14.0" />
          </children>
       </AnchorPane>
       <AnchorPane fx:id="tablePane" layoutX="35.0" layoutY="35.0" opacity="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="35.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="35.0">

@@ -61,7 +61,7 @@ public class LoggedController {
 
         try {
             FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/PersonalSummary.fxml") );
-            AnchorPane pane = (AnchorPane) loader.load();
+            AnchorPane pane = loader.load();
 
             layout.setCenter(pane);
         } catch (IOException ex) {
@@ -258,6 +258,19 @@ public class LoggedController {
                 readSyncData();
             } else if( value.equals(Bundles.getString("menu.cash.property")) ) {
                 readPropertiesPanel();
+            } else if( value.equals(Bundles.getString("menu.cash.ready")) ) {
+                readReadyCashPane();
+            }
+        }
+
+        private void readReadyCashPane() {
+            try {
+                FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/ReadyCash.fxml") );
+                AnchorPane pane = loader.load();
+
+                layout.setCenter(pane);
+            } catch (IOException ex) {
+                ex.printStackTrace();
             }
         }
 
@@ -275,7 +288,7 @@ public class LoggedController {
         private void readListTransactions() {
             try {
                 FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/ListTransactions.fxml") );
-                AnchorPane pane = (AnchorPane) loader.load();
+                AnchorPane pane = loader.load();
 
                 layout.setCenter(pane);
             } catch (IOException ex) {
@@ -286,7 +299,7 @@ public class LoggedController {
         private void readListPockets() {
             try {
                 FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/Pocket.fxml") );
-                AnchorPane pane = (AnchorPane) loader.load();
+                AnchorPane pane = loader.load();
 
                 layout.setCenter(pane);
             } catch (IOException ex) {
@@ -308,7 +321,7 @@ public class LoggedController {
         private void readListMonth() {
             try {
                 FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/ListMonth.fxml") );
-                AnchorPane pane = (AnchorPane) loader.load();
+                AnchorPane pane = loader.load();
 
                 layout.setCenter(pane);
             } catch (IOException ex) {
@@ -319,7 +332,7 @@ public class LoggedController {
         private void readNewAccount() {
             try {
                 FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/NewAccount.fxml") );
-                AnchorPane pane = (AnchorPane) loader.load();
+                AnchorPane pane = loader.load();
 
                 layout.setCenter(pane);
             } catch (IOException ex) {
@@ -330,7 +343,7 @@ public class LoggedController {
         private void readNewHufTransaction() {
             try {
                 FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/NewHufTransaction.fxml") );
-                AnchorPane pane = (AnchorPane) loader.load();
+                AnchorPane pane = loader.load();
 
                 layout.setCenter(pane);
             } catch (IOException ex) {
@@ -352,7 +365,7 @@ public class LoggedController {
         private void readPersonalDataLayout() {
             try {
                 FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/PersonalSummary.fxml") );
-                AnchorPane pane = (AnchorPane) loader.load();
+                AnchorPane pane = loader.load();
 
                 layout.setCenter(pane);
             } catch (IOException ex) {

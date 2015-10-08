@@ -9,13 +9,18 @@ import pl.model.TransactionType;
 
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
 public class Constant {
 
-    private static final SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyy. MMMM dd");
+    private static final SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyy. MMMM dd.");
     private static final NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.getDefault());
 
     private static List<Bank> banks = new LinkedList<>();
@@ -64,5 +69,14 @@ public class Constant {
 
     public static List<TransactionType> getTransactionTypes() {
         return transactionTypes;
+    }
+
+    public static Date dateFromLocalDate(LocalDate date) {
+        return Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant());
+    }
+
+    public static LocalDate localDateFromDate(Date date) {
+        Instant instant = Instant.ofEpochMilli(date.getTime());
+        return LocalDateTime.ofInstant(instant, ZoneId.systemDefault()).toLocalDate();
     }
 }

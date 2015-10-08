@@ -191,7 +191,29 @@ public class ListTransactionController {
 
     @FXML
     private void handleSaveTransaction() {
+        Transaction transaction = new Transaction();
+        if( newTransactionType.getSelectionModel().getSelectedItem().equals("Készpénz") ) {
+            transaction.setBeforeMoney(Main.getLoggedUser().getReadycash().getMoney());
+        } else {
+            transaction.setBeforeMoney(newAccountComboBox.getSelectionModel().getSelectedItem().getMoney());
+        }
+        transaction.setAccount(newAccountComboBox.getSelectionModel().getSelectedItem());
+        transaction.setComment(newTransactionCommentField.getText());
+        transaction.setDate(Constant.dateFromLocalDate(newTransactionDatePicker.getValue()));
+        transaction.setType(newTransactionTypeComboBox.getSelectionModel().getSelectedItem());
+        float amount = Float.valueOf( newTransactionAmountTextField.getText() );
+        transaction.setMoney(amount);
 
+        Session session = SessionUtil.getSession();
+        org.hibernate.Transaction tx = session.beginTransaction();
+        session.save(transaction);
+        tx.commit();
+        session.close();
+
+        newAccountComboBox.getSelectionModel().getSelectedItem().getTransactions().add(transaction);
+        loadTransactionsToTable();
+        tablePane.setOpacity(0);
+        new FadeInUpTransition(tablePane).play();
     }
 
     private void loadTransactionToFrom(Transaction transaction) {

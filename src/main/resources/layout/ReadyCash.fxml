@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="463.0" prefWidth="698.0" stylesheets="@../styles/login.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pl.controllers.ReadyCashController">
+   <children>
+      <Label layoutX="14.0" layoutY="14.0" text="Készpénz" textFill="#2b579a">
+         <font>
+            <Font name="Segoe UI Semilight" size="48.0" />
+         </font>
+      </Label>
+      <Label layoutX="90.0" layoutY="117.0" text="Jelenleg ennyi készpénz áll rendelkezésemre:" />
+      <TextField fx:id="amountField" layoutX="349.0" layoutY="113.0" />
+      <Button layoutX="592.0" layoutY="419.0" mnemonicParsing="false" onAction="#handleSave" text="Mentés" />
+      <Label layoutX="526.0" layoutY="120.0" text="Ft" />
+   </children>
+</AnchorPane>

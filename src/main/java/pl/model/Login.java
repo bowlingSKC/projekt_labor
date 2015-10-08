@@ -88,8 +88,7 @@ public class Login {
 
     @Override
     public int hashCode() {
-        int result = user.hashCode();
-        result = 31 * result + ip.hashCode();
+        int result = 31 * ip.hashCode();
         result = 31 * result + date.hashCode();
         return result;
     }

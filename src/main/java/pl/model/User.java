@@ -157,6 +157,14 @@ public class User {
         this.properties = properties;
     }
 
+    public float getAllMoneyInProperties() {
+        float money = 0;
+        for(Property prop : properties) {
+            money += prop.getMoney();
+        }
+        return money;
+    }
+
     public float getAllMoneyFromAccounts() {
         float sum = 0;
         for(Account acc : accounts) {
@@ -166,7 +174,7 @@ public class User {
     }
 
     public float getAllMoney() {
-        return getAllMoneyFromAccounts() + readycash.getMoney();
+        return getAllMoneyFromAccounts() + readycash.getMoney() + getAllMoneyInProperties();
     }
 
     public Date getLastLogin() {

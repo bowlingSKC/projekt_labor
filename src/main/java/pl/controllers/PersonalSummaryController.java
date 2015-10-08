@@ -52,7 +52,7 @@ public class PersonalSummaryController {
     }
 
     private void computePropertyCash() {
-        inPropertiesLabel.setText("0");
+        inPropertiesLabel.setText(Constant.getNumberFormat().format(Main.getLoggedUser().getAllMoneyInProperties()));
     }
 
 }

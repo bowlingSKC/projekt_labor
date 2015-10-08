@@ -175,8 +175,15 @@ public class AccountListController {
 
     @FXML
     private void handleNewAccount() {
-
+        try {
+            saveAccountToDatabase(newAccNum1.getText() + newAccNum2.getText() + newAccNum3.getText());
+            refershTableItems();
+            clearAllNewAccountField();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
+
 
     private void refershTableItems() {
         accountTableView.getItems().clear();

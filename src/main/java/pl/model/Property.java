@@ -15,9 +15,11 @@ public class Property {
     private User owner;
     @Column(name = "name", length = 100, nullable = false)
     private String name;
+    @Column(name = "money",  nullable = false)
+    private float money;
     @Column(name = "bought", nullable = false)
     @Temporal(TemporalType.DATE)
-    private Date bought;
+    private Date bought = new Date();
     @Column(name = "comment")
     private String comment;
     @OneToOne
@@ -28,9 +30,10 @@ public class Property {
 
     }
 
-    public Property(User owner, String name, Date bought, String comment, Depriciation depriciation) {
+    public Property(User owner, String name, float money, Date bought, String comment, Depriciation depriciation) {
         this.owner = owner;
         this.name = name;
+        this.money = money;
         this.bought = bought;
         this.comment = comment;
         this.depriciation = depriciation;
@@ -58,6 +61,14 @@ public class Property {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public float getMoney() {
+        return money;
+    }
+
+    public void setMoney(float money) {
+        this.money = money;
     }
 
     public Date getBought() {
