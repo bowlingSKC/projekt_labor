@@ -1,10 +1,7 @@
 package pl.controllers;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -14,6 +11,8 @@ import pl.MessageBox;
 import pl.jpa.SessionUtil;
 import pl.model.Currency;
 import pl.model.ReadyCash;
+
+import java.util.Optional;
 
 public class ReadyCashController {
 
@@ -32,7 +31,6 @@ public class ReadyCashController {
     private TableColumn<ReadyCash, Float> amountColumn;
     @FXML
     private TableColumn<ReadyCash, Integer> inHufColumn;
-    private ReadyCash selectedReadyCash;
 
     @FXML
     public void initialize() {
@@ -44,7 +42,19 @@ public class ReadyCashController {
         currencyColumn.setCellValueFactory(new PropertyValueFactory<>("currency"));
         amountColumn.setCellValueFactory(new PropertyValueFactory<>("money"));
 
-        readyCashTableView.getItems().setAll(Main.getLoggedUser().getReadycash());
+        amountColumn.setCellFactory(t -> new TableCell<ReadyCash, Float>() {
+            @Override
+            protected void updateItem(Float item, boolean empty) {
+                super.updateItem(item, empty);
+                if( item != null && !empty ) {
+                    setText(Constant.getNumberFormat().format(item));
+                } else {
+                    setText("");
+                }
+            }
+        });
+
+        updateTableData();
     }
 
     private void initTransactionPane() {
@@ -61,18 +71,98 @@ public class ReadyCashController {
         try {
             checkAllField();
 
-            ReadyCash selected = getSelectedReadyCash();
-            Session session = SessionUtil.getSession();
-            Transaction tx = session.beginTransaction();
-            session.saveOrUpdate(selected);
-            tx.commit();
-            session.close();
+            if( transactionTypeComboBox.getSelectionModel().getSelectedItem().equals("Kimenő") ) {
+                handleOutTransactions();
+            } else {
+                handleInTransaction();
+            }
+            updateTableData();
 
             MessageBox.showInformationMessage("Sikeres", "Siker", "Hurrá", false);
         } catch (Throwable ex) {
-            ex.printStackTrace();
             MessageBox.showErrorMessage("Hiba", "Nem lehet létrehozni a tranzakciót!", ex.getMessage(), false);
         }
+    }
+
+    private void updateTableData() {
+        readyCashTableView.getItems().setAll(Main.getLoggedUser().getReadycash());
+    }
+
+    private void handleInTransaction() throws Exception {
+        ReadyCash selected = new ReadyCash(Main.getLoggedUser(), 0.0f);
+        boolean was = false;
+        selected.setCurrency(currencyComboBox.getSelectionModel().getSelectedItem());
+        if( Main.getLoggedUser().getReadycash() != null ) {
+            for(ReadyCash tmp : Main.getLoggedUser().getReadycash()) {
+                if( tmp.getCurrency().equals(currencyComboBox.getSelectionModel().getSelectedItem()) ) {
+                    selected = tmp;
+                    was = true;
+                    break;
+                }
+            }
+        }
+        selected.setMoney(selected.getMoney() + Float.valueOf(amountFiled.getText()));
+
+        if( !was ) {
+            Main.getLoggedUser().getReadycash().add(selected);
+        }
+
+        transactionSaveOrUpdate(selected);
+    }
+
+    private void handleOutTransactions() throws Exception {
+        if( Main.getLoggedUser().getReadycash() == null ) {
+            throw new Exception("Nincs regisztrált készpénzed, így nem tudsz kimenő pénzt felvenni!");
+        }
+
+        ReadyCash readyCash = null;
+        for( ReadyCash readyCash1 : Main.getLoggedUser().getReadycash() ) {
+            if( readyCash1.getCurrency().equals(currencyComboBox.getSelectionModel().getSelectedItem()) ) {
+                readyCash = readyCash1;
+                break;
+            }
+        }
+
+        if( readyCash == null ) {
+            throw new Exception("A kiválasztott valutából nincs ");
+        }
+
+        if( readyCash.getMoney() < Float.valueOf(amountFiled.getText()) ) {
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Nincs elegendő pénzmennyiség");
+            alert.setHeaderText("Nincs elég pénz a megadott valután.");
+            alert.setContentText("Akarja az összes pénzt levenni a valutáról?");
+            Optional<ButtonType> result = alert.showAndWait();
+            if( result.get() == ButtonType.OK ) {
+                transactionDelete(readyCash);
+                Main.getLoggedUser().getReadycash().remove(readyCash);
+            }
+            return;
+        }
+
+        if( Float.compare(readyCash.getMoney() - Float.valueOf(amountFiled.getText()), 0) == 0 ) {
+            transactionDelete(readyCash);
+            Main.getLoggedUser().getReadycash().remove(readyCash);
+        } else {
+            readyCash.setMoney(readyCash.getMoney() - Float.valueOf(amountFiled.getText()));
+            transactionSaveOrUpdate(readyCash);
+        }
+    }
+
+    private void transactionSaveOrUpdate(ReadyCash selected) {
+        Session session = SessionUtil.getSession();
+        Transaction tx = session.beginTransaction();
+        session.saveOrUpdate(selected);
+        tx.commit();
+        session.close();
+    }
+
+    private void transactionDelete(ReadyCash selected) {
+        Session session = SessionUtil.getSession();
+        Transaction tx = session.beginTransaction();
+        session.delete(selected);
+        tx.commit();
+        session.close();
     }
 
     private void checkAllField() throws Exception {
@@ -84,15 +174,6 @@ public class ReadyCashController {
             }
         } catch (NumberFormatException ex) {
             buffer.append("Csak számot lehet megadni a mezőben!\n");
-        }
-
-        for(ReadyCash readyCash : Main.getLoggedUser().getReadycash()) {
-            if( readyCash.getCurrency().equals(currencyComboBox.getSelectionModel().getSelectedItem()) ) {
-                if( Float.valueOf(amountFiled.getText()) > readyCash.getMoney() ) {
-                    buffer.append("Nincs elég pénz ebből a valutából!\n");
-                }
-                break;
-            }
         }
 
         if( buffer.toString().length() != 0 ) {

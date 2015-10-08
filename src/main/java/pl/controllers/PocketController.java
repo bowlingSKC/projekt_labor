@@ -62,9 +62,9 @@ public class PocketController {
         }
 
         // Számlák lekérdezése
-//        session = SessionUtil.getSession();
-//        query = session.createQuery("from Account");
-//        accounts = query.list();
+        session = SessionUtil.getSession();
+        query = session.createQuery("from Account");
+        accounts = query.list();
 
         // Zsebek lekérdezése
         session = SessionUtil.getSession();
