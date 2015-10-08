@@ -16,6 +16,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import pl.Main;
 import pl.jpa.SessionUtil;
 import pl.model.*;
@@ -111,32 +112,35 @@ public class SyncDataController {
 
     @FXML
     private void handleAll(){
-        List<TransactionType> types;
         if( confirmAll() ) {
             Session session = SessionUtil.getSession();
+            //Query query = session.createQuery("from TransactionType");
+            //List<TransactionType> tTypes;
+            //tTypes = query.list();
             org.hibernate.Transaction tx = session.beginTransaction();
 
             for (int index = 0; index < myTransactions.size(); index++){
-                String compare = myTransactions.get(index).getAccount().toString();
-                compare = compare.substring(0, 24);
+                Long compare = myTransactions.get(index).getAccount().getId();
+                System.out.println(compare);
+                //compare = compare.substring(0, 24);
                 try {
                     // Számla kiválasztása
-                    //Account account = Main.getLoggedUser().getAccounts();
                     for (Account acc : Main.getLoggedUser().getAccounts()) {
-                        if (compare.equals(acc.getAccountNumber())) {
+                        if (compare == acc.getId()) {
                             System.out.println("OK.");
                             acc.setMoney(acc.getMoney() + myTransactions.get(index).getMoney());
                             session.update(acc);
 
                             // Tranzakció létrehozása a belépett felhasználónak
-                            Query query = session.createQuery("from TransactionType where id = :id");
-                            query.setParameter("id", 1);
-                            TransactionType transactionType = (TransactionType) query.uniqueResult();
-                            Transaction myTransaction = myTransactions.get(index);
-                            myTransaction.setType(transactionType);
-
-                            session.save(myTransaction);
-                            System.out.println("OK!");
+                            /*for(TransactionType ttype : tTypes) {
+                                if(ttype.getId() == 1){
+                                    Transaction myTransaction = myTransactions.get(index);
+                                    myTransaction.setType(ttype);
+                                    session.save(myTransaction);
+                                    System.out.println("OK!");
+                                }
+                            }*/
+                            session.save( myTransactions.get(index));
 
                         }
                     }
@@ -152,7 +156,6 @@ public class SyncDataController {
             session.flush();
             session.close();
         }
-
     }
 
     private boolean confirmTransaction(){
@@ -194,7 +197,17 @@ public class SyncDataController {
     }
 
     private void processOTPCSV(){
-
+        TransactionType tempType = new TransactionType();
+        Session session = SessionUtil.getSession();
+        Query query = session.createQuery("from TransactionType");
+        List<TransactionType> tTypes;
+        tTypes = query.list();
+        session.close();
+        for(TransactionType ttype : tTypes) {
+            if(ttype.getId() == 1){
+                tempType = ttype;
+            }
+        }
         try {
             String csvFile = fileList.getSelectionModel().getSelectedItem().getAbsolutePath();
             BufferedReader br = null;
@@ -215,14 +228,27 @@ public class SyncDataController {
                             "   Közlemény: " + transaction[9] + " " + transaction[10] + " " + transaction[12]);
                     transactionList.setItems(items);
 
+
                     //Parse to transaction
                     transaction[0] = checkSzamla(transaction[0]);   //számlaszám helyes formátumra hozása
                     transaction[7] = checkSzamla(transaction[7]);
                     DateFormat format = new SimpleDateFormat("yyyyMMdd", Locale.ENGLISH);       //dátum helyes formátumra hozása
+
+                    Account tempAcc = new Account();
+                    session = SessionUtil.getSession();
+                    query = session.createQuery("from Account");
+                    List<Account> tempAccounts;
+                    tempAccounts = query.list();
+                    session.close();
+                    for(Account ac : tempAccounts) {
+                        if(ac.getAccountNumber().toString().equals(transaction[0]) ){
+                            tempAcc = ac;
+                        }
+                    }
                     Date date = format.parse(transaction[4]);
-                    myTransactions.add(new Transaction(new Account(transaction[0]), transaction[7], Float.valueOf(transaction[6]),
+                    myTransactions.add(new Transaction(tempAcc, transaction[7], Float.valueOf(transaction[6]),
                             Float.valueOf(transaction[2]), date,
-                            transaction[9] + " " + transaction[10] + " " + transaction[12], new TransactionType()));
+                            transaction[9] + " " + transaction[10] + " " + transaction[12], tempType));
                 }
 
             } catch (FileNotFoundException e) {
@@ -239,6 +265,7 @@ public class SyncDataController {
                 }
             }
         } catch (Exception e) {
+            e.printStackTrace();
             System.out.println("Hiba!");
         }
     }

@@ -27,6 +27,18 @@
       <Button layoutX="38.0" layoutY="263.0" mnemonicParsing="false" onAction="#handleIn" text="Betesz" />
       <Button layoutX="137.0" layoutY="263.0" mnemonicParsing="false" onAction="#handleOut" text="Kivesz" />
       <Label layoutX="189.0" layoutY="227.0" text="Ft" />
-      <TextArea fx:id="moneyArea" layoutX="38.0" layoutY="419.0" />
+      <TableView fx:id="pocketTableView" layoutX="37.0" layoutY="416.0" prefHeight="250.0" prefWidth="508.0">
+        <columns>
+          <TableColumn fx:id="pocketTableColumn" prefWidth="137.0" text="Zseb" />
+          <TableColumn fx:id="moneyTableColumn" prefWidth="112.0" text="Összeg" />
+            <TableColumn fx:id="accountTableColumn" prefWidth="258.0" text="Számla" />
+        </columns>
+      </TableView>
+      <TableView fx:id="remainedTableView" layoutX="553.0" layoutY="416.0" prefHeight="250.0" prefWidth="206.0">
+        <columns>
+          <TableColumn fx:id="szamlaTableColumn" prefWidth="125.0" text="Számla" />
+          <TableColumn fx:id="egyenlegTableColumn" prefWidth="81.0" text="Egyenleg" />
+        </columns>
+      </TableView>
     </children>
 </AnchorPane>

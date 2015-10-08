@@ -18,7 +18,7 @@
             <TextField fx:id="ellSzamlaText" layoutX="171.0" layoutY="145.0" prefHeight="25.0" prefWidth="172.0" />
             <TextField fx:id="commText" layoutX="171.0" layoutY="181.0" prefHeight="25.0" prefWidth="173.0" />
             <Button layoutX="230.0" layoutY="225.0" mnemonicParsing="false" onAction="#sendTransaction" text="Adatok elfogadása" />
-            <Button layoutX="22.0" layoutY="225.0" mnemonicParsing="false" onAction="#cancelTransaction" text="Mégse" />
+            <Button fx:id="closeButton" layoutX="22.0" layoutY="225.0" mnemonicParsing="false" onAction="#cancelTransaction" text="Mégse" />
             <DatePicker fx:id="datumText" layoutX="171.0" layoutY="105.0" prefHeight="25.0" prefWidth="172.0" />
          </children>
       </AnchorPane>

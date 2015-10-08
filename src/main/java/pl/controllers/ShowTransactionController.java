@@ -5,6 +5,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.Label;
+import javafx.stage.Stage;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import pl.Main;
@@ -19,6 +20,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -40,6 +42,8 @@ public class ShowTransactionController {
     //private TextField ellNevText;
     @FXML
     private TextField commText;
+    @FXML
+    private Button closeButton;
 
     private Transaction myTransaction;
 
@@ -94,7 +98,7 @@ public class ShowTransactionController {
 
     public  void setTransaction(Transaction trans){
         myTransaction = trans;
-        szamlaText.setText(myTransaction.getAccount().toString().substring(0,24));
+        szamlaText.setText(myTransaction.getAccount().getAccountNumber().toString().substring(0,24));
         moneyText.setText(String.valueOf(myTransaction.getMoney()));
         datumText.setValue(myTransaction.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
         ellSzamlaText.setText(myTransaction.getAnotherAccount());
@@ -106,7 +110,8 @@ public class ShowTransactionController {
 
     @FXML
     public void cancelTransaction(){
-        
+        Stage stage = (Stage) closeButton.getScene().getWindow();
+        stage.close();
     }
 
     public void updateData(){
@@ -122,11 +127,37 @@ public class ShowTransactionController {
 
     @FXML
     private void sendTransaction(){
-
         updateData();
+
+        TransactionType tempType = new TransactionType();
+        Session session = SessionUtil.getSession();
+        Query query = session.createQuery("from TransactionType");
+        List<TransactionType> tTypes;
+        tTypes = query.list();
+        session.close();
+        for(TransactionType ttype : tTypes) {
+            if(ttype.getId() == 1){
+                tempType = ttype;
+            }
+        }
+
+        Account tempAcc = new Account();
+        session = SessionUtil.getSession();
+        query = session.createQuery("from Account");
+        List<Account> tempAccounts;
+        tempAccounts = query.list();
+        session.close();
+        for(Account ac : tempAccounts) {
+            if(ac.getAccountNumber().toString().equals(szamlaText.getText()) ){
+                tempAcc = ac;
+            }
+        }
+
+
+
         String compare = myTransaction.getAccount().toString();
         compare = compare.substring(0,24);
-        Session session = SessionUtil.getSession();
+        session = SessionUtil.getSession();
         org.hibernate.Transaction tx = session.beginTransaction();
 
         try {
@@ -137,12 +168,8 @@ public class ShowTransactionController {
                     acc.setMoney(acc.getMoney() + myTransaction.getMoney());
                     session.update(acc);
 
-                    // Tranzakció létrehozása a belépett felhasználónak
-                    Query query = session.createQuery("from TransactionType where id = :id");
-                    query.setParameter("id", 1);
-                    TransactionType transactionType = (TransactionType) query.uniqueResult();
-                    myTransaction.setType(transactionType);
-
+                    myTransaction.setAccount(tempAcc);
+                    myTransaction.setType(tempType);
                     session.save(myTransaction);
                     System.out.println("OK");
                 }
@@ -155,6 +182,8 @@ public class ShowTransactionController {
         tx.commit();
         session.flush();
         session.close();
+        Stage stage = (Stage) closeButton.getScene().getWindow();
+        stage.close();
 
     }
 
