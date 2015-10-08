@@ -9,10 +9,14 @@ public class ReadyCash {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @OneToOne(fetch = FetchType.EAGER, mappedBy = "readycash", cascade = CascadeType.ALL)
+    @ManyToOne
+    @JoinColumn(name = "owner_id", nullable = true)
     private User owner;
     @Column(name = "money", nullable = false)
     private float money = 0.0f;
+    @ManyToOne
+    @JoinColumn(name = "currency_id", nullable = true)
+    private Currency currency;
 
     public ReadyCash() {
         money = 0.0f;
@@ -45,6 +49,14 @@ public class ReadyCash {
 
     public void setMoney(float money) {
         this.money = money;
+    }
+
+    public Currency getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(Currency currency) {
+        this.currency = currency;
     }
 
     @Override

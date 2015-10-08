@@ -18,6 +18,7 @@ import pl.model.ReadyCash;
 import pl.model.User;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -52,7 +53,7 @@ public class RegistrationController {
 
             User newUser = creteUserFromFields();
             ReadyCash readyCash = new ReadyCash(newUser, 0.0f);
-            newUser.setReadycash(readyCash);
+            newUser.setReadycash(new HashSet<>());
             Session session = SessionUtil.getSession();
             Transaction tx = session.beginTransaction();
             session.save(readyCash);

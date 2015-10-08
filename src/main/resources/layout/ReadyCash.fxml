@@ -5,16 +5,35 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="463.0" prefWidth="698.0" stylesheets="@../styles/login.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pl.controllers.ReadyCashController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="432.0" prefWidth="698.0" stylesheets="@../styles/login.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pl.controllers.ReadyCashController">
    <children>
       <Label layoutX="14.0" layoutY="14.0" text="Készpénz" textFill="#2b579a">
          <font>
             <Font name="Segoe UI Semilight" size="48.0" />
          </font>
       </Label>
-      <Label layoutX="90.0" layoutY="117.0" text="Jelenleg ennyi készpénz áll rendelkezésemre:" />
-      <TextField fx:id="amountField" layoutX="349.0" layoutY="113.0" />
-      <Button layoutX="592.0" layoutY="419.0" mnemonicParsing="false" onAction="#handleSave" text="Mentés" />
-      <Label layoutX="526.0" layoutY="120.0" text="Ft" />
+      <VBox layoutX="55.0" layoutY="84.0">
+         <children>
+            <Label text="Készpénz tranzakció" />
+            <HBox alignment="CENTER_LEFT" layoutX="67.0" layoutY="93.0" spacing="10.0">
+               <children>
+                  <ComboBox fx:id="transactionTypeComboBox" layoutX="183.0" layoutY="101.0" prefHeight="27.0" prefWidth="140.0" />
+                  <TextField fx:id="amountFiled" />
+                  <ComboBox fx:id="currencyComboBox" layoutX="327.0" layoutY="101.0" prefWidth="150.0" />
+                  <Button mnemonicParsing="false" onAction="#handleSave" text="Mentés" />
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+      <TableView fx:id="readyCashTableView" layoutX="55.0" layoutY="158.0" prefHeight="228.0" prefWidth="589.0">
+        <columns>
+          <TableColumn fx:id="currencyColumn" prefWidth="75.0" text="Valuta" />
+          <TableColumn fx:id="amountColumn" prefWidth="75.0" styleClass="money-cell" text="Mennyiség" />
+            <TableColumn fx:id="inHufColumn" prefWidth="75.0" styleClass="money-cell" text="Forint érték" />
+        </columns>
+         <columnResizePolicy>
+            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+         </columnResizePolicy>
+      </TableView>
    </children>
 </AnchorPane>

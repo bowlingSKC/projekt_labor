@@ -67,6 +67,17 @@ public class Constant {
         return currencies;
     }
 
+    public static Currency getHufCurrency() {
+        Currency currency = null;
+        for(Currency currency1 : getCurrencies()) {
+            if( currency1.getCode().equals("HUF") ) {
+                currency = currency1;
+                break;
+            }
+        }
+        return currency;
+    }
+
     public static List<TransactionType> getTransactionTypes() {
         return transactionTypes;
     }

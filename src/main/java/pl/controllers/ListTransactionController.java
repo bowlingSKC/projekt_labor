@@ -191,6 +191,7 @@ public class ListTransactionController {
 
     @FXML
     private void handleSaveTransaction() {
+        /*
         Transaction transaction = new Transaction();
         if( newTransactionType.getSelectionModel().getSelectedItem().equals("Készpénz") ) {
             transaction.setBeforeMoney(Main.getLoggedUser().getReadycash().getMoney());
@@ -211,6 +212,7 @@ public class ListTransactionController {
         session.close();
 
         newAccountComboBox.getSelectionModel().getSelectedItem().getTransactions().add(transaction);
+        */ // TODO
         loadTransactionsToTable();
         tablePane.setOpacity(0);
         new FadeInUpTransition(tablePane).play();

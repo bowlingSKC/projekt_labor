@@ -32,8 +32,8 @@ public class User {
     @Column(name = "registred", nullable = false)
     private Date registredDate;
 
-    @OneToOne(fetch = FetchType.EAGER)
-    private ReadyCash readycash;
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "owner")
+    private Set<ReadyCash> readycash;
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "user")
     private Set<Login> logins = new HashSet<>(0);
@@ -141,11 +141,11 @@ public class User {
         this.logins = logins;
     }
 
-    public ReadyCash getReadycash() {
+    public Set<ReadyCash> getReadycash() {
         return readycash;
     }
 
-    public void setReadycash(ReadyCash readycash) {
+    public void setReadycash(Set<ReadyCash> readycash) {
         this.readycash = readycash;
     }
 
@@ -159,22 +159,36 @@ public class User {
 
     public float getAllMoneyInProperties() {
         float money = 0;
-        for(Property prop : properties) {
-            money += prop.getMoney();
+        if( properties != null ) {
+            for(Property prop : properties) {
+                money += prop.getMoney();
+            }
         }
         return money;
     }
 
     public float getAllMoneyFromAccounts() {
         float sum = 0;
-        for(Account acc : accounts) {
-            sum += acc.getMoney();
+        if( accounts != null ) {
+            for(Account acc : accounts) {
+                sum += acc.getMoney();
+            }
+        }
+        return sum;
+    }
+
+    public float getAllMoneyInReadyCash() {
+        float sum = 0;
+        if( readycash != null ) {
+            for(ReadyCash readyCash : readycash) {
+                sum += readyCash.getMoney();        // TODO átváltani
+            }
         }
         return sum;
     }
 
     public float getAllMoney() {
-        return getAllMoneyFromAccounts() + readycash.getMoney() + getAllMoneyInProperties();
+        return getAllMoneyFromAccounts() + getAllMoneyInReadyCash() + getAllMoneyInProperties();
     }
 
     public Date getLastLogin() {
@@ -200,10 +214,5 @@ public class User {
         if (!email.equals(user.email)) return false;
 
         return true;
-    }
-
-    @Override
-    public int hashCode() {
-        return email.hashCode();
     }
 }

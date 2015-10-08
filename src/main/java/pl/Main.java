@@ -101,8 +101,8 @@ public class Main extends Application {
         md.update(salt.getBytes());
         byte[] bytes = md.digest(pswd.getBytes());
         StringBuilder sb = new StringBuilder();
-        for( int i = 0; i < bytes.length; i++ ) {
-            sb.append( Integer.toString( (bytes[i] & 0xff) + 0x100 ).substring(1) );
+        for (byte aByte : bytes) {
+            sb.append(Integer.toString((aByte & 0xff) + 0x100).substring(1));
         }
         generatedPassword = sb.toString();
         return generatedPassword;

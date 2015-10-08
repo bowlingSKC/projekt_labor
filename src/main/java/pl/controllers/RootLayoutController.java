@@ -75,7 +75,7 @@ public class RootLayoutController {
     @FXML
     private void handleLogin() {
         if( emailTextField.getText().length() == 0 || pswdTextField.getText().length() == 0 ) {
-            System.out.println("Nem tï¿½ltï¿½ttï¿½l ki minen mez?t!");
+            MessageBox.showErrorMessage("Hiba", "Nem tölttél ki minden mez?t!", "Minden mez? kitöltése kötelez?", false);
             return;
         }
 

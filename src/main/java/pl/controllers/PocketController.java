@@ -1,24 +1,22 @@
 package pl.controllers;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.geometry.Side;
-import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.chart.PieChart;
-import javafx.scene.control.*;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.paint.Color;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import pl.Main;
 import pl.jpa.SessionUtil;
-import pl.model.*;
+import pl.model.Account;
+import pl.model.Pocket;
+import pl.model.myCategory;
 
-import java.time.ZoneId;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.List;
 
 public class PocketController {
 
@@ -64,9 +62,9 @@ public class PocketController {
         }
 
         // Számlák lekérdezése
-        session = SessionUtil.getSession();
-        query = session.createQuery("from Account");
-        accounts = query.list();
+//        session = SessionUtil.getSession();
+//        query = session.createQuery("from Account");
+//        accounts = query.list();
 
         // Zsebek lekérdezése
         session = SessionUtil.getSession();
@@ -84,7 +82,7 @@ public class PocketController {
                         pocWas = true;
                     }
                 }
-                if(pocWas == false){
+                if(!pocWas){
                     pocketPie.getData().add(new PieChart.Data(poc.getCategory().getName(), poc.getMoney()));
                     sumMoney -= poc.getMoney();
                 }

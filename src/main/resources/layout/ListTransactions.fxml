@@ -51,7 +51,7 @@
             <Button layoutX="579.0" layoutY="455.0" mnemonicParsing="false" onAction="#handleSaveTransaction" text="Mentés" AnchorPane.bottomAnchor="14.0" AnchorPane.rightAnchor="14.0" />
          </children>
       </AnchorPane>
-      <AnchorPane fx:id="tablePane" layoutX="35.0" layoutY="35.0" opacity="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="35.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="35.0">
+      <AnchorPane fx:id="tablePane" layoutX="35.0" layoutY="35.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="35.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="35.0">
          <children>
             <AnchorPane layoutY="345.0" AnchorPane.bottomAnchor="15.0">
                <children>
@@ -98,7 +98,7 @@
               <columns>
                   <TableColumn fx:id="crudColumn" prefWidth="84.0" text="Művelet" />
                 <TableColumn fx:id="accountTableColumn" prefWidth="182.0" text="Saját számla" />
-                <TableColumn fx:id="moneyTableColumn" prefWidth="75.0" text="Összeg" />
+                <TableColumn fx:id="moneyTableColumn" prefWidth="75.0" styleClass="money-cell" text="Összeg" />
                   <TableColumn fx:id="dateTableColumn" prefWidth="70.0" text="Dátum" />
                   <TableColumn fx:id="transactionTypeColumn" prefWidth="75.0" text="Típus" />
               </columns>

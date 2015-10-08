@@ -48,7 +48,7 @@ public class PersonalSummaryController {
     }
 
     private void computeReadyCash() {
-        inReadyCashLabel.setText(Constant.getNumberFormat().format(Main.getLoggedUser().getReadycash().getMoney()));
+        inReadyCashLabel.setText(Constant.getNumberFormat().format(Main.getLoggedUser().getAllMoneyInReadyCash()));
     }
 
     private void computePropertyCash() {
