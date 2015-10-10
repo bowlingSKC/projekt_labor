@@ -44,6 +44,8 @@ public class ShowTransactionController {
     private TextField commText;
     @FXML
     private Button closeButton;
+    @FXML
+    private ComboBox<TransactionType> typeComboBox;
 
     private Transaction myTransaction;
 
@@ -59,6 +61,15 @@ public class ShowTransactionController {
                 }
             }
         });
+        Session session = SessionUtil.getSession();
+        Query query = session.createQuery("from TransactionType");
+        List<TransactionType> tTypes;
+        tTypes = query.list();
+        session.close();
+        for(TransactionType ttype : tTypes) {
+            typeComboBox.getItems().add(ttype);
+        }
+        typeComboBox.getSelectionModel().selectFirst();
         /*moneyText.textProperty().addListener(new ChangeListener<String>() {
             @Override
             public void changed(ObservableValue<? extends String> observable,
@@ -122,6 +133,7 @@ public class ShowTransactionController {
         myTransaction.setDate(mydate);
         myTransaction.setAnotherAccount(checkSzamla(ellSzamlaText.getText()));
         myTransaction.setComment(commText.getText());
+        myTransaction.setType(typeComboBox.getSelectionModel().getSelectedItem());
     }
 
 
@@ -129,21 +141,9 @@ public class ShowTransactionController {
     private void sendTransaction(){
         updateData();
 
-        TransactionType tempType = new TransactionType();
-        Session session = SessionUtil.getSession();
-        Query query = session.createQuery("from TransactionType");
-        List<TransactionType> tTypes;
-        tTypes = query.list();
-        session.close();
-        for(TransactionType ttype : tTypes) {
-            if(ttype.getId() == 1){
-                tempType = ttype;
-            }
-        }
-
         Account tempAcc = new Account();
-        session = SessionUtil.getSession();
-        query = session.createQuery("from Account");
+        Session session = SessionUtil.getSession();
+        Query query = session.createQuery("from Account");
         List<Account> tempAccounts;
         tempAccounts = query.list();
         session.close();
@@ -169,7 +169,7 @@ public class ShowTransactionController {
                     session.update(acc);
 
                     myTransaction.setAccount(tempAcc);
-                    myTransaction.setType(tempType);
+                    //myTransaction.setType(tempType);
                     session.save(myTransaction);
                     System.out.println("OK");
                 }

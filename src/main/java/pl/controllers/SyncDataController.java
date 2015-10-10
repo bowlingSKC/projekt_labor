@@ -7,6 +7,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
@@ -20,8 +21,10 @@ import org.hibernate.SessionFactory;
 import pl.Main;
 import pl.jpa.SessionUtil;
 import pl.model.*;
+import pl.model.Currency;
 
 import javax.swing.*;
+import javax.swing.text.TabableView;
 import java.awt.event.ActionEvent;
 import java.io.*;
 import java.text.DateFormat;
@@ -39,7 +42,23 @@ public class SyncDataController {
     private ComboBox<String> fileTypes;
 
     @FXML
-    private ListView<String> transactionList;
+    private TableView<Transaction> transactionTableView;
+    @FXML
+    private TableColumn<Transaction, Account> szamlaTableColumn;
+    @FXML
+    private TableColumn<Transaction, Float> osszegTableColumn;
+    @FXML
+    private TableColumn<Transaction, Currency> currencyTableColumn;
+    @FXML
+    private TableColumn<Transaction, Date> dateTableColumn;
+    @FXML
+    private TableColumn<Transaction, Float> presentTableColumn;
+    @FXML
+    private TableColumn<Transaction, Account> anotherTableColumn;
+    @FXML
+    private TableColumn<Transaction, String> commentTableColumn;
+    @FXML
+    private TableColumn<Transaction, TransactionType> typeTableColumn;
 
     private ArrayList<Transaction> myTransactions;
 
@@ -53,18 +72,31 @@ public class SyncDataController {
                 }
             }
         });
-        transactionList.setOnMouseClicked(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent mouseEvent) {
-                if (mouseEvent.getButton().equals(MouseButton.PRIMARY) && !transactionList.getSelectionModel().isEmpty()) {
-                    handleSelect();
-                }
-            }
-        });
         myTransactions = new ArrayList<>();
         //fileTypes.setValue("OTP - CSV");
         fileTypes.getItems().add("OTP - CSV");
         fileTypes.getItems().add("Coming soon...");
+
+        //TableView
+        szamlaTableColumn.setCellValueFactory(new PropertyValueFactory<>("account"));
+        osszegTableColumn.setCellValueFactory(new PropertyValueFactory<>("money"));
+        currencyTableColumn.setCellValueFactory(new PropertyValueFactory<>("category"));
+        dateTableColumn.setCellValueFactory(new PropertyValueFactory<>("date"));
+        presentTableColumn.setCellValueFactory(new PropertyValueFactory<>("beforeMoney"));
+        anotherTableColumn.setCellValueFactory(new PropertyValueFactory<>("anotherAccount"));
+        commentTableColumn.setCellValueFactory(new PropertyValueFactory<>("comment"));
+        typeTableColumn.setCellValueFactory(new PropertyValueFactory<>("type"));
+
+        transactionTableView.setRowFactory( tv -> {
+            TableRow<Transaction> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && (! row.isEmpty()) ) {
+                    Transaction rowData = row.getItem();
+                    handleSelect(rowData);
+                }
+            });
+            return row ;
+        });
     }
 
     @FXML
@@ -87,26 +119,38 @@ public class SyncDataController {
                     processOTPCSV();
                     break;
             }
+            transactionTableView.getItems().clear();
+            for(Transaction tra : myTransactions){
+                transactionTableView.getItems().addAll(tra);
+            }
         }catch (NullPointerException e){
         }
 
     }
     @FXML
-    private void handleSelect(){
-        int index = transactionList.getSelectionModel().getSelectedIndex();
-        try {
-            Stage dialogStage = new Stage();
-            FXMLLoader loader = new FXMLLoader(Main.class.getResource("../layout/ShowTransaction.fxml"));
-            BorderPane pane = loader.load();
-            Scene scene = new Scene(pane);
-            dialogStage.setScene(scene);
-            ShowTransactionController showTransactionController = loader.getController();
-            showTransactionController.setTransaction(myTransactions.get(index));
-            dialogStage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("Sikertelen művelet!");
+    private void handleSelect(Transaction raw){
+        //int index = transactionList.getSelectionModel().getSelectedIndex();
+        int index = 0;
+        for(int i = 0; i < myTransactions.size(); i++){
+            if(myTransactions.get(i) == raw){
+                index = i;
+                System.out.println(index);
+                try {
+                    Stage dialogStage = new Stage();
+                    FXMLLoader loader = new FXMLLoader(Main.class.getResource("../layout/ShowTransaction.fxml"));
+                    BorderPane pane = loader.load();
+                    Scene scene = new Scene(pane);
+                    dialogStage.setScene(scene);
+                    ShowTransactionController showTransactionController = loader.getController();
+                    showTransactionController.setTransaction(myTransactions.get(index));
+                    dialogStage.show();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    System.out.println("Sikertelen művelet!");
+                }
+            }
         }
+
 
     }
 
@@ -158,7 +202,7 @@ public class SyncDataController {
         }
     }
 
-    private boolean confirmTransaction(){
+    /*private boolean confirmTransaction(){
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Megerősítés");
         alert.setHeaderText("Biztosan fel akarod venni a kiválasztott tételt?");
@@ -168,7 +212,7 @@ public class SyncDataController {
             return true;
         }
         return false;
-    }
+    }*/
 
     private boolean confirmAll(){
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -226,7 +270,7 @@ public class SyncDataController {
                             "   Könyvelt egyenleg: " + transaction[6] + " " + transaction[3] +
                             "   Ellenoldali számlaszám: " + transaction[7] + "   Ellenoldali név: " + transaction[8] +
                             "   Közlemény: " + transaction[9] + " " + transaction[10] + " " + transaction[12]);
-                    transactionList.setItems(items);
+                    //transactionList.setItems(items);
 
 
                     //Parse to transaction

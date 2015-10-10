@@ -110,7 +110,7 @@ public class PocketController {
         }
         pockets = segedPockets;
 
-        pocketPie.getData().add(new PieChart.Data("Fentmaradó", sumMoney));
+        pocketPie.getData().add(new PieChart.Data("Fentmaradt", sumMoney));
 
         if(pockets != null)
         updateArea();
@@ -353,7 +353,7 @@ public class PocketController {
 
     public void refreshPie(){
         for(int i = 0; i < pocketPie.getData().size(); i++){
-            if(pocketPie.getData().get(i).getName() == "Fentmaradó"){
+            if(pocketPie.getData().get(i).getName() == "Fentmaradt"){
                 pocketPie.getData().get(i).setPieValue(sumMoney);
             }
         }

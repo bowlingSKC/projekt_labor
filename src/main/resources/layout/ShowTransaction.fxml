@@ -4,22 +4,24 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane prefHeight="269.0" prefWidth="366.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pl.controllers.ShowTransactionController">
+<BorderPane prefHeight="269.0" prefWidth="415.0" stylesheets="@../styles/login.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pl.controllers.ShowTransactionController">
    <top>
-      <AnchorPane prefHeight="268.0" prefWidth="334.0" BorderPane.alignment="CENTER">
+      <AnchorPane prefHeight="309.0" prefWidth="415.0" BorderPane.alignment="CENTER">
          <children>
             <Label layoutX="28.0" layoutY="41.0" text="Számlaszám:" />
             <Label layoutX="27.0" layoutY="74.0" text="Összeg:" />
             <Label layoutX="28.0" layoutY="109.0" text="Dátum:" />
             <Label layoutX="27.0" layoutY="149.0" text="Ellenoldali számlaszám:" />
-            <Label layoutX="27.0" layoutY="185.0" text="Közlemény:" />
-            <TextField fx:id="szamlaText" layoutX="171.0" layoutY="37.0" prefHeight="25.0" prefWidth="174.0" />
-            <TextField fx:id="moneyText" layoutX="171.0" layoutY="70.0" prefHeight="25.0" prefWidth="173.0" />
-            <TextField fx:id="ellSzamlaText" layoutX="171.0" layoutY="145.0" prefHeight="25.0" prefWidth="172.0" />
-            <TextField fx:id="commText" layoutX="171.0" layoutY="181.0" prefHeight="25.0" prefWidth="173.0" />
-            <Button layoutX="230.0" layoutY="225.0" mnemonicParsing="false" onAction="#sendTransaction" text="Adatok elfogadása" />
-            <Button fx:id="closeButton" layoutX="22.0" layoutY="225.0" mnemonicParsing="false" onAction="#cancelTransaction" text="Mégse" />
-            <DatePicker fx:id="datumText" layoutX="171.0" layoutY="105.0" prefHeight="25.0" prefWidth="172.0" />
+            <Label layoutX="27.0" layoutY="188.0" text="Közlemény:" />
+            <TextField fx:id="szamlaText" layoutX="171.0" layoutY="37.0" prefHeight="30.0" prefWidth="221.0" />
+            <TextField fx:id="moneyText" layoutX="171.0" layoutY="70.0" prefHeight="30.0" prefWidth="220.0" />
+            <TextField fx:id="ellSzamlaText" layoutX="171.0" layoutY="145.0" prefHeight="30.0" prefWidth="220.0" />
+            <TextField fx:id="commText" layoutX="171.0" layoutY="181.0" prefHeight="30.0" prefWidth="220.0" />
+            <Button layoutX="238.0" layoutY="255.0" mnemonicParsing="false" onAction="#sendTransaction" text="Adatok elfogadása" />
+            <Button fx:id="closeButton" layoutX="14.0" layoutY="255.0" mnemonicParsing="false" onAction="#cancelTransaction" text="Mégse" />
+            <DatePicker fx:id="datumText" layoutX="171.0" layoutY="105.0" prefHeight="32.0" prefWidth="220.0" />
+            <Label layoutX="27.0" layoutY="221.0" text="Típus:" />
+            <ComboBox fx:id="typeComboBox" layoutX="171.0" layoutY="217.0" prefHeight="27.0" prefWidth="216.0" />
          </children>
       </AnchorPane>
    </top>
