@@ -14,7 +14,6 @@ import pl.Main;
 import pl.MessageBox;
 import pl.SendMail;
 import pl.jpa.SessionUtil;
-import pl.model.ReadyCash;
 import pl.model.User;
 
 import java.util.Date;
@@ -51,10 +50,8 @@ public class RegistrationController {
             SendMail.Send(emailField.getText(), "Regisztráció", "Sikeresen regisztráltál a rendszerünkbe.\n Jelszavad: " + pswdField.getText());
 
             User newUser = creteUserFromFields();
-            ReadyCash readyCash = new ReadyCash(newUser, 0.0f);
             Session session = SessionUtil.getSession();
             Transaction tx = session.beginTransaction();
-            session.save(readyCash);
             session.save(newUser);
             tx.commit();
             session.close();

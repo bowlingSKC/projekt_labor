@@ -177,7 +177,7 @@ public class PropertiesController {
     private class ButtonCell extends TableCell<Object, Boolean> {
         final Hyperlink cellButtonDelete = new Hyperlink(Bundles.getString("delete"));
         final Hyperlink cellButtonEdit = new Hyperlink(Bundles.getString("edit"));
-        final Hyperlink cellButtonSell = new Hyperlink("Elad");
+        final Hyperlink cellButtonSell = new Hyperlink(Bundles.getString("sell"));
         final HBox hb = new HBox(cellButtonDelete, cellButtonEdit, cellButtonSell);
 
         ButtonCell(final TableView tblView) {

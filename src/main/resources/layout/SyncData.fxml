@@ -7,11 +7,6 @@
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pl.controllers.SyncDataController">
     <children>
-        <Label layoutX="14.0" layoutY="14.0" text="Szinkronizálás webbanki adatokkal">
-            <font>
-                <Font name="System Bold" size="15.0" />
-            </font>
-        </Label>
       <Button fx:id="openButton" layoutX="447.0" layoutY="75.0" mnemonicParsing="false" onAction="#handleOpen" prefHeight="34.0" prefWidth="140.0" text="Fájl hozzáadása" />
       <ListView fx:id="fileList" layoutX="14.0" layoutY="65.0" prefHeight="88.0" prefWidth="419.0" />
       <Label layoutX="14.0" layoutY="48.0" text="Kiválasztott fájl(ok):" />

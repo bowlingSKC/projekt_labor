@@ -12,6 +12,8 @@ public class TransactionType  implements Serializable {
     private Integer id;
     @Column(name = "name", nullable = false, length = 50, updatable = false)
     private String name;
+    @Column(name = "sign", nullable = false, length = 1, updatable = false)
+    private String sign;
 
     public TransactionType() {
 
@@ -35,6 +37,14 @@ public class TransactionType  implements Serializable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getSign() {
+        return sign;
+    }
+
+    public void setSign(String sign) {
+        this.sign = sign;
     }
 
     @Override

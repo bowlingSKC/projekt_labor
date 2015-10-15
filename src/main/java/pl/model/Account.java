@@ -45,6 +45,9 @@ public class Account {
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "account")
     private Set<Transaction> transactions = new HashSet<>(0);
 
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "account")
+    private Set<Pocket> pockets = new HashSet<>(0);
+
     public Account() {
 
     }
@@ -143,6 +146,14 @@ public class Account {
 
     public void setTransactions(Set<Transaction> transactions) {
         this.transactions = transactions;
+    }
+
+    public Set<Pocket> getPockets() {
+        return pockets;
+    }
+
+    public void setPockets(Set<Pocket> pockets) {
+        this.pockets = pockets;
     }
 
     @Override

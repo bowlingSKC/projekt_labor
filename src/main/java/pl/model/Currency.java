@@ -11,9 +11,9 @@ public class Currency {
     private Long id;
     @Column(name = "code", nullable = false, updatable = false, length = 3)
     private String code;
-    @Column(name = "name", nullable = false, updatable = false, length = 50)
+    @Column(name = "name", nullable = true, updatable = false, length = 50)
     private String name;
-    @Column(name = "eng_name", nullable = false, updatable = false, length = 50)
+    @Column(name = "eng_name", nullable = true, updatable = false, length = 50)
     private String engName;
 
     public Currency() {

@@ -9,11 +9,11 @@
 
 <AnchorPane prefHeight="450.0" prefWidth="750.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pl.controllers.LoggedController">
    <children>
-      <BorderPane fx:id="layout" style="-fx-border-color: white;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <BorderPane style="-fx-border-color: white;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <left>
             <VBox alignment="CENTER" prefHeight="448.0" prefWidth="195.0" style="-fx-background-color: rgb(43, 87, 154);" BorderPane.alignment="TOP_CENTER">
                <children>
-                  <Button mnemonicParsing="false" onAction="#handleLogout" prefHeight="40.0" prefWidth="40.0" stylesheets="@../styles/buttonCircle.css">
+                  <Button fx:id="logoutButton" mnemonicParsing="false" onAction="#handleLogout" prefHeight="40.0" prefWidth="40.0" stylesheets="@../styles/buttonCircle.css">
                      <graphic>
                         <ImageView fitHeight="16.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -39,6 +39,20 @@
                </BorderPane.margin>
             </VBox>
          </left>
+         <center>
+            <BorderPane fx:id="layout" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+               <top>
+                  <Label fx:id="titleLabel" text="Ide kerül a cím ..." textFill="#2b579a" BorderPane.alignment="CENTER_LEFT">
+                     <font>
+                        <Font name="Segoe UI Semilight" size="48.0" />
+                     </font>
+                  </Label>
+               </top>
+               <BorderPane.margin>
+                  <Insets top="20.0" />
+               </BorderPane.margin>
+            </BorderPane>
+         </center>
       </BorderPane>
       <Button fx:id="resizeButton" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="10.0" prefWidth="10.0" styleClass="decoration-button-resize" stylesheets="@../styles/windows.css" AnchorPane.bottomAnchor="2.0" AnchorPane.rightAnchor="2.0" />
       <Label fx:id="nameLabel" alignment="CENTER" stylesheets="@../styles/buttonCircle.css" text="Ide jön a bejelentkezett felhasználó neve" textFill="#a1a1a1" AnchorPane.leftAnchor="1.0" AnchorPane.rightAnchor="-1.0" AnchorPane.topAnchor="1.0">

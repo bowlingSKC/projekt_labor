@@ -46,7 +46,7 @@ public class Constant {
     }
 
     private static void getCurrenciesFromDatabase(Session session) {
-        Query query = session.createQuery("from Currency order by name asc");
+        Query query = session.createQuery("from Currency order by id asc");
         currencies.addAll(query.list());
     }
 

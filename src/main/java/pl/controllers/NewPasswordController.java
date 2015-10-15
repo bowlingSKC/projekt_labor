@@ -13,10 +13,6 @@ import java.util.Optional;
 
 public class NewPasswordController {
 
-    private Stage dialogStage;
-
-    @FXML
-    private Label closeDialogLabel;
     @FXML
     private PasswordField newPasswordField;
     @FXML
@@ -58,8 +54,6 @@ public class NewPasswordController {
 
         MessageBox.showInformationMessage("Jelsz� megv�ltoztat�sa", "A jelsz� sikeresen megv�ltozott!",
                 "Legk�zelebb az �j jelsz�val l�phet be. Az �j jelsz� ki lett k�ldve a regisztr�lt E-mail c�mre.", false);
-
-        dialogStage.close();
     }
 
     private boolean confirm() {
@@ -87,11 +81,6 @@ public class NewPasswordController {
                 ex.printStackTrace();
             }
         });
-
-        closeDialogLabel.setOnMouseClicked(event -> dialogStage.close());
     }
 
-    public void setDialogStage(Stage dialogStage) {
-        this.dialogStage = dialogStage;
-    }
 }

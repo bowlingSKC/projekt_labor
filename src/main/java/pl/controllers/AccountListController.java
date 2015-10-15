@@ -1,7 +1,5 @@
 package pl.controllers;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -21,19 +19,15 @@ import pl.jpa.SessionUtil;
 import pl.model.Account;
 import pl.model.Bank;
 import pl.model.Currency;
-import pl.model.Transaction;
 
-import java.io.IOException;
 import java.text.NumberFormat;
-import java.time.ZoneId;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class AccountListController {
 
-    private final SearchListener searchListener = new SearchListener();
-
     // ============= TÁBLÁZAT =============
+    @FXML
+    private AnchorPane tablePane;
     @FXML
     private TableView<Account> accountTableView;
     @FXML
@@ -52,6 +46,8 @@ public class AccountListController {
 
     // ============= ÚJ SZÁMLA LÉTREHOZÁSA =============
     @FXML
+    private AnchorPane editPane;
+    @FXML
     private ComboBox<Bank> newAccBankComboBox;
     @FXML
     private TextField newAccNum1;
@@ -69,37 +65,17 @@ public class AccountListController {
     private DatePicker newAccDatePicker;
     // ============= ÚJ SZÁMLA LÉTREHOZÁSA VÉGE =============
 
-    // ============= KERESÉS =============
-    @FXML
-    private TextField searchAccName;
-    @FXML
-    private TextField searchAccNum;
-    @FXML
-    private ComboBox<Bank> searchComboBox;
-    // ============= KERESÉS VÉGE =============
 
     // ============= MÓDOSÍTÁS/TÖRLÉS ============
 
     @FXML
     public void initialize() {
+        tablePane.setOpacity(1);
+
         initAccountListTable();
-        accountTableView.getItems().setAll(Main.getLoggedUser().getAccounts() );
+        accountTableView.getItems().setAll(Main.getLoggedUser().getAccounts());
         computeSumMoneyOnAccounts();
         initNewAccountPanel();
-        initSearchPanel();
-    }
-
-    private void initSearchPanel() {
-        Set<Bank> myBanks = new HashSet<>(0);
-        myBanks.addAll(Main.getLoggedUser().getAccounts().stream().map(Account::getBank).collect(Collectors.toList()));
-        searchComboBox.getItems().add(new Bank(Bundles.getString("cash.bankaccount.search.bank.all")));
-        searchComboBox.getItems().addAll(myBanks);
-        searchComboBox.getSelectionModel().select(0);
-
-        // listeners
-        searchAccName.textProperty().addListener(searchListener);
-        searchAccNum.textProperty().addListener(searchListener);
-        searchComboBox.getSelectionModel().selectedIndexProperty().addListener(searchListener);
     }
 
     private void initNewAccountPanel() {
@@ -120,6 +96,18 @@ public class AccountListController {
         accountBankColumn.setCellValueFactory(new PropertyValueFactory<>("bank"));
         accountMoneyColumn.setCellValueFactory(new PropertyValueFactory<>("money"));
         valutaColumn.setCellValueFactory(new PropertyValueFactory<>("currency"));
+
+//        accountNoColumn.setCellFactory(t -> new TableCell<Account, String>() {
+//            @Override
+//            protected void updateItem(String item, boolean empty) {
+//                super.updateItem(item, empty);
+//                if( item != null && !empty ) {
+//                   setText(String.format("%8c-%8c-%8c", item));
+//                } else {
+//                    setText("");
+//                }
+//            }
+//        });
 
         // dupla katt
         accountTableView.setRowFactory(tv -> {
@@ -175,29 +163,93 @@ public class AccountListController {
 
     @FXML
     private void handleNewAccount() {
+        tablePane.setOpacity(0);
+        new FadeInUpTransition(editPane).play();
+    }
+
+    @FXML
+    private void handleBackToTableView() {
+        refershTableItems();
+        editPane.setOpacity(0);
+        new FadeInUpTransition(tablePane).play();
+    }
+
+    @FXML
+    private void handleSaveAccount() {
         try {
-            saveAccountToDatabase(newAccNum1.getText() + newAccNum2.getText() + newAccNum3.getText());
-            refershTableItems();
+            checkAllFields();
+
+            Account result = getAccountFromFields();
+            checkAccountExistsInDatabase(result);
+
+            saveAccountToDatabase(result);
             clearAllNewAccountField();
-        } catch (Exception e) {
-            e.printStackTrace();
+
+            refershTableItems();
+            editPane.setOpacity(0);
+            new FadeInUpTransition(tablePane).play();
+        } catch (Throwable ex) {
+            MessageBox.showErrorMessage("Hiba", "Hiba a számla létrehozásakkor", ex.getMessage(), false);
         }
     }
 
+    private void checkAllFields() throws Exception {
+        StringBuilder buffer = new StringBuilder();
+
+        if( newAccBankComboBox.getSelectionModel().getSelectedItem() == null ) {
+            buffer.append("Bank választása kötelező!\n");
+        }
+
+        if( newAccNum1.getText().length() != 8 || newAccNum2.getText().length() != 8 || newAccNum3.getText().length() != 8 ) {
+            buffer.append("A számlaszámnak háromszor 8 számból kell állnia!\n");
+        }
+        // TODO: számokat ellenőrizni, ne legyenek benne betűk
+
+        if( newAcccurrencyComboBox.getSelectionModel().getSelectedItem() == null ) {
+            buffer.append("Közelező valutát választani!\n");
+        }
+
+        if( buffer.toString().length() != 0 ) {
+            throw new Exception( buffer.toString() );
+        }
+    }
+
+    public Account getAccountFromFields() {
+        Account account = new Account();
+        account.setOwner(Main.getLoggedUser());
+        account.setBank( newAccBankComboBox.getSelectionModel().getSelectedItem() );
+        account.setCurrency(newAcccurrencyComboBox.getSelectionModel().getSelectedItem());
+        account.setAccountNumber( newAccNum1.getText().trim() + newAccNum2.getText().trim() + newAccNum3.getText().trim() );
+
+        if( newAccMoney.getText().length() == 0 ) {
+            account.setMoney(0.0f);
+        } else {
+            account.setMoney(Float.valueOf(newAccMoney.getText()));
+        }
+
+        if( newAccName.getText().length() == 0 ) {
+            account.setName("Számlám");
+        } else {
+            account.setName( newAccName.getText() );
+        }
+
+        if( newAccDatePicker.getValue() == null ) {
+            account.setCreatedDate( new Date() );
+        } else {
+            account.setCreatedDate( Constant.dateFromLocalDate(newAccDatePicker.getValue()) );
+        }
+
+        return account;
+    }
 
     private void refershTableItems() {
         accountTableView.getItems().clear();
         accountTableView.getItems().addAll(Main.getLoggedUser().getAccounts());
 
-        searchComboBox.getItems().clear();
-        initSearchPanel();
         computeSumMoneyOnAccounts();
     }
 
-    private void saveAccountToDatabase(String newAccNo) throws Exception {
-        Date date = Date.from(newAccDatePicker.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
-        Account account = new Account(newAccNo, newAccName.getText().trim(), Float.valueOf(newAccMoney.getText()),
-                date, Main.getLoggedUser(), newAccBankComboBox.getSelectionModel().getSelectedItem(), newAcccurrencyComboBox.getSelectionModel().getSelectedItem());
+    private void saveAccountToDatabase(Account account) throws Exception {
         Session session = SessionUtil.getSession();
         org.hibernate.Transaction tx = session.beginTransaction();
         session.save(account);
@@ -207,14 +259,14 @@ public class AccountListController {
         Main.getLoggedUser().getAccounts().add(account);
     }
 
-    private void checkAccountExistsInDatabase(String newAccNo) throws Exception {
+    private void checkAccountExistsInDatabase(Account account) throws Exception {
         Session session = SessionUtil.getSession();
-        Query query = session.createQuery("from Account where accountNumber = :acc");
-        query.setParameter("acc", newAccNo);
-        Account account = (Account) query.uniqueResult();
+        Query query = session.createQuery("from Account where accountNumber = :number");
+        query.setParameter("number", account.getAccountNumber());
+        Account db = (Account) query.uniqueResult();
         session.close();
 
-        if( account != null ) {
+        if( db != null ) {
             throw new Exception(Bundles.getString("error.newaccount.exists") );
         }
     }
@@ -285,49 +337,6 @@ public class AccountListController {
 
         if( buffer.toString().length() != 0 ) {
             throw new Exception(buffer.toString());
-        }
-    }
-
-    private class SearchListener implements ChangeListener {
-        @Override
-        public void changed(ObservableValue observable, Object oldValue, Object newValue) {
-
-            Set<Account> accounts = new HashSet<>(Main.getLoggedUser().getAccounts());
-
-            if(searchAccName.getText().length() > 0) {
-                Iterator<Account> iter = accounts.iterator();
-                while(iter.hasNext()) {
-                    Account acc = iter.next();
-                    if (!acc.getName().toUpperCase().contains(searchAccName.getText().trim().toUpperCase())) {
-                        iter.remove();
-                    }
-                }
-            }
-
-            if( searchAccNum.getText().length() > 0 ) {
-                Iterator<Account> iter = accounts.iterator();
-                while(iter.hasNext()) {
-                    Account acc = iter.next();
-                    if (!acc.getAccountNumber().contains(searchAccNum.getText().trim())) {
-                        iter.remove();
-                    }
-                }
-            }
-
-            if( searchComboBox.getSelectionModel().getSelectedItem() != null ) {
-                Bank selectedBank = searchComboBox.getSelectionModel().getSelectedItem();
-                if( !selectedBank.getName().equals(Bundles.getString("cash.bankaccount.search.bank.all")) ) {
-                    Iterator<Account> iter = accounts.iterator();
-                    while(iter.hasNext()) {
-                        Account account = iter.next();
-                        if (!account.getBank().equals(selectedBank)) {
-                            iter.remove();
-                        }
-                    }
-                }
-            }
-
-            accountTableView.getItems().setAll(accounts);
         }
     }
 

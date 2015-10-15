@@ -181,15 +181,4 @@ public class ReadyCashController {
         }
 
     }
-
-    public ReadyCash getSelectedReadyCash() {
-        ReadyCash selected = new ReadyCash(Main.getLoggedUser(), 0.0f);
-        selected.setCurrency(Constant.getHufCurrency());
-        for(ReadyCash readyCash : Main.getLoggedUser().getReadycash()) {
-            if( readyCash.getCurrency().equals(currencyComboBox.getSelectionModel().getSelectedItem()) ) {
-                selected = readyCash;
-            }
-        }
-        return selected;
-    }
 }

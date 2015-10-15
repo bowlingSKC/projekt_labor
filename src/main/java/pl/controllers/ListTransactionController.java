@@ -6,27 +6,24 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 import javafx.util.Callback;
-import org.hibernate.*;
+import org.hibernate.Query;
+import org.hibernate.Session;
 import pl.Constant;
 import pl.Main;
+import pl.MessageBox;
 import pl.animations.FadeInUpTransition;
+import pl.bundles.Bundles;
 import pl.jpa.SessionUtil;
 import pl.model.*;
-import pl.model.Transaction;
+import pl.model.Currency;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.time.ZoneId;
 import java.util.*;
 
 public class ListTransactionController {
@@ -59,14 +56,16 @@ public class ListTransactionController {
     @FXML
     private ScrollPane scrollPane;
 
+    // ========= TYPE PANE =========
     @FXML
     private AnchorPane tablePane;
     @FXML
     private AnchorPane editPane;
+    @FXML
+    private AnchorPane transferPane;
+    // ========= TYPE PANE VÉGE =========
 
     // ========= EDIT PANE =========
-    @FXML
-    private ComboBox<String> newTransactionType;
     @FXML
     private ComboBox<Account> newAccountComboBox;
     @FXML
@@ -79,6 +78,19 @@ public class ListTransactionController {
     private DatePicker newTransactionDatePicker;
     @FXML
     private TextField newTransactionCommentField;
+
+    @FXML
+    private ComboBox<Pocket> newTransactionFromPocket;
+    @FXML
+    private Label amointInPocketsLabel;
+
+    @FXML
+    private TextField anotherAccNum1;
+    @FXML
+    private TextField anotherAccNum2;
+    @FXML
+    private TextField anotherAccNum3;
+
     // ========= EDIT PANE VÉGE =========
 
     @FXML
@@ -93,19 +105,13 @@ public class ListTransactionController {
         dateTableColumn.setCellValueFactory(new PropertyValueFactory<>("date"));
         transactionTypeColumn.setCellValueFactory(new PropertyValueFactory<>("type"));
 
-        moneyTableColumn.setCellFactory(column -> new TableCell<Transaction, Float>() {
+        transactionTableView.setRowFactory(tableView -> new TableRow<Transaction>() {
             @Override
-            protected void updateItem(Float item, boolean empty) {
+            protected void updateItem(Transaction item, boolean empty) {
                 super.updateItem(item, empty);
-
-                if( item == null || empty ) {
-                    setText(null);
-                    setStyle("");
-                } else {
-                    setText(Float.toString(item));
-
-                    if( item < 0 ) {
-                        setStyle("-fx-background-color: indianred;");
+                if( item != null && !empty ) {
+                    if( item.getType().getSign().equals("-") ) {
+                        setStyle("-fx-background-color: lightcoral;");
                     } else {
                         setStyle("");
                     }
@@ -160,19 +166,24 @@ public class ListTransactionController {
     }
 
     private void initEditTransaction() {
-        newTransactionType.getItems().add("Készpénz");
-        newTransactionType.getItems().add("Bankkártya");
         newAccountComboBox.getItems().setAll(Main.getLoggedUser().getAccounts());
         newTransactionTypeComboBox.getItems().setAll(Constant.getTransactionTypes());
         currencyComboBox.getItems().setAll(Constant.getCurrencies());
 
-        newTransactionType.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            if( newTransactionType.getSelectionModel().getSelectedItem().equals("Bankkártya") ) {
-                newAccountComboBox.setVisible(true);
-            } else {
-                newAccountComboBox.setVisible(false);
+        newAccountComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> newTransactionFromPocket.getItems().setAll(newValue.getPockets()));
+        newTransactionFromPocket.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> amointInPocketsLabel.setText( newValue.getMoney() + " " + newAccountComboBox.getSelectionModel().getSelectedItem().getCurrency()));
+
+        newTransactionTypeComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            hideAllTypePane();
+            if( newValue.getId() == 1 ) {
+                new FadeInUpTransition(transferPane).play();
             }
         });
+
+    }
+
+    private void hideAllTypePane() {
+        transferPane.setOpacity(0);
     }
 
     @FXML
@@ -191,31 +202,158 @@ public class ListTransactionController {
 
     @FXML
     private void handleSaveTransaction() {
-        /*
-        Transaction transaction = new Transaction();
-        if( newTransactionType.getSelectionModel().getSelectedItem().equals("Készpénz") ) {
-            transaction.setBeforeMoney(Main.getLoggedUser().getReadycash().getMoney());
-        } else {
-            transaction.setBeforeMoney(newAccountComboBox.getSelectionModel().getSelectedItem().getMoney());
-        }
-        transaction.setAccount(newAccountComboBox.getSelectionModel().getSelectedItem());
-        transaction.setComment(newTransactionCommentField.getText());
-        transaction.setDate(Constant.dateFromLocalDate(newTransactionDatePicker.getValue()));
-        transaction.setType(newTransactionTypeComboBox.getSelectionModel().getSelectedItem());
-        float amount = Float.valueOf( newTransactionAmountTextField.getText() );
-        transaction.setMoney(amount);
 
+        try {
+            checkAllFields();
+            checkValidTransaction();
+
+            Transaction transaction = new Transaction();
+            fillTransactionFromFields(transaction);
+            fillEmptyFields(transaction);
+
+            saveTransactionToDatabase(transaction);
+
+            loadTransactionsToTable();
+            tablePane.setOpacity(0);
+            new FadeInUpTransition(tablePane).play();
+        } catch (Throwable ex) {
+            MessageBox.showErrorMessage("Hiba", "A tranzakciót nem lehet végrehajtani!", ex.getMessage(), false);
+        }
+    }
+
+    private void saveTransactionToDatabase(Transaction transaction) {
+        Account account = transaction.getAccount();
         Session session = SessionUtil.getSession();
         org.hibernate.Transaction tx = session.beginTransaction();
+
+        account.setMoney( account.getMoney() - transaction.getMoney() );
+
+        if( newTransactionTypeComboBox.getSelectionModel().getSelectedItem().getId() == 1 ) {
+            session.update(account);
+        }
+
+        if( newTransactionTypeComboBox.getSelectionModel().getSelectedItem().getId() == 2) {
+            ReadyCash readyCash = null;
+            for(ReadyCash tmp : Main.getLoggedUser().getReadycash()) {
+                if( currencyComboBox.getSelectionModel().getSelectedItem().equals(tmp.getCurrency()) ) {
+                    readyCash = tmp;
+                    break;
+                }
+            }
+
+            if( readyCash == null ) {
+                readyCash = new ReadyCash();
+                readyCash.setCurrency(currencyComboBox.getSelectionModel().getSelectedItem());
+                readyCash.setMoney(transaction.getMoney());
+                readyCash.setOwner(Main.getLoggedUser());
+                session.save(readyCash);
+
+                Main.getLoggedUser().getReadycash().add(readyCash);
+            } else {
+                readyCash.setMoney( readyCash.getMoney() + transaction.getMoney() );
+                session.update(readyCash);
+            }
+        }
+
+        if( newTransactionTypeComboBox.getSelectionModel().getSelectedItem().getId() == 3 ) {
+            ReadyCash readyCash = null;
+            for(ReadyCash tmp : Main.getLoggedUser().getReadycash()) {
+                if( tmp.getCurrency().equals(currencyComboBox.getSelectionModel().getSelectedItem()) ) {
+                    readyCash = tmp;
+                    break;
+                }
+            }
+
+            if( readyCash != null ) {
+                readyCash.setMoney( readyCash.getMoney() - transaction.getMoney() );
+                Account selectedItem = newAccountComboBox.getSelectionModel().getSelectedItem();
+                selectedItem.setMoney( selectedItem.getMoney() + transaction.getMoney() );
+
+                session.update(selectedItem);
+                if( readyCash.getMoney() == 0.0f ) {
+                    session.delete(readyCash);
+                } else {
+                    session.update(readyCash);
+                }
+                session.update(selectedItem);
+            } else {
+                MessageBox.showErrorMessage("Hiba", "A tranzakciót nem lehet végrehajtani!", "Nincs készpénzben ilyen valuta regisztrálva!", false);
+                session.close();
+                return;
+            }
+        }
+
         session.save(transaction);
+
         tx.commit();
         session.close();
 
-        newAccountComboBox.getSelectionModel().getSelectedItem().getTransactions().add(transaction);
-        */ // TODO
-        loadTransactionsToTable();
-        tablePane.setOpacity(0);
-        new FadeInUpTransition(tablePane).play();
+        account.getTransactions().add(transaction);
+    }
+
+    private void fillTransactionFromFields(Transaction transaction) {
+        transaction.setAccount(newAccountComboBox.getSelectionModel().getSelectedItem());
+        transaction.setType(newTransactionTypeComboBox.getSelectionModel().getSelectedItem());
+        transaction.setMoney( Float.valueOf(newTransactionAmountTextField.getText()) );
+        transaction.setComment(newTransactionCommentField.getText());
+
+    }
+
+    private void checkValidTransaction() throws Exception {
+        StringBuilder buffer = new StringBuilder();
+
+        if( Float.valueOf( newTransactionAmountTextField.getText() ) > newAccountComboBox.getSelectionModel().getSelectedItem().getMoney()  ) {
+            buffer.append("Nincs elég pénz a számládon!\n");
+        }
+
+        if( buffer.toString().length() != 0 ) {
+            throw new Exception(buffer.toString());
+        }
+    }
+
+    private void fillEmptyFields(Transaction transaction) {
+        transaction.setBeforeMoney( newAccountComboBox.getSelectionModel().getSelectedItem().getMoney() );
+
+        if( newTransactionDatePicker.getValue() == null ) {
+            transaction.setDate(new Date());
+        }
+
+    }
+
+    private void checkAllFields() throws Exception {
+        StringBuilder buffer = new StringBuilder();
+
+        if( newAccountComboBox.getSelectionModel().getSelectedItem() == null  ) {
+            buffer.append("Számla választása kötelező!\n");
+        }
+
+        if( newTransactionTypeComboBox.getSelectionModel().getSelectedItem() == null ) {
+            buffer.append("Tranzakció típusa választása kötelező!\n");
+        }
+
+        try {
+            if( Float.valueOf(newTransactionAmountTextField.getText()) < 0 ) {
+                buffer.append("Nullánál nagyobb számot lehet megadni csak összegnek!\n");
+            }
+        } catch (NumberFormatException ex) {
+            buffer.append("Összegnek csak számot lehet megadni!\n");
+        }
+
+        // TODO: itt kell ellenőrizni a további feltételeket is
+
+        if( newTransactionTypeComboBox.getSelectionModel().getSelectedItem() != null && newTransactionTypeComboBox.getSelectionModel().getSelectedItem().getId() == 1 ) {
+            if( newTransactionFromPocket.getSelectionModel().getSelectedItem() == null ) {
+                buffer.append("Nem választottál ki forrás zsebet!\n");
+            } else {
+                if( newTransactionFromPocket.getSelectionModel().getSelectedItem().getMoney() < Float.valueOf(newTransactionAmountTextField.getText()) ) {
+                    buffer.append("A megadott zsebben nincs elég pénz a tranzakció végrehajtásához!\n");
+                }
+            }
+        }
+
+        if( buffer.toString().length() != 0 ) {
+            throw new Exception(buffer.toString());
+        }
     }
 
     private void loadTransactionToFrom(Transaction transaction) {
@@ -268,8 +406,8 @@ public class ListTransactionController {
     }
 
     private class ButtonCell extends TableCell<Object, Boolean> {
-        final Hyperlink cellButtonDelete = new Hyperlink("Törlés");
-        final Hyperlink cellButtonEdit = new Hyperlink("Módosítás");
+        final Hyperlink cellButtonDelete = new Hyperlink(Bundles.getString("delete"));
+        final Hyperlink cellButtonEdit = new Hyperlink(Bundles.getString("edit"));
         final HBox hb = new HBox(cellButtonDelete, cellButtonEdit);
 
         ButtonCell(final TableView tblView) {
