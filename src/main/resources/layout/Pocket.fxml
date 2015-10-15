@@ -22,18 +22,19 @@
       <Button layoutX="22.0" layoutY="263.0" mnemonicParsing="false" onAction="#handleIn" text="Betesz" />
       <Button layoutX="176.0" layoutY="263.0" mnemonicParsing="false" onAction="#handleOut" text="Kivesz" />
       <Label layoutX="243.0" layoutY="230.0" text="Ft" />
-      <TableView fx:id="pocketTableView" layoutX="37.0" layoutY="416.0" prefHeight="250.0" prefWidth="508.0">
+      <TableView fx:id="pocketTableView" layoutX="260.0" layoutY="416.0" prefHeight="250.0" prefWidth="508.0">
         <columns>
           <TableColumn fx:id="pocketTableColumn" prefWidth="137.0" text="Zseb" />
           <TableColumn fx:id="moneyTableColumn" prefWidth="112.0" text="Összeg" />
             <TableColumn fx:id="accountTableColumn" prefWidth="254.0" text="Számla" />
         </columns>
       </TableView>
-      <TableView fx:id="remainedTableView" layoutX="553.0" layoutY="416.0" prefHeight="250.0" prefWidth="206.0">
+      <TableView fx:id="remainedTableView" layoutX="23.0" layoutY="416.0" prefHeight="250.0" prefWidth="231.0">
         <columns>
-          <TableColumn fx:id="szamlaTableColumn" prefWidth="125.0" text="Számla" />
-          <TableColumn fx:id="egyenlegTableColumn" prefWidth="76.0" text="Fentmaradt" />
+          <TableColumn fx:id="szamlaTableColumn" prefWidth="133.0" text="Számla" />
+          <TableColumn fx:id="egyenlegTableColumn" prefWidth="92.0" text="Fentmaradt" />
         </columns>
       </TableView>
+      <Button layoutX="23.0" layoutY="374.0" mnemonicParsing="false" onAction="#exportCSV" text="Export to CSV" />
     </children>
 </AnchorPane>

@@ -28,6 +28,7 @@ import javax.swing.text.TabableView;
 import java.awt.event.ActionEvent;
 import java.io.*;
 import java.text.DateFormat;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.util.*;
@@ -96,6 +97,37 @@ public class SyncDataController {
                 }
             });
             return row ;
+        });
+        //Pénz formátum
+        osszegTableColumn.setCellFactory(column -> new TableCell<Transaction, Float>() {
+            @Override
+            protected void updateItem(Float item, boolean empty) {
+                super.updateItem(item, empty);
+
+                if( item == null || empty ) {
+                    setText(null);
+                    setStyle("");
+                } else {
+                    NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.getDefault());
+                    setText(numberFormat.format(item));
+                    //setText(Float.toString(item));
+                }
+            }
+        });
+        presentTableColumn.setCellFactory(column -> new TableCell<Transaction, Float>() {
+            @Override
+            protected void updateItem(Float item, boolean empty) {
+                super.updateItem(item, empty);
+
+                if( item == null || empty ) {
+                    setText(null);
+                    setStyle("");
+                } else {
+                    NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.getDefault());
+                    setText(numberFormat.format(item));
+                    //setText(Float.toString(item));
+                }
+            }
         });
     }
 

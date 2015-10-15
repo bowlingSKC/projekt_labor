@@ -4,15 +4,21 @@ import javafx.fxml.FXML;
 import javafx.scene.chart.PieChart;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.stage.FileChooser;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import pl.Main;
 import pl.jpa.SessionUtil;
 import pl.model.*;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.List;
+import java.util.Locale;
 
 public class PocketController {
 
@@ -135,7 +141,7 @@ public class PocketController {
 
         egyenlegTableColumn.setCellValueFactory(new PropertyValueFactory<>("money"));
         szamlaTableColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-
+        //Pénz formátum
         moneyTableColumn.setCellFactory(column -> new TableCell<Pocket, Float>() {
             @Override
             protected void updateItem(Float item, boolean empty) {
@@ -145,35 +151,27 @@ public class PocketController {
                     setText(null);
                     setStyle("");
                 } else {
-                    setText(Float.toString(item));
-
-                    /*if( item < 0 ) {
-                        setStyle("-fx-background-color: indianred;");
-                    } else {
-                        setStyle("");
-                    }*/
+                    NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.getDefault());
+                    setText(numberFormat.format(item));
+                    //setText(Float.toString(item));
                 }
             }
         });
-//        pocketTableColumn.setCellFactory(column -> new TableCell<Pocket, myCategory>() {
-//            @Override
-//            protected void updateItem(myCategory item, boolean empty) {
-//                super.updateItem(item, empty);
-//
-//                if( item == null || empty ) {
-//                    setText(null);
-//                    setStyle("");
-//                } else {
-//                    setText(item.getName());
-//
-//                    /*if( item < 0 ) {
-//                        setStyle("-fx-background-color: indianred;");
-//                    } else {
-//                        setStyle("");
-//                    }*/
-//                }
-//            }
-//        });
+        egyenlegTableColumn.setCellFactory(column -> new TableCell<Account, Float>() {
+            @Override
+            protected void updateItem(Float item, boolean empty) {
+                super.updateItem(item, empty);
+
+                if( item == null || empty ) {
+                    setText(null);
+                    setStyle("");
+                } else {
+                    NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.getDefault());
+                    setText(numberFormat.format(item));
+                    //setText(Float.toString(item));
+                }
+            }
+        });
 
     }
 
@@ -388,6 +386,34 @@ public class PocketController {
         }
         for(Account acc : accounts){
             remainedTableView.getItems().addAll(acc);
+        }
+    }
+
+    public void exportCSV(){
+        FileWriter writer = null;
+        try {
+            FileChooser fileChooser = new FileChooser();
+            FileChooser.ExtensionFilter extFilter =
+                    new FileChooser.ExtensionFilter("CSV file (*.csv)", "*.csv");
+            fileChooser.getExtensionFilters().add(extFilter);
+            File file = fileChooser.showSaveDialog(Main.getPrimaryStage());
+            if(file != null){
+
+                writer = new FileWriter(file);
+                for(Pocket poc : pockets){
+                    writer.append(poc.getAccount().toString());
+                    writer.append(';');
+                    writer.append(String.valueOf(poc.getMoney()));
+                    writer.append(';');
+                    writer.append(poc.getCategory().toString());
+                    writer.append('\n');
+                    writer.flush();
+                }
+                writer.close();
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

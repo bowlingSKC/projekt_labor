@@ -7,10 +7,10 @@
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="562.0" prefWidth="827.0" stylesheets="@../styles/login.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pl.controllers.SyncDataController">
     <children>
-      <Button fx:id="openButton" layoutX="447.0" layoutY="75.0" mnemonicParsing="false" onAction="#handleOpen" prefHeight="34.0" prefWidth="140.0" text="Fájl hozzáadása" />
+      <Button fx:id="openButton" layoutX="447.0" layoutY="75.0" mnemonicParsing="false" onAction="#handleOpen" prefHeight="34.0" prefWidth="174.0" text="Fájl hozzáadása" />
       <ListView fx:id="fileList" layoutX="14.0" layoutY="65.0" prefHeight="88.0" prefWidth="419.0" />
       <Label layoutX="14.0" layoutY="48.0" text="Kiválasztott fájl(ok):" />
-      <Button fx:id="dataProcess" layoutX="472.0" layoutY="119.0" mnemonicParsing="false" onAction="#handleAll" prefHeight="34.0" prefWidth="149.0" text="Mindet felvesz" />
+      <Button fx:id="dataProcess" layoutX="447.0" layoutY="119.0" mnemonicParsing="false" onAction="#handleAll" prefHeight="34.0" prefWidth="174.0" text="Mindet felvesz" />
       <Label layoutX="14.0" layoutY="169.0" text="Felvinni kívánt tranzakció(k):" />
       <Label layoutX="403.0" layoutY="40.0" text="Fájl típusa:" />
       <ComboBox fx:id="fileTypes" layoutX="472.0" layoutY="35.0" prefHeight="27.0" prefWidth="149.0" />
