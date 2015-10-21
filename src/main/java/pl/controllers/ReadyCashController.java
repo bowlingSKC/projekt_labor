@@ -77,8 +77,7 @@ public class ReadyCashController {
                 handleInTransaction();
             }
             updateTableData();
-
-            MessageBox.showInformationMessage("Sikeres", "Siker", "Hurrá", false);
+            
         } catch (Throwable ex) {
             MessageBox.showErrorMessage("Hiba", "Nem lehet létrehozni a tranzakciót!", ex.getMessage(), false);
         }

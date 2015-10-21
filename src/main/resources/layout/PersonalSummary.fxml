@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.*?>
 <?import javafx.scene.text.*?>
 <?import javafx.scene.control.*?>
 <?import java.lang.*?>
@@ -7,7 +8,7 @@
 
 <AnchorPane prefHeight="454.0" prefWidth="734.0" stylesheets="@../styles/login.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pl.controllers.PersonalSummaryController">
    <children>
-      <HBox alignment="BASELINE_CENTER" layoutX="242.0" layoutY="182.0" spacing="10.0">
+      <HBox alignment="BASELINE_CENTER" layoutX="242.0" layoutY="160.0" spacing="10.0" AnchorPane.leftAnchor="192.0" AnchorPane.rightAnchor="192.0">
          <children>
             <Label text="Önnek jelenleg">
                <font>
@@ -26,7 +27,7 @@
             </Label>
          </children>
       </HBox>
-      <GridPane layoutX="192.0" layoutY="227.0" prefHeight="90.0" prefWidth="350.0" AnchorPane.leftAnchor="192.0">
+      <GridPane layoutX="192.0" layoutY="205.0" prefHeight="123.0" prefWidth="350.0" AnchorPane.leftAnchor="192.0" AnchorPane.rightAnchor="192.0">
         <columnConstraints>
           <ColumnConstraints hgrow="SOMETIMES" maxWidth="151.0" minWidth="10.0" prefWidth="149.0" />
           <ColumnConstraints hgrow="SOMETIMES" maxWidth="184.0" minWidth="10.0" prefWidth="147.0" />
@@ -36,17 +37,49 @@
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
             <Label text="készpénz" />
             <Label text="bankszámlá(ko)n" GridPane.rowIndex="1" />
             <Label text="vagyontárgyakban" GridPane.rowIndex="2" />
-            <Label fx:id="inReadyCashLabel" text="Label" GridPane.columnIndex="1" />
-            <Label fx:id="inAccountsLabel" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-            <Label fx:id="inPropertiesLabel" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="2" />
             <Label text="Ft" GridPane.columnIndex="2" />
             <Label text="Ft" GridPane.columnIndex="2" GridPane.rowIndex="1" />
             <Label text="Ft" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+            <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1">
+               <children>
+                  <Label fx:id="inReadyCashLabel" text="Label" />
+               </children>
+               <GridPane.margin>
+                  <Insets right="8.0" />
+               </GridPane.margin>
+            </HBox>
+            <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+               <children>
+                  <Label fx:id="inAccountsLabel" text="Label" />
+               </children>
+               <GridPane.margin>
+                  <Insets right="8.0" />
+               </GridPane.margin>
+            </HBox>
+            <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+               <children>
+                  <Label fx:id="inPropertiesLabel" text="Label" />
+               </children>
+               <GridPane.margin>
+                  <Insets right="8.0" />
+               </GridPane.margin>
+            </HBox>
+            <Label text="tartozások" GridPane.rowIndex="3" />
+            <Label text="Ft" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+            <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
+               <children>
+                  <Label fx:id="debitLabel" text="Label" />
+               </children>
+               <GridPane.margin>
+                  <Insets right="8.0" />
+               </GridPane.margin>
+            </HBox>
          </children>
       </GridPane>
    </children>

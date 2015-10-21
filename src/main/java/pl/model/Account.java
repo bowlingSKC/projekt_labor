@@ -177,6 +177,6 @@ public class Account {
 
     @Override
     public String toString() {
-        return name + " [" + accountNumber + "]";
+        return name + " [" + accountNumber.substring(0, 8) + "-" + accountNumber.substring(8, 16) + "-" + accountNumber.substring(17) + "]";
     }
 }

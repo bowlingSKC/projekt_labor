@@ -147,9 +147,11 @@ public class ShowTransactionController {
         moneyText.setText(String.valueOf(myTransaction.getMoney()));
         datumText.setValue(myTransaction.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
         //ellSzamlaText.setText(myTransaction.getAnotherAccount());
-        ellSzamlaText1.setText(myTransaction.getAnotherAccount().toString().substring(0,8));
-        ellSzamlaText2.setText(myTransaction.getAnotherAccount().toString().substring(8,16));
-        ellSzamlaText3.setText(myTransaction.getAnotherAccount().toString().substring(16,24));
+        if( myTransaction.getAnotherAccount().toString().length() > 0 ) {
+            ellSzamlaText1.setText(myTransaction.getAnotherAccount().toString().substring(0,8));
+            ellSzamlaText2.setText(myTransaction.getAnotherAccount().toString().substring(8,16));
+            ellSzamlaText3.setText(myTransaction.getAnotherAccount().toString().substring(16,24));
+        }
         commText.setText(myTransaction.getComment());
 
     }
@@ -196,8 +198,9 @@ public class ShowTransactionController {
         }
 
 
-        String compare = myTransaction.getAccount().toString();
-        compare = compare.substring(0,24);
+//        String compare = myTransaction.getAccount().toString();
+        String compare = myTransaction.getAccount().getAccountNumber();
+//        compare = compare.substring(0,24);
         session = SessionUtil.getSession();
         org.hibernate.Transaction tx = session.beginTransaction();
 

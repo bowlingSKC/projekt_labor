@@ -17,7 +17,10 @@ import pl.MessageBox;
 import pl.animations.FadeInUpTransition;
 import pl.bundles.Bundles;
 import pl.jpa.SessionUtil;
+import pl.model.Account;
+import pl.model.Currency;
 import pl.model.Property;
+import pl.model.ReadyCash;
 
 import java.util.Date;
 import java.util.Optional;
@@ -28,6 +31,8 @@ public class PropertiesController {
     private AnchorPane tablePane;
     @FXML
     private AnchorPane editPane;
+    @FXML
+    private AnchorPane sellPane;
 
     @FXML
     private TableView<Property> propertyTableView;
@@ -49,11 +54,43 @@ public class PropertiesController {
     @FXML
     private TextField commentField;
 
+    // ====== SELL PANE ======
+    @FXML
+    private Label sellPropertyNameLabel;
+    @FXML
+    private TextField sellPropertyValueField;
+    @FXML
+    private ComboBox<Currency> sellProCurrencyComboBoxComboBox;
+    @FXML
+    private DatePicker sellPropertyDate;
+    @FXML
+    private ComboBox<String> sellPropertyTypeBox;
+    @FXML
+    private ComboBox<Account> sellPropertyAccounts;
+    // ====== SELL PANE VÉGE ======
+
     @FXML
     public void initialize() {
         loadPropertiesToTable();
         initPropertyTable();
         initTableLayout();
+
+        initSellPane();
+    }
+
+    private void initSellPane() {
+        sellProCurrencyComboBoxComboBox.getItems().setAll(Constant.getCurrencies());
+        sellPropertyTypeBox.getItems().add(Bundles.getString("readycash"));
+        sellPropertyTypeBox.getItems().add(Bundles.getString("account"));
+        sellPropertyAccounts.setVisible(false);
+        sellPropertyTypeBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if( newValue.equals(Bundles.getString("account")) ) {
+                sellPropertyAccounts.setVisible(true);
+            } else {
+                sellPropertyAccounts.setVisible(false);
+            }
+        });
+        sellPropertyAccounts.getItems().setAll(Main.getLoggedUser().getAccounts());
     }
 
     private void initTableLayout() {
@@ -140,6 +177,62 @@ public class PropertiesController {
         }
     }
 
+    @FXML
+    private void handleSellProperty() {
+
+        Session session = SessionUtil.getSession();
+        Transaction tx = session.beginTransaction();
+
+        Property property = propertyTableView.getSelectionModel().getSelectedItem();
+
+        if( sellPropertyTypeBox.getSelectionModel().getSelectedItem().equals(Bundles.getString("account")) ) {
+            pl.model.Transaction transaction = new pl.model.Transaction();
+            transaction.setMoney(Float.valueOf(sellPropertyValueField.getText()));
+            transaction.setAccount(sellPropertyAccounts.getSelectionModel().getSelectedItem());
+            transaction.setDate(Constant.dateFromLocalDate(sellPropertyDate.getValue()));
+            transaction.setBeforeMoney(5.0f);
+            transaction.setType(Constant.getTransactionTypes().get(Constant.getTransactionTypes().size() - 1));
+            transaction.setComment("Vagyontargy eladasabol szarmazo jovedelem: " + property.getName() + "");
+
+            Account selected = sellPropertyAccounts.getSelectionModel().getSelectedItem();
+            selected.setMoney(selected.getMoney() + Float.valueOf(sellPropertyValueField.getText()));
+
+            session.update(selected);
+            session.save(transaction);
+
+            selected.getTransactions().add(transaction);
+            Main.getLoggedUser().getProperties().remove(property);
+        } else {
+            ReadyCash readyCash = null;
+            for( ReadyCash tmp : Main.getLoggedUser().getReadycash() ) {
+                if( tmp.getCurrency().getCode().equals( sellProCurrencyComboBoxComboBox.getSelectionModel().getSelectedItem().getCode() ) ) {
+                    readyCash = tmp;
+                    break;
+                }
+            }
+
+            if( readyCash != null ) {
+                readyCash.setMoney( readyCash.getMoney() + Float.valueOf(sellPropertyValueField.getText()) );
+                session.update(readyCash);
+            } else {
+                readyCash = new ReadyCash();
+                readyCash.setMoney( readyCash.getMoney() + Float.valueOf(sellPropertyValueField.getText()) );
+                readyCash.setOwner(Main.getLoggedUser());
+                readyCash.setCurrency( sellProCurrencyComboBoxComboBox.getSelectionModel().getSelectedItem() );
+
+                Main.getLoggedUser().getReadycash().add(readyCash);
+                session.save(readyCash);
+            }
+        }
+
+        session.delete(property);
+
+        tx.commit();
+        session.close();
+
+
+        handleBackToTablePane();
+    }
 
     private void checkAllField() throws Exception {
         StringBuffer buffer = new StringBuffer();
@@ -163,8 +256,18 @@ public class PropertiesController {
 
     @FXML
     private void handleBackToTablePane() {
-        editPane.setOpacity(0);
+        setUnvisibleAllPanes();
+        updateTableItems();
         new FadeInUpTransition(tablePane).play();
+    }
+
+    private void updateTableItems() {
+        propertyTableView.getItems().setAll(Main.getLoggedUser().getProperties());
+    }
+
+    private void setUnvisibleAllPanes() {
+        editPane.setOpacity(0);
+        sellPane.setOpacity(0);
     }
 
     private void loadPropertyToEditPane(Property property) {
@@ -199,11 +302,14 @@ public class PropertiesController {
                 loadPropertyToEditPane(propertyTableView.getItems().get(row));
                 tablePane.setOpacity(0);
                 new FadeInUpTransition(editPane).play();
-
             });
 
             cellButtonSell.setOnAction((ActionEvent t) -> {
-
+                Property selected = propertyTableView.getItems().get( getTableRow().getIndex() );
+                sellPropertyNameLabel.setText( selected.getName() );
+                propertyTableView.getSelectionModel().select( selected );
+                tablePane.setOpacity(0);
+                new FadeInUpTransition(sellPane).play();
             });
         }
 

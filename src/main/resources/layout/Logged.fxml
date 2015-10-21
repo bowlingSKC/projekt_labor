@@ -46,6 +46,9 @@
                      <font>
                         <Font name="Segoe UI Semilight" size="48.0" />
                      </font>
+                     <BorderPane.margin>
+                        <Insets left="8.0" />
+                     </BorderPane.margin>
                   </Label>
                </top>
                <BorderPane.margin>

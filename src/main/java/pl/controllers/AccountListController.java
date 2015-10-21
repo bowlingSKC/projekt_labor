@@ -97,19 +97,19 @@ public class AccountListController {
         accountMoneyColumn.setCellValueFactory(new PropertyValueFactory<>("money"));
         valutaColumn.setCellValueFactory(new PropertyValueFactory<>("currency"));
 
-//        accountNoColumn.setCellFactory(t -> new TableCell<Account, String>() {
-//            @Override
-//            protected void updateItem(String item, boolean empty) {
-//                super.updateItem(item, empty);
-//                if( item != null && !empty ) {
-//                   setText(String.format("%8c-%8c-%8c", item));
-//                } else {
-//                    setText("");
-//                }
-//            }
-//        });
+        accountNoColumn.setCellFactory(t -> new TableCell<Account, String>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if( item != null && !empty ) {
+                   setText( item.substring(0, 8) + "-" + item.substring(8, 16) + "-" + item.substring(17) );
+                } else {
+                    setText("");
+                }
+            }
+        });
 
-        // dupla katt
+        // dupla katt, TODO: szerkeszteni valahogy
         accountTableView.setRowFactory(tv -> {
             TableRow<Account> row = new TableRow<>();
             row.setOnMouseClicked(event -> {

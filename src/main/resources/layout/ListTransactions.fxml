@@ -104,7 +104,7 @@
             </StackPane>
          </children>
       </AnchorPane>
-      <AnchorPane fx:id="tablePane" layoutX="35.0" layoutY="35.0" opacity="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="35.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="35.0">
+      <AnchorPane fx:id="tablePane" layoutX="35.0" layoutY="35.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="35.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="35.0">
          <children>
             <AnchorPane layoutY="345.0" AnchorPane.bottomAnchor="15.0">
                <children>
@@ -152,6 +152,7 @@
                   <TableColumn fx:id="crudColumn" prefWidth="84.0" text="Művelet" />
                 <TableColumn fx:id="accountTableColumn" prefWidth="182.0" text="Saját számla" />
                 <TableColumn fx:id="moneyTableColumn" prefWidth="75.0" styleClass="money-cell" text="Összeg" />
+                  <TableColumn fx:id="beforeMoneyColumn" prefWidth="75.0" styleClass="money-cell" text="Tranzakció elötti összeg" />
                   <TableColumn fx:id="dateTableColumn" prefWidth="70.0" text="Dátum" />
                   <TableColumn fx:id="transactionTypeColumn" prefWidth="75.0" text="Típus" />
               </columns>

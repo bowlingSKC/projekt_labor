@@ -30,6 +30,8 @@ public class PersonalSummaryController {
     private Label inAccountsLabel;
     @FXML
     private Label inPropertiesLabel;
+    @FXML
+    private Label debitLabel;
 
     @FXML
     public void initialize() {
@@ -37,10 +39,11 @@ public class PersonalSummaryController {
         computePropertyCash();
         computeReadyCash();
         computeAccountsLabel();
+        computeDepit();
     }
 
     private void computeSumOfMoney() {
-        sumOfMoneyLabel.setText( Constant.getNumberFormat().format(Main.getLoggedUser().getAllMoney()) );
+        sumOfMoneyLabel.setText( Constant.getNumberFormat().format(Main.getLoggedUser().getAllMoney() - Main.getLoggedUser().getAllDebitsInValue()) );
     }
 
     private void computeAccountsLabel() {
@@ -53,6 +56,10 @@ public class PersonalSummaryController {
 
     private void computePropertyCash() {
         inPropertiesLabel.setText(Constant.getNumberFormat().format(Main.getLoggedUser().getAllMoneyInProperties()));
+    }
+
+    private void computeDepit() {
+        debitLabel.setText( Constant.getNumberFormat().format(Main.getLoggedUser().getAllDebitsInValue()) );
     }
 
 }

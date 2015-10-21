@@ -47,6 +47,8 @@ public class User {
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "owner")
     private Set<Property> properties = new HashSet<>(0);
 
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "owner")
+    private Set<Debit> debits = new HashSet<>(0);
 
     public User() {
 
@@ -157,6 +159,14 @@ public class User {
         this.properties = properties;
     }
 
+    public Set<Debit> getDebits() {
+        return debits;
+    }
+
+    public void setDebits(Set<Debit> debits) {
+        this.debits = debits;
+    }
+
     public float getAllMoneyInProperties() {
         float money = 0;
         if( properties != null ) {
@@ -191,17 +201,12 @@ public class User {
         return getAllMoneyFromAccounts() + getAllMoneyInReadyCash() + getAllMoneyInProperties();
     }
 
-    public Date getLastLogin() {
-        Date date = null;
-        if( logins.size() != 0 ) {
-            date = logins.iterator().next().getDate();
-            for( Login login : logins ) {
-                if( date.before(login.getDate()) ) {
-                    date = login.getDate();
-                }
-            }
+    public float getAllDebitsInValue() {
+        float sum = 0;
+        for(Debit debit : debits) {
+            sum += debit.getMoney();
         }
-        return date;
+        return sum;
     }
 
     @Override

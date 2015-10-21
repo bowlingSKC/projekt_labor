@@ -40,6 +40,8 @@ public class ListTransactionController {
     @FXML
     private TableColumn<Transaction, Float> moneyTableColumn;
     @FXML
+    private TableColumn<Transaction, Float> beforeMoneyColumn;
+    @FXML
     private TableColumn<Transaction, Date> dateTableColumn;
     @FXML
     private TableColumn<Transaction, TransactionType> transactionTypeColumn;
@@ -102,6 +104,7 @@ public class ListTransactionController {
         // TableView
         accountTableColumn.setCellValueFactory(new PropertyValueFactory<>("account"));
         moneyTableColumn.setCellValueFactory(new PropertyValueFactory<>("money"));
+        beforeMoneyColumn.setCellValueFactory(new PropertyValueFactory<>("beforeMoney"));
         dateTableColumn.setCellValueFactory(new PropertyValueFactory<>("date"));
         transactionTypeColumn.setCellValueFactory(new PropertyValueFactory<>("type"));
 
@@ -115,6 +118,31 @@ public class ListTransactionController {
                     } else {
                         setStyle("");
                     }
+                }
+            }
+        });
+
+        moneyTableColumn.setCellFactory(col -> new TableCell<Transaction, Float>() {
+            @Override
+            protected void updateItem(Float item, boolean empty) {
+                super.updateItem(item, empty);
+
+                if( item != null && !empty ) {
+                    setText( Constant.getNumberFormat().format(item) );
+                } else {
+                    setText("");
+                }
+            }
+        });
+
+        beforeMoneyColumn.setCellFactory(col -> new TableCell<Transaction, Float>() {
+            @Override
+            protected void updateItem(Float item, boolean empty) {
+                super.updateItem(item, empty);
+                if( item != null && !empty ) {
+                    setText(Constant.getNumberFormat().format(item));
+                } else {
+                    setText("");
                 }
             }
         });
@@ -214,7 +242,8 @@ public class ListTransactionController {
             saveTransactionToDatabase(transaction);
 
             loadTransactionsToTable();
-            tablePane.setOpacity(0);
+            clearAllFieldsOnEditPane();
+            editPane.setOpacity(0);
             new FadeInUpTransition(tablePane).play();
         } catch (Throwable ex) {
             MessageBox.showErrorMessage("Hiba", "A tranzakciót nem lehet végrehajtani!", ex.getMessage(), false);
@@ -226,9 +255,8 @@ public class ListTransactionController {
         Session session = SessionUtil.getSession();
         org.hibernate.Transaction tx = session.beginTransaction();
 
-        account.setMoney( account.getMoney() - transaction.getMoney() );
-
         if( newTransactionTypeComboBox.getSelectionModel().getSelectedItem().getId() == 1 ) {
+            account.setMoney( account.getMoney() - transaction.getMoney() );
             session.update(account);
         }
 
@@ -253,6 +281,9 @@ public class ListTransactionController {
                 readyCash.setMoney( readyCash.getMoney() + transaction.getMoney() );
                 session.update(readyCash);
             }
+            account.setMoney( account.getMoney() - transaction.getMoney() );
+            session.update(account);
+
         }
 
         if( newTransactionTypeComboBox.getSelectionModel().getSelectedItem().getId() == 3 ) {
@@ -266,16 +297,15 @@ public class ListTransactionController {
 
             if( readyCash != null ) {
                 readyCash.setMoney( readyCash.getMoney() - transaction.getMoney() );
-                Account selectedItem = newAccountComboBox.getSelectionModel().getSelectedItem();
-                selectedItem.setMoney( selectedItem.getMoney() + transaction.getMoney() );
+                account.setMoney( account.getMoney() + transaction.getMoney() );
 
-                session.update(selectedItem);
+                session.update(account);
                 if( readyCash.getMoney() == 0.0f ) {
                     session.delete(readyCash);
                 } else {
                     session.update(readyCash);
                 }
-                session.update(selectedItem);
+                session.update(account);
             } else {
                 MessageBox.showErrorMessage("Hiba", "A tranzakciót nem lehet végrehajtani!", "Nincs készpénzben ilyen valuta regisztrálva!", false);
                 session.close();
@@ -341,23 +371,27 @@ public class ListTransactionController {
 
         // TODO: itt kell ellenőrizni a további feltételeket is
 
-        if( newTransactionTypeComboBox.getSelectionModel().getSelectedItem() != null && newTransactionTypeComboBox.getSelectionModel().getSelectedItem().getId() == 1 ) {
-            if( newTransactionFromPocket.getSelectionModel().getSelectedItem() == null ) {
-                buffer.append("Nem választottál ki forrás zsebet!\n");
-            } else {
-                if( newTransactionFromPocket.getSelectionModel().getSelectedItem().getMoney() < Float.valueOf(newTransactionAmountTextField.getText()) ) {
-                    buffer.append("A megadott zsebben nincs elég pénz a tranzakció végrehajtásához!\n");
-                }
-            }
-        }
-
         if( buffer.toString().length() != 0 ) {
             throw new Exception(buffer.toString());
         }
     }
 
     private void loadTransactionToFrom(Transaction transaction) {
+        // TODO
+    }
 
+    private void clearAllFieldsOnEditPane() {
+//        newAccountComboBox.getSelectionModel().select(0);
+//        newTransactionTypeComboBox.getSelectionModel().select(0);
+//        newTransactionAmountTextField.setText("");
+//        currencyComboBox.getSelectionModel().select(0);
+//        newTransactionDatePicker.setValue(null);
+//        newTransactionCommentField.setText("");
+//        newTransactionFromPocket.getSelectionModel().select(0);
+//        amointInPocketsLabel.setText("");
+//        anotherAccNum1.setText("");
+//        anotherAccNum2.setText("");
+//        anotherAccNum3.setText("");
     }
 
     private List<Transaction> getAllTransactions() {

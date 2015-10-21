@@ -125,7 +125,8 @@ public class LoggedController {
         TreeItem<String> accountsMenu = new TreeItem<>(Bundles.getString("menu.cash.account"));
         TreeItem<String> propertiesMenu = new TreeItem<>(Bundles.getString("menu.cash.property"));
         TreeItem<String> listPocketsMenu = new TreeItem<>(Bundles.getString("menu.cash.pocket"));
-        cashMenu.getChildren().addAll(readyMenu, accountsMenu, propertiesMenu, listPocketsMenu);
+        TreeItem<String> debitMenu = new TreeItem<>(Bundles.getString("menu.debit.title"));
+        cashMenu.getChildren().addAll(readyMenu, accountsMenu, propertiesMenu, listPocketsMenu, debitMenu);
 
         TreeItem<String> orderMenu = new TreeItem<>(Bundles.getString("menu.transaction"));
         orderMenu.expandedProperty().addListener(expandedListener);
@@ -271,6 +272,20 @@ public class LoggedController {
                 readReadyCashPane();
             } else if( value.equals(Bundles.getString("menu.settings.newPassword")) ) {
                 readNewPassword();
+            } else if( value.equals(Bundles.getString("menu.debit.title")) ) {
+                readDebitPanel();
+            }
+        }
+
+        private void readDebitPanel() {
+            try {
+                FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/Debit.fxml"), Bundles.getBundle() );
+                AnchorPane pane = loader.load();
+
+                layout.setCenter(pane);
+                titleLabel.setText( Bundles.getString("menu.debit.title") );
+            } catch (IOException ex) {
+                ex.printStackTrace();
             }
         }
 

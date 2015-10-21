@@ -30,6 +30,7 @@
         <mapping class="pl.model.ReadyCash" />
         <mapping class="pl.model.Property" />
         <mapping class="pl.model.Depriciation" />
+        <mapping class="pl.model.Debit" />
 
 
     </session-factory>
