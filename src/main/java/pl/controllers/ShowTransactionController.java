@@ -11,6 +11,7 @@ import org.hibernate.Session;
 import pl.Main;
 import pl.jpa.SessionUtil;
 import pl.model.Account;
+import pl.model.Currency;
 import pl.model.Transaction;
 import pl.model.TransactionType;
 
@@ -24,9 +25,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-/**
- * Created by andru on 2015. 09. 25..
- */
 public class ShowTransactionController {
 
     private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy. MM. dd.");
@@ -57,6 +55,8 @@ public class ShowTransactionController {
     private Button closeButton;
     @FXML
     private ComboBox<TransactionType> typeComboBox;
+    @FXML
+    private ComboBox<Currency> currencyComboBox;
 
     private Transaction myTransaction;
 
@@ -90,10 +90,22 @@ public class ShowTransactionController {
                 }
             }
         });
+        //Currency betöltése
+        Session session = SessionUtil.getSession();
+        Query query = session.createQuery("from Currency");
+        List<Currency> tmpCurr;
+        tmpCurr = query.list();
+        session.close();
+        for(Currency curr : tmpCurr) {
+            currencyComboBox.getItems().add(curr);
+            /*if(curr.getCode().equals(myTransaction.getCurrency().getCode())){
+                currencyComboBox.getSelectionModel().select(curr);
+            }*/
+        }
 
         //Tranzakció típusok betöltése
-        Session session = SessionUtil.getSession();
-        Query query = session.createQuery("from TransactionType");
+        session = SessionUtil.getSession();
+        query = session.createQuery("from TransactionType");
         List<TransactionType> tTypes;
         tTypes = query.list();
         session.close();
@@ -138,7 +150,7 @@ public class ShowTransactionController {
     }
 
 
-    public  void setTransaction(Transaction trans){
+    public void setTransaction(Transaction trans){
         myTransaction = trans;
         //szamlaText.setText(myTransaction.getAccount().getAccountNumber().toString().substring(0,24));
         szamla1Text.setText(myTransaction.getAccount().getAccountNumber().toString().substring(0,8));
@@ -153,6 +165,7 @@ public class ShowTransactionController {
             ellSzamlaText3.setText(myTransaction.getAnotherAccount().toString().substring(16,24));
         }
         commText.setText(myTransaction.getComment());
+        currencyComboBox.getSelectionModel().select(myTransaction.getCurrency());
 
     }
 
@@ -166,6 +179,7 @@ public class ShowTransactionController {
     public void updateData(){
         //myTransaction.setAccount(new Account(checkSzamla(szamlaText.getText())));
         myTransaction.setAccount(new Account(checkSzamla(szamla1Text.getText() + szamla2Text.getText() + szamla3Text.getText())));
+        System.out.println(myTransaction.getAccount().getAccountNumber());
         myTransaction.setMoney(Float.valueOf(moneyText.getText()));
         Date mydate = Date.from(datumText.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
         System.out.println(mydate.toString());
@@ -174,6 +188,7 @@ public class ShowTransactionController {
         myTransaction.setAnotherAccount(checkSzamla(ellSzamlaText1.getText() + ellSzamlaText2.getText() + ellSzamlaText3.getText()));
         myTransaction.setComment(commText.getText());
         myTransaction.setType(typeComboBox.getSelectionModel().getSelectedItem());
+        myTransaction.setCurrency(currencyComboBox.getSelectionModel().getSelectedItem());
     }
 
 
@@ -193,14 +208,11 @@ public class ShowTransactionController {
             }*/
             if (ac.getAccountNumber().toString().equals(szamla1Text.getText() + szamla2Text.getText() + szamla3Text.getText())) {
                 tempAcc = ac;
-
             }
         }
+        myTransaction.setAccount(tempAcc);
 
-
-//        String compare = myTransaction.getAccount().toString();
         String compare = myTransaction.getAccount().getAccountNumber();
-//        compare = compare.substring(0,24);
         session = SessionUtil.getSession();
         org.hibernate.Transaction tx = session.beginTransaction();
 
@@ -212,7 +224,6 @@ public class ShowTransactionController {
                     acc.setMoney(acc.getMoney() + myTransaction.getMoney());
                     session.update(acc);
 
-                    myTransaction.setAccount(tempAcc);
                     //myTransaction.setType(tempType);
                     session.save(myTransaction);
                     System.out.println("OK");

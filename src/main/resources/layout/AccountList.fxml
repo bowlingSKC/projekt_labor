@@ -96,6 +96,7 @@
                </children>
             </GridPane>
             <Button layoutX="527.0" layoutY="-1.0" mnemonicParsing="false" onAction="#handleNewAccount" text="Új számla nyitása" AnchorPane.rightAnchor="14.0" />
+            <Button layoutX="370.0" layoutY="-1.0" mnemonicParsing="false" onAction="#handleToCSV" text="Export to CSV" AnchorPane.rightAnchor="200.0" />
          </children>
       </AnchorPane>
    </children>

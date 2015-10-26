@@ -7,6 +7,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -20,6 +21,9 @@ import pl.model.Account;
 import pl.model.Bank;
 import pl.model.Currency;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.*;
 
@@ -337,6 +341,41 @@ public class AccountListController {
 
         if( buffer.toString().length() != 0 ) {
             throw new Exception(buffer.toString());
+        }
+    }
+
+    public void handleToCSV(){
+        FileWriter writer = null;
+        try {
+            FileChooser fileChooser = new FileChooser();
+            FileChooser.ExtensionFilter extFilter =
+                    new FileChooser.ExtensionFilter("CSV file (*.csv)", "*.csv");
+            fileChooser.getExtensionFilters().add(extFilter);
+            File file = fileChooser.showSaveDialog(Main.getPrimaryStage());
+            if(file != null){
+
+                writer = new FileWriter(file);
+
+                for(int i = 0; i < accountTableView.getItems().size(); i++){
+                    writer.append(accountTableView.getItems().get(i).getName());
+                    writer.append(';');
+                    writer.append(accountTableView.getItems().get(i).getAccountNumber());
+                    writer.append(';');
+                    writer.append(String.valueOf(accountTableView.getItems().get(i).getMoney()));
+                    writer.append(';');
+                    writer.append(accountTableView.getItems().get(i).getCurrency().toString());
+                    writer.append(';');
+                    writer.append(accountTableView.getItems().get(i).getBank().toString());
+                    writer.append(';');
+                    writer.append(accountTableView.getItems().get(i).getCreatedDate().toString());
+                    writer.append('\n');
+                    writer.flush();
+                }
+                writer.close();
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

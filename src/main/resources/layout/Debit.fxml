@@ -9,6 +9,7 @@
    <children>
       <AnchorPane fx:id="tablePane" layoutX="50.0" layoutY="44.0" opacity="0.71" prefHeight="527.0" prefWidth="765.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
          <children>
+            <Button mnemonicParsing="false" onAction="#handleToCSV" text="Export to CSV" AnchorPane.rightAnchor="250.0" AnchorPane.topAnchor="40.0" />
             <Button layoutX="544.0" layoutY="40.0" mnemonicParsing="false" onAction="#handleNewDebit" text="Új tartozás felvétele" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="40.0" />
             <TableView fx:id="debitTableView" layoutY="47.0" prefHeight="437.0" prefWidth="665.0" AnchorPane.bottomAnchor="50.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="91.0">
               <columns>
