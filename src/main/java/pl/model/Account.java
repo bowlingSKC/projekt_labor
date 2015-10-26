@@ -40,9 +40,6 @@ public class Account {
     private Currency currency;
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "account")
-    private Set<MoneyGroup> moneyGroups;
-
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "account")
     private Set<Transaction> transactions = new HashSet<>(0);
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "account")
@@ -122,15 +119,6 @@ public class Account {
     public void setBank(Bank bank) {
         this.bank = bank;
     }
-
-    public Set<MoneyGroup> getMoneyGroups() {
-        return moneyGroups;
-    }
-
-    public void setMoneyGroups(Set<MoneyGroup> moneyGroups) {
-        this.moneyGroups = moneyGroups;
-    }
-
 
     public Currency getCurrency() {
         return currency;

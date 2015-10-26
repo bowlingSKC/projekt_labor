@@ -81,7 +81,8 @@ public class Main extends Application {
         });
 
         service.setOnFailed(event -> {
-            MessageBox.showErrorMessage("Hiba", "Hiba a program betöltése közben!", "Próbálja később!", true);
+            MessageBox.showErrorMessage(
+                    Bundles.getString("error.nodb.title"), Bundles.getString("error.nodb.header"), Bundles.getString("error.nodb.text"), true);
             Platform.exit();
             System.exit(0);
         });

@@ -16,6 +16,7 @@ import pl.Main;
 import pl.MessageBox;
 import pl.animations.FadeInUpTransition;
 import pl.bundles.Bundles;
+import pl.dao.PropertyDao;
 import pl.jpa.SessionUtil;
 import pl.model.Account;
 import pl.model.Currency;
@@ -26,6 +27,8 @@ import java.util.Date;
 import java.util.Optional;
 
 public class PropertiesController {
+
+    private Property editedProperty = null;
 
     @FXML
     private AnchorPane tablePane;
@@ -156,20 +159,26 @@ public class PropertiesController {
         try {
             checkAllField();
 
-            Property property = new Property();
-            property.setName(nameField.getText());
-            property.setBought(Constant.dateFromLocalDate(datePicker.getValue()));
-            property.setMoney(Float.valueOf(moneyField.getText()));
-            property.setComment(commentField.getText());
-            property.setOwner(Main.getLoggedUser());
+            if( editedProperty == null ) {
+                editedProperty = new Property();
+            }
+
+            editedProperty.setName(nameField.getText());
+            editedProperty.setBought(Constant.dateFromLocalDate(datePicker.getValue()));
+            editedProperty.setMoney(Float.valueOf(moneyField.getText()));
+            editedProperty.setComment(commentField.getText());
+            editedProperty.setOwner(Main.getLoggedUser());
 
             Session session = SessionUtil.getSession();
             Transaction tx = session.beginTransaction();
-            session.saveOrUpdate(property);                 // ez nem oké, mert mindig újat hoz létre
+            session.saveOrUpdate(editedProperty);
             tx.commit();
             session.close();
 
-            Main.getLoggedUser().getProperties().add(property);
+            if( Main.getLoggedUser().getProperties().contains(editedProperty) ) {   // TODO: bug
+                Main.getLoggedUser().getProperties().add(editedProperty);
+            }
+
             loadPropertiesToTable();
             handleBackToTablePane();
         } catch (Throwable ex) {
@@ -256,6 +265,7 @@ public class PropertiesController {
 
     @FXML
     private void handleBackToTablePane() {
+        editedProperty = null;
         setUnvisibleAllPanes();
         updateTableItems();
         new FadeInUpTransition(tablePane).play();
@@ -271,6 +281,7 @@ public class PropertiesController {
     }
 
     private void loadPropertyToEditPane(Property property) {
+        editedProperty = property;
         nameField.setText( property.getName() );
         moneyField.setText( Float.toString(property.getMoney()) );
         datePicker.setValue(Constant.localDateFromDate(property.getBought()));
@@ -293,7 +304,9 @@ public class PropertiesController {
                 alert.setContentText("A törlés következtében az adat elveszik.");
                 Optional<ButtonType> result = alert.showAndWait();
                 if( result.get() == ButtonType.OK ) {
-
+                    PropertyDao.deleteProperty( (Property) tblView.getItems().get(row));
+                    Main.getLoggedUser().getProperties().remove( (Property) tblView.getItems().get(row) );
+                    updateTableItems();
                 }
             });
 

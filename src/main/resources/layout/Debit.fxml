@@ -7,13 +7,13 @@
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="578.0" prefWidth="765.0" stylesheets="@../styles/login.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pl.controllers.DebitController">
    <children>
-      <AnchorPane fx:id="tablePane" layoutX="50.0" layoutY="44.0" opacity="0.0" prefHeight="527.0" prefWidth="765.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+      <AnchorPane fx:id="tablePane" layoutX="50.0" layoutY="44.0" opacity="0.71" prefHeight="527.0" prefWidth="765.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
          <children>
             <Button layoutX="544.0" layoutY="40.0" mnemonicParsing="false" onAction="#handleNewDebit" text="Új tartozás felvétele" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="40.0" />
             <TableView fx:id="debitTableView" layoutY="47.0" prefHeight="437.0" prefWidth="665.0" AnchorPane.bottomAnchor="50.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="91.0">
               <columns>
                 <TableColumn fx:id="whoColumn" prefWidth="75.0" text="Kinek" />
-                <TableColumn fx:id="amountColumn" prefWidth="75.0" text="Összeg" />
+                <TableColumn fx:id="amountColumn" prefWidth="75.0" styleClass="money-cell" text="Összeg" />
                   <TableColumn fx:id="currencyColumn" prefWidth="75.0" text="Valuta" />
                   <TableColumn fx:id="dateColumn" prefWidth="75.0" text="Határidő" />
                   <TableColumn fx:id="actionsColumn" prefWidth="75.0" text="Művelet" />

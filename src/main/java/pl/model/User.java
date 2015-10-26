@@ -1,5 +1,7 @@
 package pl.model;
 
+import pl.CurrencyExchange;
+
 import javax.persistence.*;
 import java.util.Date;
 import java.util.HashSet;
@@ -32,22 +34,19 @@ public class User {
     @Column(name = "registred", nullable = false)
     private Date registredDate;
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "owner")
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "owner", cascade = CascadeType.ALL)
     private Set<ReadyCash> readycash;
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "user")
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "user", cascade = CascadeType.ALL)
     private Set<Login> logins = new HashSet<>(0);
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "owner")
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "owner", cascade = CascadeType.ALL)
     private Set<Account> accounts = new HashSet<>(0);
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "owner")
-    private Set<MoneyGroup> moneyGroups;
-
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "owner")
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "owner", cascade = CascadeType.ALL)
     private Set<Property> properties = new HashSet<>(0);
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "owner")
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "owner", cascade = CascadeType.ALL)
     private Set<Debit> debits = new HashSet<>(0);
 
     public User() {
@@ -119,14 +118,6 @@ public class User {
         this.accounts = accounts;
     }
 
-    public Set<MoneyGroup> getMoneyGroups() {
-        return moneyGroups;
-    }
-
-    public void setMoneyGroups(Set<MoneyGroup> moneyGroups) {
-        this.moneyGroups = moneyGroups;
-    }
-
     public Date getRegistredDate() {
         return registredDate;
     }
@@ -191,7 +182,11 @@ public class User {
         float sum = 0;
         if( readycash != null ) {
             for(ReadyCash readyCash : readycash) {
-                sum += readyCash.getMoney();        // TODO átváltani
+                if( !readyCash.getCurrency().getCode().equals("HUF") ) {
+                    sum += CurrencyExchange.toHuf(readyCash.getCurrency(), readyCash.getMoney());
+                } else {
+                    sum += readyCash.getMoney();
+                }
             }
         }
         return sum;

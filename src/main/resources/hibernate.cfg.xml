@@ -22,7 +22,6 @@
         <mapping class="pl.model.Pocket" />
         <mapping class="pl.model.myCategory" />
         <mapping class="pl.model.Account" />
-        <mapping class="pl.model.MoneyGroup" />
         <mapping class="pl.model.Login" />
         <mapping class="pl.model.Transaction" />
         <mapping class="pl.model.TransactionType" />

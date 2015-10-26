@@ -13,18 +13,27 @@
          <left>
             <VBox alignment="CENTER" prefHeight="448.0" prefWidth="195.0" style="-fx-background-color: rgb(43, 87, 154);" BorderPane.alignment="TOP_CENTER">
                <children>
-                  <Button fx:id="logoutButton" mnemonicParsing="false" onAction="#handleLogout" prefHeight="40.0" prefWidth="40.0" stylesheets="@../styles/buttonCircle.css">
-                     <graphic>
-                        <ImageView fitHeight="16.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../imgs/arrowLeft.png" />
-                           </image>
-                        </ImageView>
-                     </graphic>
+                  <Pane prefHeight="200.0" prefWidth="200.0">
+                     <children>
+                        <HBox alignment="CENTER" prefHeight="47.0" prefWidth="200.0">
+                           <children>
+                              <Button fx:id="logoutButton" mnemonicParsing="false" onAction="#handleLogout" prefHeight="40.0" prefWidth="40.0" stylesheets="@../styles/buttonCircle.css">
+                                 <graphic>
+                                    <ImageView fitHeight="16.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../imgs/arrowLeft.png" />
+                                       </image>
+                                    </ImageView>
+                                 </graphic>
+                              </Button>
+                           </children>
+                        </HBox>
+                     </children>
                      <VBox.margin>
-                        <Insets bottom="10.0" top="10.0" />
+                        <Insets top="5.0" />
                      </VBox.margin>
-                  </Button>
+                  </Pane>
+                  <Pane prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS" />
                   <TreeView fx:id="menuTree" prefHeight="450.0" prefWidth="167.0" style="-fx-background-color: rgb(43, 87, 154);" stylesheets="@../styles/menu_tree.css" BorderPane.alignment="CENTER">
                      <BorderPane.margin>
                         <Insets bottom="2.0" left="2.0" top="2.0" />
@@ -33,6 +42,7 @@
                         <Insets left="2.0" right="2.0" />
                      </VBox.margin>
                   </TreeView>
+                  <Pane prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS" />
                </children>
                <BorderPane.margin>
                   <Insets />

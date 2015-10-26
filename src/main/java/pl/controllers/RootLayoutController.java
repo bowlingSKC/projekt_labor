@@ -23,6 +23,7 @@ import pl.MessageBox;
 import pl.animations.FadeInLeftTransition;
 import pl.animations.FadeInLeftTransition1;
 import pl.animations.FadeInRightTransition;
+import pl.animations.FadeInUpTransition;
 import pl.bundles.Bundles;
 import pl.jpa.SessionUtil;
 import pl.model.Login;
@@ -57,14 +58,15 @@ public class RootLayoutController {
     @FXML
     public void initialize() {
         Platform.runLater(() -> {
-            new FadeInRightTransition(emailLabel).play();
+            new FadeInLeftTransition(emailLabel).play();
             new FadeInLeftTransition(titleLabel).play();
             new FadeInLeftTransition1(pswdLabel).play();
             new FadeInLeftTransition1(emailTextField).play();
             new FadeInLeftTransition1(pswdTextField).play();
+
             new FadeInRightTransition(loginButton).play();
-            new FadeInRightTransition(regButton).play();
-            new FadeInLeftTransition1(forgetPswd).play();
+            new FadeInUpTransition(regButton).play();
+            new FadeInUpTransition(forgetPswd).play();
             windowCloseLabel.setOnMouseClicked((MouseEvent event) -> {
                 Platform.exit();
                 System.exit(0);

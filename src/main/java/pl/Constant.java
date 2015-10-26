@@ -21,11 +21,14 @@ import java.util.Locale;
 public class Constant {
 
     private static final SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyy. MMMM dd.");
+    private static final SimpleDateFormat yyyyMMddHHssmm = new SimpleDateFormat("yyy. MMMM dd. HH:ss:mm");
     private static final NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.getDefault());
 
     private static List<Bank> banks = new LinkedList<>();
     private static List<Currency> currencies = new LinkedList<>();
     private static List<TransactionType> transactionTypes = new LinkedList<>();
+
+    private static Currency hufCurrency;
 
     public static void init() {
         Session session = SessionUtil.getSession();
@@ -48,11 +51,22 @@ public class Constant {
     private static void getCurrenciesFromDatabase(Session session) {
         Query query = session.createQuery("from Currency order by id asc");
         currencies.addAll(query.list());
+
+        for(Currency currency : currencies) {
+            if( currency.getCode().equals("HUF") ) {
+                hufCurrency = currency;
+                break;
+            }
+        }
     }
 
     // ======== GETTER ========
     public static SimpleDateFormat getDateFormat() {
         return yyyyMMdd;
+    }
+
+    public static SimpleDateFormat getDateTimeFormat() {
+        return yyyyMMddHHssmm;
     }
 
     public static NumberFormat getNumberFormat() {
@@ -67,17 +81,6 @@ public class Constant {
         return currencies;
     }
 
-    public static Currency getHufCurrency() {
-        Currency currency = null;
-        for(Currency currency1 : getCurrencies()) {
-            if( currency1.getCode().equals("HUF") ) {
-                currency = currency1;
-                break;
-            }
-        }
-        return currency;
-    }
-
     public static List<TransactionType> getTransactionTypes() {
         return transactionTypes;
     }
@@ -89,5 +92,9 @@ public class Constant {
     public static LocalDate localDateFromDate(Date date) {
         Instant instant = Instant.ofEpochMilli(date.getTime());
         return LocalDateTime.ofInstant(instant, ZoneId.systemDefault()).toLocalDate();
+    }
+
+    public static Currency getHufCurrency() {
+        return hufCurrency;
     }
 }

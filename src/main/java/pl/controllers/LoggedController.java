@@ -143,7 +143,9 @@ public class LoggedController {
         settingsMenu.expandedProperty().addListener(expandedListener);
         TreeItem<String> personalSettings = new TreeItem<>(Bundles.getString("menu.settings.personal"));
         TreeItem<String> newPassword = new TreeItem<>(Bundles.getString("menu.settings.newPassword"));
-        settingsMenu.getChildren().addAll(personalSettings, newPassword);
+        TreeItem<String> myLogins = new TreeItem<>(Bundles.getString("menu.personal.logins.title"));
+        TreeItem<String> deleteProfile = new TreeItem<>(Bundles.getString("menu.personal.delete"));
+        settingsMenu.getChildren().addAll(personalSettings, newPassword, myLogins, deleteProfile);
 
         root.getChildren().addAll(cashMenu, orderMenu, importExportMenu, settingsMenu);
 
@@ -274,6 +276,34 @@ public class LoggedController {
                 readNewPassword();
             } else if( value.equals(Bundles.getString("menu.debit.title")) ) {
                 readDebitPanel();
+            } else if( value.equals(Bundles.getString("menu.personal.delete")) ) {
+                readDeletePanel();
+            } else if( value.equals(Bundles.getString("menu.personal.logins.title")) ) {
+                readMyLoginsPanel();
+            }
+        }
+
+        private void readMyLoginsPanel() {
+            try {
+                FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/MyLogins.fxml"), Bundles.getBundle() );
+                AnchorPane pane = loader.load();
+
+                layout.setCenter(pane);
+                titleLabel.setText( Bundles.getString("menu.personal.logins.title") );
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+
+        private void readDeletePanel() {
+            try {
+                FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/DeleteUser.fxml"), Bundles.getBundle() );
+                AnchorPane pane = loader.load();
+
+                layout.setCenter(pane);
+                titleLabel.setText( Bundles.getString("menu.personal.delete") );
+            } catch (IOException ex) {
+                ex.printStackTrace();
             }
         }
 
