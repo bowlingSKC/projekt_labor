@@ -367,7 +367,7 @@ public class LoggedController {
                 AnchorPane pane = loader.load();
 
                 layout.setCenter(pane);
-                titleLabel.setText(Bundles.getString("menu.demonstration.title"));
+                //titleLabel.setText(Bundles.getString("menu.demonstration.title"));
             } catch (IOException ex) {
                 ex.printStackTrace();
             }

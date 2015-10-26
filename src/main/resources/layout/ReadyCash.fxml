@@ -30,5 +30,6 @@
             <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
          </columnResizePolicy>
       </TableView>
+      <Button layoutX="545.0" layoutY="123.0" mnemonicParsing="false" onAction="#handleToCSV" text="Export to CSV" />
    </children>
 </AnchorPane>

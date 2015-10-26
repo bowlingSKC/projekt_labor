@@ -3,6 +3,7 @@ package pl.controllers;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.stage.FileChooser;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import pl.Constant;
@@ -12,6 +13,9 @@ import pl.jpa.SessionUtil;
 import pl.model.Currency;
 import pl.model.ReadyCash;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Optional;
 
 public class ReadyCashController {
@@ -179,5 +183,34 @@ public class ReadyCashController {
             throw new Exception(buffer.toString());
         }
 
+    }
+
+    public void handleToCSV(){
+        FileWriter writer = null;
+        try {
+            FileChooser fileChooser = new FileChooser();
+            FileChooser.ExtensionFilter extFilter =
+                    new FileChooser.ExtensionFilter("CSV file (*.csv)", "*.csv");
+            fileChooser.getExtensionFilters().add(extFilter);
+            File file = fileChooser.showSaveDialog(Main.getPrimaryStage());
+            if(file != null){
+
+                writer = new FileWriter(file);
+
+                for(int i = 0; i < readyCashTableView.getItems().size(); i++){
+                    writer.append(readyCashTableView.getItems().get(i).getCurrency().toString());
+                    writer.append(';');
+                    writer.append(String.valueOf(readyCashTableView.getItems().get(i).getMoney()));
+                    //writer.append(';');
+                    //writer.append(readyCashTableView.getItems().get(i).g);
+                    writer.append('\n');
+                    writer.flush();
+                }
+                writer.close();
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

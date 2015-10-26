@@ -8,6 +8,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
+import javafx.stage.FileChooser;
 import javafx.util.Callback;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -21,6 +22,9 @@ import pl.model.Currency;
 import pl.model.Debit;
 
 import javax.xml.soap.Text;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Date;
 
@@ -213,6 +217,41 @@ public class DebitController {
             } else {
                 setGraphic(null);
             }
+        }
+    }
+
+    public void handleToCSV(){
+        FileWriter writer = null;
+        try {
+            FileChooser fileChooser = new FileChooser();
+            FileChooser.ExtensionFilter extFilter =
+                    new FileChooser.ExtensionFilter("CSV file (*.csv)", "*.csv");
+            fileChooser.getExtensionFilters().add(extFilter);
+            File file = fileChooser.showSaveDialog(Main.getPrimaryStage());
+            if(file != null){
+
+                writer = new FileWriter(file);
+
+                for(int i = 0; i < debitTableView.getItems().size(); i++){
+                    writer.append(debitTableView.getItems().get(i).getName());
+                    writer.append(';');
+                    writer.append(String.valueOf(debitTableView.getItems().get(i).getMoney()));
+                    writer.append(';');
+                    writer.append(debitTableView.getItems().get(i).getCurrency().toString());
+                    writer.append(';');
+                    writer.append(debitTableView.getItems().get(i).getDeadline().toString());
+                    /*writer.append(';');
+                    writer.append(accountTableView.getItems().get(i).getBank().toString());
+                    writer.append(';');
+                    writer.append(accountTableView.getItems().get(i).getCreatedDate().toString());
+                    */writer.append('\n');
+                    writer.flush();
+                }
+                writer.close();
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

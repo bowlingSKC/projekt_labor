@@ -152,8 +152,8 @@
                   <TableColumn fx:id="crudColumn" prefWidth="84.0" text="Művelet" />
                 <TableColumn fx:id="accountTableColumn" prefWidth="182.0" text="Saját számla" />
                 <TableColumn fx:id="moneyTableColumn" prefWidth="75.0" styleClass="money-cell" text="Összeg" />
-                  <TableColumn fx:id="beforeMoneyColumn" prefWidth="75.0" styleClass="money-cell" text="Tranzakció elötti összeg" />
-                  <TableColumn fx:id="dateTableColumn" prefWidth="70.0" text="Dátum" />
+                  <TableColumn fx:id="beforeMoneyColumn" prefWidth="101.0" styleClass="money-cell" text="Tranzakció elötti összeg" />
+                  <TableColumn fx:id="dateTableColumn" prefWidth="104.0" text="Dátum" />
                   <TableColumn fx:id="transactionTypeColumn" prefWidth="75.0" text="Típus" />
               </columns>
                <columnResizePolicy>
@@ -161,6 +161,7 @@
                </columnResizePolicy>
             </TableView>
             <Button layoutX="538.0" mnemonicParsing="false" onAction="#handleNewTransaction" text="Új tranzakció" AnchorPane.rightAnchor="35.0" AnchorPane.topAnchor="35.0" />
+            <Button layoutX="350.0" layoutY="35.0" mnemonicParsing="false" onAction="#handleToCSV" text="Export to CSV" AnchorPane.rightAnchor="175.0" AnchorPane.topAnchor="35.0" />
          </children>
       </AnchorPane>
    </children>

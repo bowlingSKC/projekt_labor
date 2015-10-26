@@ -19,6 +19,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import pl.Main;
+import pl.bundles.Bundles;
 import pl.jpa.SessionUtil;
 import pl.model.*;
 import pl.model.Currency;
@@ -81,7 +82,7 @@ public class SyncDataController {
         //TableView
         szamlaTableColumn.setCellValueFactory(new PropertyValueFactory<>("account"));
         osszegTableColumn.setCellValueFactory(new PropertyValueFactory<>("money"));
-        currencyTableColumn.setCellValueFactory(new PropertyValueFactory<>("category"));
+        currencyTableColumn.setCellValueFactory(new PropertyValueFactory<>("currency"));
         dateTableColumn.setCellValueFactory(new PropertyValueFactory<>("date"));
         presentTableColumn.setCellValueFactory(new PropertyValueFactory<>("beforeMoney"));
         anotherTableColumn.setCellValueFactory(new PropertyValueFactory<>("anotherAccount"));
@@ -248,9 +249,9 @@ public class SyncDataController {
 
     private boolean confirmAll(){
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Megerősítés");
-        alert.setHeaderText("Biztosan fel akarod venni az összes tételt?");
-        alert.setContentText("Ez a művelet kockázatos lehet.");
+        alert.setTitle(Bundles.getString("error.syncdata.title"));
+        alert.setHeaderText(Bundles.getString("error.syncdata.question"));
+        alert.setContentText(Bundles.getString("error.syncdata.content"));
         Optional<ButtonType> result = alert.showAndWait();
         if( result.get() == ButtonType.OK ) {
             return true;
@@ -273,6 +274,7 @@ public class SyncDataController {
     }
 
     private void processOTPCSV(){
+        myTransactions.clear();
         TransactionType tempType = new TransactionType();
         Session session = SessionUtil.getSession();
         Query query = session.createQuery("from TransactionType");
@@ -309,7 +311,7 @@ public class SyncDataController {
                     transaction[0] = checkSzamla(transaction[0]);   //számlaszám helyes formátumra hozása
                     transaction[7] = checkSzamla(transaction[7]);
                     DateFormat format = new SimpleDateFormat("yyyyMMdd", Locale.ENGLISH);       //dátum helyes formátumra hozása
-
+                    //Find account
                     Account tempAcc = new Account();
                     session = SessionUtil.getSession();
                     query = session.createQuery("from Account");
@@ -321,10 +323,21 @@ public class SyncDataController {
                             tempAcc = ac;
                         }
                     }
+                    //Find currency
+                    Currency myCurr = new Currency();
+                    session = SessionUtil.getSession();
+                    query = session.createQuery("from Currency");
+                    List<Currency> tmpCurr = query.list();
+                    session.close();
+                    for(Currency curr : tmpCurr) {
+                        if(curr.getCode().equals(transaction[3]) ){
+                            myCurr = curr;
+                        }
+                    }
                     Date date = format.parse(transaction[4]);
                     myTransactions.add(new Transaction(tempAcc, transaction[7], Float.valueOf(transaction[6]),
                             Float.valueOf(transaction[2]), date,
-                            transaction[9] + " " + transaction[10] + " " + transaction[12], tempType));
+                            transaction[9] + " " + transaction[10] + " " + transaction[12], tempType, myCurr));
                 }
 
             } catch (FileNotFoundException e) {

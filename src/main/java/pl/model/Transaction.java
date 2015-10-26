@@ -35,10 +35,25 @@ public class Transaction {
     @JoinColumn(name = "type_id", nullable = false, updatable = false)
     private TransactionType type;
 
+    @ManyToOne
+    @JoinColumn(name = "currency_id", nullable = false, updatable = false)
+    private Currency currency;
+
     public Transaction() {
 
     }
 
+    public Transaction(Account account, String anotherAccount, float before, float money, Date date, String comment, TransactionType type, Currency curr) {
+        this.account = account;
+        this.anotherAccount = anotherAccount;
+        this.money = money;
+        this.beforeMoney = before;
+        this.date = date;
+        this.comment = comment;
+        this.type = type;
+        this.currency = curr;
+    }
+    //Currency nélküli konstruktor
     public Transaction(Account account, String anotherAccount, float before, float money, Date date, String comment, TransactionType type) {
         this.account = account;
         this.anotherAccount = anotherAccount;
@@ -123,6 +138,10 @@ public class Transaction {
         this.beforeMoney = beforeMoney;
     }
 
+    public Currency getCurrency() {return currency;}
+
+    public void setCurrency(Currency currency) {this.currency = currency;}
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -141,7 +160,7 @@ public class Transaction {
         return true;
     }
 
-    @Override
+    /*@Override
     public int hashCode() {
         int result = account != null ? account.hashCode() : 0;
         result = 31 * result + (anotherAccount != null ? anotherAccount.hashCode() : 0);
@@ -150,5 +169,5 @@ public class Transaction {
         result = 31 * result + (comment != null ? comment.hashCode() : 0);
         result = 31 * result + type.hashCode();
         return result;
-    }
+    }*/
 }

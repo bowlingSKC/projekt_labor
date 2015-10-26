@@ -11,6 +11,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.util.Callback;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -23,7 +24,13 @@ import pl.jpa.SessionUtil;
 import pl.model.*;
 import pl.model.Currency;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 
 public class ListTransactionController {
@@ -326,7 +333,14 @@ public class ListTransactionController {
         transaction.setType(newTransactionTypeComboBox.getSelectionModel().getSelectedItem());
         transaction.setMoney( Float.valueOf(newTransactionAmountTextField.getText()) );
         transaction.setComment(newTransactionCommentField.getText());
-
+        //New
+        transaction.setCurrency(currencyComboBox.getSelectionModel().getSelectedItem());
+        if(newTransactionDatePicker.getValue() != null){
+            LocalDate localDate = newTransactionDatePicker.getValue();
+            Instant instant = Instant.from(localDate.atStartOfDay(ZoneId.systemDefault()));
+            Date tmpdate = Date.from(instant);
+            transaction.setDate(tmpdate);
+        }
     }
 
     private void checkValidTransaction() throws Exception {
@@ -482,6 +496,45 @@ public class ListTransactionController {
             } else {
                 setGraphic(null);
             }
+        }
+    }
+
+    public void handleToCSV(){
+        FileWriter writer = null;
+        try {
+            FileChooser fileChooser = new FileChooser();
+            FileChooser.ExtensionFilter extFilter =
+                    new FileChooser.ExtensionFilter("CSV file (*.csv)", "*.csv");
+            fileChooser.getExtensionFilters().add(extFilter);
+            File file = fileChooser.showSaveDialog(Main.getPrimaryStage());
+            if(file != null){
+
+                writer = new FileWriter(file);
+
+                for(int i = 0; i < transactionTableView.getItems().size(); i++){
+                    writer.append(transactionTableView.getItems().get(i).getAccount().toString());
+                    writer.append(';');
+                    writer.append(String.valueOf(transactionTableView.getItems().get(i).getMoney()));
+                    writer.append(';');
+                    writer.append(String.valueOf(transactionTableView.getItems().get(i).getBeforeMoney()));
+                    writer.append(';');
+                    writer.append(String.valueOf(transactionTableView.getItems().get(i).getCurrency()));
+                    writer.append(';');
+                    writer.append(transactionTableView.getItems().get(i).getDate().toString());
+                    writer.append(';');
+                    writer.append(transactionTableView.getItems().get(i).getType().toString());
+                    writer.append(';');
+                    writer.append(transactionTableView.getItems().get(i).getAnotherAccount().toString());
+                    writer.append(';');
+                    writer.append(transactionTableView.getItems().get(i).getComment());
+                    writer.append('\n');
+                    writer.flush();
+                }
+                writer.close();
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
