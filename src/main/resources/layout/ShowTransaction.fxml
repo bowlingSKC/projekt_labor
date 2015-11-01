@@ -8,11 +8,11 @@
    <top>
       <AnchorPane prefHeight="309.0" prefWidth="515.0" BorderPane.alignment="CENTER">
          <children>
-            <Label layoutX="28.0" layoutY="41.0" text="Számlaszám:" />
-            <Label layoutX="27.0" layoutY="74.0" text="Összeg:" />
-            <Label layoutX="28.0" layoutY="109.0" text="Dátum:" />
-            <Label layoutX="27.0" layoutY="149.0" text="Ellenoldali számlaszám:" />
-            <Label layoutX="27.0" layoutY="188.0" text="Közlemény:" />
+            <Label fx:id="accLabel" layoutX="28.0" layoutY="41.0" text="Számlaszám:" />
+            <Label fx:id="moneyLabel" layoutX="27.0" layoutY="74.0" text="Összeg:" />
+            <Label fx:id="dateLabel" layoutX="28.0" layoutY="109.0" text="Dátum:" />
+            <Label fx:id="anoaccLabel" layoutX="27.0" layoutY="149.0" text="Ellenoldali számlaszám:" />
+            <Label fx:id="commLabel" layoutX="27.0" layoutY="188.0" text="Közlemény:" />
             <HBox layoutX="171.0" layoutY="35.0">
                <children>
                   <TextField fx:id="szamla1Text" layoutX="171.0" layoutY="37.0" prefHeight="30.0" prefWidth="100.0" />
@@ -24,10 +24,10 @@
             </HBox>
             <TextField fx:id="moneyText" layoutX="171.0" layoutY="68.0" prefHeight="30.0" prefWidth="213.0" />
             <TextField fx:id="commText" layoutX="171.0" layoutY="181.0" prefHeight="30.0" prefWidth="311.0" />
-            <Button layoutX="337.0" layoutY="255.0" mnemonicParsing="false" onAction="#sendTransaction" text="Adatok elfogadása" />
+            <Button fx:id="acceptButton" layoutX="337.0" layoutY="255.0" mnemonicParsing="false" onAction="#sendTransaction" text="Adatok elfogadása" />
             <Button fx:id="closeButton" layoutX="14.0" layoutY="255.0" mnemonicParsing="false" onAction="#cancelTransaction" text="Mégse" />
             <DatePicker fx:id="datumText" layoutX="171.0" layoutY="105.0" prefHeight="32.0" prefWidth="313.0" />
-            <Label layoutX="27.0" layoutY="221.0" text="Típus:" />
+            <Label fx:id="typeLabel" layoutX="27.0" layoutY="221.0" text="Típus:" />
             <ComboBox fx:id="typeComboBox" layoutX="171.0" layoutY="217.0" prefHeight="27.0" prefWidth="314.0" />
             <HBox layoutX="171.0" layoutY="143.0">
                <children>

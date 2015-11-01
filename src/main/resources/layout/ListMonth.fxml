@@ -11,10 +11,10 @@
     <children>
       <Pane layoutX="46.0" layoutY="432.0">
          <children>
-              <Label layoutX="19.0" layoutY="30.0" text="Intervallum kezdete:" />
+              <Label fx:id="startLabel" layoutX="19.0" layoutY="30.0" text="Intervallum kezdete:" />
               <DatePicker fx:id="searchToDate" layoutX="160.0" layoutY="55.0" />
-              <Label layoutX="19.0" layoutY="59.0" text="Intervallum vége:" />
-              <Label text="Szűrés:">
+              <Label fx:id="endLabel" layoutX="19.0" layoutY="59.0" text="Intervallum vége:" />
+              <Label fx:id="filterLabel" text="Szűrés:">
                   <font>
                       <Font name="System Bold" size="12.0" />
                   </font>
@@ -30,5 +30,11 @@
           <NumberAxis side="LEFT" />
         </yAxis>
       </AreaChart>
+      <Label fx:id="accountsLabel" layoutX="421.0" layoutY="432.0" text="Számlák:">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font>
+      </Label>
+      <ScrollPane fx:id="scrollPane" layoutX="421.0" layoutY="449.0" prefHeight="166.0" prefWidth="301.0" />
     </children>
 </AnchorPane>

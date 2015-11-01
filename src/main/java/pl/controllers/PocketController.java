@@ -8,6 +8,7 @@ import javafx.stage.FileChooser;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import pl.Main;
+import pl.bundles.Bundles;
 import pl.jpa.SessionUtil;
 import pl.model.*;
 
@@ -46,6 +47,19 @@ public class PocketController {
     private TableColumn<Account, Account> szamlaTableColumn;
     @FXML
     private TableColumn<Account, Float> egyenlegTableColumn;
+    //LANGUAGE
+    @FXML
+    private Label addpocketLabel;
+    @FXML
+    private Label chooseaccLabel;
+    @FXML
+    private Label choosepocketLabel;
+    @FXML
+    private Label moneyLabel;
+    @FXML
+    private Button inButton;
+    @FXML
+    private Button outButton;
 
     private float sumMoney;
     private float allMoney;
@@ -56,14 +70,22 @@ public class PocketController {
 
     @FXML
     public void initialize() {
+        //LANGUAGE
+        addpocketLabel.setText(Bundles.getString("addpocket"));
+        chooseaccLabel.setText(Bundles.getString("chooseacc"));
+        choosepocketLabel.setText(Bundles.getString("choosepocket"));
+        moneyLabel.setText(Bundles.getString("money"));
+        inButton.setText(Bundles.getString("putin"));
+        outButton.setText(Bundles.getString("takeout"));
+        pocketPie.setTitle(Bundles.getString("pockets"));
+
         //Számlák lekérdezése
         accounts = new ArrayList<>();
         for (Account acc : Main.getLoggedUser().getAccounts()) {
-            //accountMoney.put(acc.getAccountNumber(), acc.getMoney());
             szamlaCombo.getItems().add(acc);
             sumMoney += acc.getMoney();
             allMoney += acc.getMoney();
-            //accounts.add(acc);
+            accounts.add(acc);
         }
 
         // Kategóriák lekérdezése
@@ -75,24 +97,10 @@ public class PocketController {
             pocketCombo.getItems().add(cat);
         }
 
-        // Számlák lekérdezése
-        session = SessionUtil.getSession();
-        query = session.createQuery("from Account");
-        List<Account> tmp = query.list();
-        for(Account acc : tmp){
-            if(acc.getOwner().getId() == Main.getLoggedUser().getId()){
-                accounts.add(acc);
-            }
-        }
-
         // Zsebek lekérdezése
-        session = SessionUtil.getSession();
-        query = session.createQuery("from Pocket");
         List<Pocket> segedPockets = new ArrayList<>();
-        pockets = query.list();
-        session.close();
-        for(Pocket poc : pockets){
-            if(poc.getOwner().getId() == Main.getLoggedUser().getId()){
+        for (Account acc : Main.getLoggedUser().getAccounts()) {
+            for(Pocket poc : acc.getPockets()){
                 boolean pocWas = false;
                 for(int i = 0; i < pocketPie.getData().size(); i++){
                     if(poc.getCategory().toString() == pocketPie.getData().get(i).getName()){
@@ -106,20 +114,19 @@ public class PocketController {
                     sumMoney -= poc.getMoney();
                 }
                 //NEW
-                for (Account acc : accounts) {
-                    if(acc.getId() == poc.getAccount().getId()){
-                        acc.setMoney(acc.getMoney() - poc.getMoney());
+                for (Account acc2 : accounts) {
+                    if(acc2.getId() == poc.getAccount().getId()){
+                        acc2.setMoney(acc2.getMoney() - poc.getMoney());
                     }
                 }
                 segedPockets.add(poc);
             }
         }
         pockets = segedPockets;
-
-        pocketPie.getData().add(new PieChart.Data("Fentmaradt", sumMoney));
-
-        if(pockets != null)
-        updateArea();
+        pocketPie.getData().add(new PieChart.Data(Bundles.getString("remained"), sumMoney));
+        if(pockets != null){
+            updateArea();
+        }
 
         //Placing tooltips
         pocketPie.getData().stream().forEach(data -> {
@@ -136,11 +143,16 @@ public class PocketController {
 
         // TableView
         accountTableColumn.setCellValueFactory(new PropertyValueFactory<>("account"));
+        accountTableColumn.setText(Bundles.getString("accountC"));
         moneyTableColumn.setCellValueFactory(new PropertyValueFactory<>("money"));
+        moneyTableColumn.setText(Bundles.getString("moneyC"));
         pocketTableColumn.setCellValueFactory(new PropertyValueFactory<>("category"));
+        pocketTableColumn.setText(Bundles.getString("pocket"));
 
         egyenlegTableColumn.setCellValueFactory(new PropertyValueFactory<>("money"));
+        egyenlegTableColumn.setText(Bundles.getString("remained"));
         szamlaTableColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        szamlaTableColumn.setText(Bundles.getString("account"));
         //Pénz formátum
         moneyTableColumn.setCellFactory(column -> new TableCell<Pocket, Float>() {
             @Override
@@ -400,6 +412,7 @@ public class PocketController {
             if(file != null){
 
                 writer = new FileWriter(file);
+                writer.append("Account;Money;Pocket\n");
                 for(Pocket poc : pockets){
                     writer.append(poc.getAccount().toString());
                     writer.append(';');

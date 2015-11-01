@@ -196,7 +196,7 @@ public class ReadyCashController {
             if(file != null){
 
                 writer = new FileWriter(file);
-
+                writer.append("Currency;Money\n");
                 for(int i = 0; i < readyCashTableView.getItems().size(); i++){
                     writer.append(readyCashTableView.getItems().get(i).getCurrency().toString());
                     writer.append(';');

@@ -355,7 +355,7 @@ public class AccountListController {
             if(file != null){
 
                 writer = new FileWriter(file);
-
+                writer.append("Name;Account number;Money;Currency;Bank;Created date\n");
                 for(int i = 0; i < accountTableView.getItems().size(); i++){
                     writer.append(accountTableView.getItems().get(i).getName());
                     writer.append(';');

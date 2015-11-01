@@ -9,6 +9,7 @@ import javafx.stage.Stage;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import pl.Main;
+import pl.bundles.Bundles;
 import pl.jpa.SessionUtil;
 import pl.model.Account;
 import pl.model.Currency;
@@ -54,14 +55,36 @@ public class ShowTransactionController {
     @FXML
     private Button closeButton;
     @FXML
+    private Button acceptButton;
+    @FXML
     private ComboBox<TransactionType> typeComboBox;
     @FXML
     private ComboBox<Currency> currencyComboBox;
+    @FXML
+    private Label accLabel;
+    @FXML
+    private Label moneyLabel;
+    @FXML
+    private Label dateLabel;
+    @FXML
+    private Label anoaccLabel;
+    @FXML
+    private Label commLabel;
+    @FXML
+    private Label typeLabel;
 
     private Transaction myTransaction;
 
     @FXML
     public void initialize() {
+        accLabel.setText(Bundles.getString("accountL"));
+        moneyLabel.setText(Bundles.getString("moneyL"));
+        dateLabel.setText(Bundles.getString("dateL"));
+        anoaccLabel.setText(Bundles.getString("anoacc"));
+        commLabel.setText(Bundles.getString("commentL"));
+        typeLabel.setText(Bundles.getString("typeL"));
+        closeButton.setText(Bundles.getString("cancel"));
+        acceptButton.setText(Bundles.getString("accData"));
         //Setting listeners to textfields
         szamla1Text.textProperty().addListener(new ChangeListener<String>() {
             @Override
@@ -220,13 +243,14 @@ public class ShowTransactionController {
             // Számla kiválasztása
             for (Account acc : Main.getLoggedUser().getAccounts()) {
                 if (compare.equals(acc.getAccountNumber())) {
-                    System.out.println("OK");
+                    //System.out.println("OK");
                     acc.setMoney(acc.getMoney() + myTransaction.getMoney());
+                    myTransaction.setMoney(Math.abs(myTransaction.getMoney()));
                     session.update(acc);
 
                     //myTransaction.setType(tempType);
                     session.save(myTransaction);
-                    System.out.println("OK");
+                    //System.out.println("OK");
                 }
             }
 

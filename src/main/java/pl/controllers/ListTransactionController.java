@@ -510,7 +510,7 @@ public class ListTransactionController {
             if(file != null){
 
                 writer = new FileWriter(file);
-
+                writer.append("Account number;Money;Money on acount;Currency;Date;Type;Another account number;Comment\n");
                 for(int i = 0; i < transactionTableView.getItems().size(); i++){
                     writer.append(transactionTableView.getItems().get(i).getAccount().toString());
                     writer.append(';');

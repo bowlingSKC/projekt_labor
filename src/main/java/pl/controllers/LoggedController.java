@@ -62,7 +62,7 @@ public class LoggedController {
         h = 0.1;
 
         String username = Main.getLoggedUser().getFirstname() + " " + Main.getLoggedUser().getLastname();
-        nameLabel.setText( username );
+        nameLabel.setText(Bundles.getString("logged.beforeuser") + " " + username );
         titleLabel.setText( Bundles.getString("logged.welcome") );
 
         createMenu();
@@ -136,8 +136,8 @@ public class LoggedController {
 
         TreeItem<String> importExportMenu = new TreeItem<>(Bundles.getString("menu.importexport"));
         importExportMenu.expandedProperty().addListener(expandedListener);
-        TreeItem<String> sysWebbank = new TreeItem<>(Bundles.getString("menu.importexport.syn"));
-        importExportMenu.getChildren().addAll(sysWebbank);
+        //TreeItem<String> sysWebbank = new TreeItem<>(Bundles.getString("menu.importexport.syn"));
+        //importExportMenu.getChildren().addAll(sysWebbank);
 
         TreeItem<String> settingsMenu = new TreeItem<>(Bundles.getString("menu.settings"));
         settingsMenu.expandedProperty().addListener(expandedListener);
@@ -266,7 +266,7 @@ public class LoggedController {
                 readListTransactions();
             } else if( value.equals(Bundles.getString("menu.transaction.report")) ) {
                 readListMonth();
-            } else if( value.equals(Bundles.getString("menu.importexport.syn")) ) {
+            } else if( value.equals(Bundles.getString("menu.importexport")) ) {
                 readSyncData();
             } else if( value.equals(Bundles.getString("menu.cash.property")) ) {
                 readPropertiesPanel();

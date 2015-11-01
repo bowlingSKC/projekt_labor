@@ -61,11 +61,27 @@ public class SyncDataController {
     private TableColumn<Transaction, String> commentTableColumn;
     @FXML
     private TableColumn<Transaction, TransactionType> typeTableColumn;
+    @FXML
+    private Label filesLabel;
+    @FXML
+    private Label alltransLabel;
+    @FXML
+    private Label typeLabel;
+    @FXML
+    private Button openButton;
+    @FXML
+    private Button dataProcess;
 
     private ArrayList<Transaction> myTransactions;
 
     @FXML
     public void initialize() {
+        alltransLabel.setText(Bundles.getString("transactions"));
+        filesLabel.setText(Bundles.getString("files"));
+        typeLabel.setText(Bundles.getString("filetype"));
+        openButton.setText(Bundles.getString("openfile"));
+        dataProcess.setText(Bundles.getString("processall"));
+
         fileList.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
@@ -75,19 +91,27 @@ public class SyncDataController {
             }
         });
         myTransactions = new ArrayList<>();
-        //fileTypes.setValue("OTP - CSV");
         fileTypes.getItems().add("OTP - CSV");
         fileTypes.getItems().add("Coming soon...");
+        fileTypes.setValue("OTP - CSV");
 
         //TableView
         szamlaTableColumn.setCellValueFactory(new PropertyValueFactory<>("account"));
+        szamlaTableColumn.setText(Bundles.getString("accountC"));
         osszegTableColumn.setCellValueFactory(new PropertyValueFactory<>("money"));
+        osszegTableColumn.setText(Bundles.getString("moneyC"));
         currencyTableColumn.setCellValueFactory(new PropertyValueFactory<>("currency"));
+        currencyTableColumn.setText(Bundles.getString("currency"));
         dateTableColumn.setCellValueFactory(new PropertyValueFactory<>("date"));
+        dateTableColumn.setText(Bundles.getString("date"));
         presentTableColumn.setCellValueFactory(new PropertyValueFactory<>("beforeMoney"));
+        presentTableColumn.setText(Bundles.getString("balance"));
         anotherTableColumn.setCellValueFactory(new PropertyValueFactory<>("anotherAccount"));
+        anotherTableColumn.setText(Bundles.getString("anotheracc"));
         commentTableColumn.setCellValueFactory(new PropertyValueFactory<>("comment"));
+        commentTableColumn.setText(Bundles.getString("comment"));
         typeTableColumn.setCellValueFactory(new PropertyValueFactory<>("type"));
+        typeTableColumn.setText(Bundles.getString("type"));
 
         transactionTableView.setRowFactory( tv -> {
             TableRow<Transaction> row = new TableRow<>();
@@ -146,6 +170,7 @@ public class SyncDataController {
     }
     @FXML
     private void handleProcess(){
+
         try {
             switch (fileTypes.getSelectionModel().getSelectedItem()) {
                 case "OTP - CSV":
@@ -153,11 +178,13 @@ public class SyncDataController {
                     break;
             }
             transactionTableView.getItems().clear();
-            for(Transaction tra : myTransactions){
+            for (Transaction tra : myTransactions) {
                 transactionTableView.getItems().addAll(tra);
             }
-        }catch (NullPointerException e){
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
 
     }
     @FXML
@@ -167,7 +194,7 @@ public class SyncDataController {
         for(int i = 0; i < myTransactions.size(); i++){
             if(myTransactions.get(i) == raw){
                 index = i;
-                System.out.println(index);
+                //System.out.println(index);
                 try {
                     Stage dialogStage = new Stage();
                     FXMLLoader loader = new FXMLLoader(Main.class.getResource("../layout/ShowTransaction.fxml"));
@@ -198,14 +225,15 @@ public class SyncDataController {
 
             for (int index = 0; index < myTransactions.size(); index++){
                 Long compare = myTransactions.get(index).getAccount().getId();
-                System.out.println(compare);
+                //System.out.println(compare);
                 //compare = compare.substring(0, 24);
                 try {
                     // Számla kiválasztása
                     for (Account acc : Main.getLoggedUser().getAccounts()) {
                         if (compare == acc.getId()) {
-                            System.out.println("OK.");
+                            //System.out.println("OK.");
                             acc.setMoney(acc.getMoney() + myTransactions.get(index).getMoney());
+                            myTransactions.get(index).setMoney(Math.abs(myTransactions.get(index).getMoney()));
                             session.update(acc);
 
                             // Tranzakció létrehozása a belépett felhasználónak
@@ -281,11 +309,6 @@ public class SyncDataController {
         List<TransactionType> tTypes;
         tTypes = query.list();
         session.close();
-        for(TransactionType ttype : tTypes) {
-            if(ttype.getId() == 1){
-                tempType = ttype;
-            }
-        }
         try {
             String csvFile = fileList.getSelectionModel().getSelectedItem().getAbsolutePath();
             BufferedReader br = null;
@@ -321,6 +344,15 @@ public class SyncDataController {
                     for(Account ac : tempAccounts) {
                         if(ac.getAccountNumber().toString().equals(transaction[0]) ){
                             tempAcc = ac;
+                        }
+                    }
+                    //Find transaction
+                    for(TransactionType ttype : tTypes) {
+                        if(ttype.getId() == 1 && Float.valueOf(transaction[2]) < 0){
+                            tempType = ttype;
+                        }
+                        if(ttype.getId() == 8 && Float.valueOf(transaction[2]) > 0){
+                            tempType = ttype;
                         }
                     }
                     //Find currency

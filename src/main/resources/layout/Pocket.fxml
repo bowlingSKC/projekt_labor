@@ -13,14 +13,14 @@
     <children>
       <PieChart fx:id="pocketPie" layoutX="270.0" layoutY="16.0" title="Zsebek" />
       <ComboBox fx:id="szamlaCombo" layoutX="21.0" layoutY="115.0" prefHeight="27.0" prefWidth="239.0" />
-      <Label layoutX="14.0" layoutY="77.0" text="Zsebhez hozzáadás/elvétel:" />
+      <Label fx:id="addpocketLabel" layoutX="14.0" layoutY="77.0" text="Zsebhez hozzáadás/elvétel:" />
       <TextField fx:id="moneyText" layoutX="23.0" layoutY="223.0" prefHeight="30.0" prefWidth="206.0" />
       <ComboBox fx:id="pocketCombo" layoutX="21.0" layoutY="167.0" prefHeight="27.0" prefWidth="239.0" />
-      <Label layoutX="21.0" layoutY="94.0" text="Számla kiválasztása:" />
-      <Label layoutX="18.0" layoutY="150.0" text="Zseb kiválasztása:" />
-      <Label layoutX="20.0" layoutY="199.0" text="Összeg:" />
-      <Button layoutX="22.0" layoutY="263.0" mnemonicParsing="false" onAction="#handleIn" text="Betesz" />
-      <Button layoutX="176.0" layoutY="263.0" mnemonicParsing="false" onAction="#handleOut" text="Kivesz" />
+      <Label fx:id="chooseaccLabel" layoutX="21.0" layoutY="94.0" text="Számla kiválasztása:" />
+      <Label fx:id="choosepocketLabel" layoutX="18.0" layoutY="150.0" text="Zseb kiválasztása:" />
+      <Label fx:id="moneyLabel" layoutX="20.0" layoutY="199.0" text="Összeg:" />
+      <Button fx:id="inButton" layoutX="22.0" layoutY="263.0" mnemonicParsing="false" onAction="#handleIn" text="Betesz" />
+      <Button fx:id="outButton" layoutX="176.0" layoutY="263.0" mnemonicParsing="false" onAction="#handleOut" text="Kivesz" />
       <Label layoutX="243.0" layoutY="230.0" text="Ft" />
       <TableView fx:id="pocketTableView" layoutX="260.0" layoutY="416.0" prefHeight="250.0" prefWidth="508.0">
         <columns>

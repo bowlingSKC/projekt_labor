@@ -352,7 +352,7 @@ public class PropertiesController {
             if(file != null){
 
                 writer = new FileWriter(file);
-
+                writer.append("Name;Money;Bought date\n");
                 for(int i = 0; i < propertyTableView.getItems().size(); i++){
                     writer.append(propertyTableView.getItems().get(i).getName());
                     writer.append(';');

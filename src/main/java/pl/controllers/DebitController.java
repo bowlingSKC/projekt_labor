@@ -231,7 +231,7 @@ public class DebitController {
             if(file != null){
 
                 writer = new FileWriter(file);
-
+                writer.append("Name;Money;Currency;Deadline\n");
                 for(int i = 0; i < debitTableView.getItems().size(); i++){
                     writer.append(debitTableView.getItems().get(i).getName());
                     writer.append(';');
