@@ -5,9 +5,9 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="578.0" prefWidth="765.0" stylesheets="@../styles/login.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pl.controllers.ReadyCashController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="578.0" prefWidth="868.0" stylesheets="@../styles/login.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pl.controllers.ReadyCashController">
    <children>
-      <VBox layoutX="88.0" layoutY="144.0">
+      <VBox layoutX="88.0" layoutY="57.0">
          <children>
             <Label text="Készpénz tranzakció" />
             <HBox alignment="CENTER_LEFT" layoutX="67.0" layoutY="93.0" spacing="10.0">
@@ -20,7 +20,7 @@
             </HBox>
          </children>
       </VBox>
-      <TableView fx:id="readyCashTableView" layoutX="88.0" layoutY="206.0" prefHeight="228.0" prefWidth="589.0">
+      <TableView fx:id="readyCashTableView" layoutX="62.0" layoutY="116.0" prefHeight="221.0" prefWidth="641.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0">
         <columns>
           <TableColumn fx:id="currencyColumn" prefWidth="75.0" text="Valuta" />
           <TableColumn fx:id="amountColumn" prefWidth="75.0" styleClass="money-cell" text="Mennyiség" />
@@ -30,6 +30,19 @@
             <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
          </columnResizePolicy>
       </TableView>
-      <Button layoutX="545.0" layoutY="123.0" mnemonicParsing="false" onAction="#handleToCSV" text="Export to CSV" />
+      <Button layoutX="722.0" layoutY="14.0" mnemonicParsing="false" onAction="#handleToCSV" text="Export to CSV" />
+      <TableView fx:id="transactionTableView" layoutX="62.0" layoutY="400.0" prefHeight="164.0" prefWidth="783.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0">
+        <columns>
+          <TableColumn fx:id="dateTableColumn" prefWidth="75.0" text="Időpont" />
+            <TableColumn fx:id="typeTableColumn" prefWidth="75.0" text="Típus" />
+          <TableColumn fx:id="amountTableColumn" prefWidth="75.0" text="Mennyiség" />
+            <TableColumn fx:id="currencyTableColumn" prefWidth="75.0" text="Valuta" />
+            <TableColumn fx:id="commentTableColumn" prefWidth="75.0" text="Megjegyzés" />
+        </columns>
+         <columnResizePolicy>
+            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+         </columnResizePolicy>
+      </TableView>
+      <Label layoutX="62.0" layoutY="383.0" text="Készpénz tranzakciók" />
    </children>
 </AnchorPane>

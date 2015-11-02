@@ -11,6 +11,7 @@ import javafx.fxml.FXML;
 import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -21,7 +22,7 @@ import pl.Main;
 import pl.bundles.Bundles;
 import pl.jpa.SessionUtil;
 import pl.model.Account;
-import pl.model.Transaction;
+import pl.model.AccountTransaction;
 
 import java.text.Format;
 import java.text.SimpleDateFormat;
@@ -54,7 +55,7 @@ public class ListMonthController {
     private Label endLabel;
 
 
-    private List<Transaction> allTransactions;
+    private List<AccountTransaction> allTransactions;
     private ArrayList<XYChart.Series> allseries;
     private String selected;
     private Date lastDate;
@@ -220,12 +221,14 @@ public class ListMonthController {
                     fromDate.setHours(fromDate.getHours() + 24);
                 }
                 fromDate = Date.from(searchFromDate.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
-                for (Transaction tr : acc.getTransactions()) {
+                /** TODO
+                for (AccountTransaction tr : acc.getTransactions()) {
                     if ((tr.getDate().after(fromDate) || tr.getDate().equals(fromDate)) &&
                             (tr.getDate().before(toDate) || tr.getDate().equals(toDate))) {
                         allseries.get(allseries.size() - 1).getData().add(new XYChart.Data(tr.getDate().toString(), tr.getBeforeMoney()));
                     }
                 }
+                 */
             } catch (Exception e) {
                 //e.printStackTrace();
             }
@@ -255,7 +258,7 @@ public class ListMonthController {
                 if (s.getData().get(i).getYValue() == 0) {
                     //Set money before first transaction
                     for(Account acc : Main.getLoggedUser().getAccounts()){
-                        for(Transaction tra : acc.getTransactions()){
+                        for(AccountTransaction tra : acc.getAccountTransactions()){
                             if(formatter.format(tra.getDate()).equals(s.getData().get(i+1).getXValue()) && s.getData().get(i).getYValue() == 0
                                     && acc.toString().equals(s.getName()) && !was){
                                 Float tmp;

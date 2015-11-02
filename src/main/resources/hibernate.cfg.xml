@@ -8,13 +8,13 @@
 
         <!-- Database connection settings -->
         <property name="connection.driver_class">com.mysql.jdbc.Driver</property>
-        <property name="connection.url">jdbc:mysql://localhost/pl</property>
+        <property name="connection.url">jdbc:mysql://localhost:3306/pl</property>
         <property name="hibernate.connection.username">root</property>
         <property name="hibernate.connection.password"></property>
         <property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
 
         <!-- Create the database scheme on startup -->
-        <!--<property name="hbm2ddl.auto">create</property>-->
+        <!--<property name="hbm2ddl.auto">create-drop</property>-->
 
         <!-- Model classes -->
         <mapping class="pl.model.User" />
@@ -24,6 +24,8 @@
         <mapping class="pl.model.Account" />
         <mapping class="pl.model.Login" />
         <mapping class="pl.model.Transaction" />
+        <mapping class="pl.model.AccountTransaction" />
+        <mapping class="pl.model.CashTransaction" />
         <mapping class="pl.model.TransactionType" />
         <mapping class="pl.model.Currency" />
         <mapping class="pl.model.ReadyCash" />

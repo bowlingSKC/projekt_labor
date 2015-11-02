@@ -9,14 +9,19 @@ import org.hibernate.Transaction;
 import pl.Constant;
 import pl.Main;
 import pl.MessageBox;
+import pl.bundles.Bundles;
 import pl.jpa.SessionUtil;
+import pl.model.CashTransaction;
 import pl.model.Currency;
 import pl.model.ReadyCash;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 public class ReadyCashController {
 
@@ -36,10 +41,64 @@ public class ReadyCashController {
     @FXML
     private TableColumn<ReadyCash, Integer> inHufColumn;
 
+    // Tranzakciók
+    @FXML
+    private TableView<CashTransaction> transactionTableView;
+    @FXML
+    private TableColumn<CashTransaction, Date> dateTableColumn;
+    @FXML
+    private TableColumn<CashTransaction, String> typeTableColumn;
+    @FXML
+    private TableColumn<CashTransaction, Float> amountTableColumn;
+    @FXML
+    private TableColumn<CashTransaction, Currency> currencyTableColumn;
+    @FXML
+    private TableColumn<CashTransaction, String> commentTableColumn;
+
+
     @FXML
     public void initialize() {
         initTransactionPane();
         initTablePane();
+        initTransactionTablePane();
+    }
+
+    private void initTransactionTablePane() {
+        dateTableColumn.setCellFactory(t -> new TableCell<CashTransaction, Date>() {
+            @Override
+            protected void updateItem(Date item, boolean empty) {
+                super.updateItem(item, empty);
+                if( item != null && !empty ) {
+                    setText(Constant.getDateFormat().format(item));
+                } else {
+                    setText("");
+                }
+            }
+        });
+        amountTableColumn.setCellFactory(t -> new TableCell<CashTransaction, Float>() {
+            @Override
+            protected void updateItem(Float item, boolean empty) {
+                super.updateItem(item, empty);
+                if( item != null && !empty ) {
+                    setText(Constant.getNumberFormat().format(item));
+                } else {
+                    setText("");
+                }
+            }
+        });
+        amountTableColumn.setCellValueFactory(new PropertyValueFactory<>("money"));
+        dateTableColumn.setCellValueFactory(new PropertyValueFactory<>("date"));
+        currencyTableColumn.setCellValueFactory(new PropertyValueFactory<>("currency"));
+        commentTableColumn.setCellValueFactory(new PropertyValueFactory<>("comment"));
+
+        updateTransactionTableItems();
+    }
+
+    private void updateTransactionTableItems() {
+        transactionTableView.getItems().clear();
+        for(ReadyCash readyCash : Main.getLoggedUser().getReadycash()) {
+            transactionTableView.getItems().addAll(readyCash.getCashTransaction());
+        }
     }
 
     private void initTablePane() {
@@ -62,8 +121,8 @@ public class ReadyCashController {
     }
 
     private void initTransactionPane() {
-        transactionTypeComboBox.getItems().add("Kimenő");
-        transactionTypeComboBox.getItems().add("Bemenő");
+        transactionTypeComboBox.getItems().add(Bundles.getString("in"));
+        transactionTypeComboBox.getItems().add(Bundles.getString("out"));
         currencyComboBox.getItems().setAll(Constant.getCurrencies());
 
         transactionTypeComboBox.getSelectionModel().select(0);
@@ -75,12 +134,13 @@ public class ReadyCashController {
         try {
             checkAllField();
 
-            if( transactionTypeComboBox.getSelectionModel().getSelectedItem().equals("Kimenő") ) {
+            if( transactionTypeComboBox.getSelectionModel().getSelectedItem().equals(Bundles.getString("out")) ) {
                 handleOutTransactions();
             } else {
                 handleInTransaction();
             }
             updateTableData();
+            updateTransactionTableItems();
             
         } catch (Throwable ex) {
             MessageBox.showErrorMessage("Hiba", "Nem lehet létrehozni a tranzakciót!", ex.getMessage(), false);
@@ -111,6 +171,7 @@ public class ReadyCashController {
         }
 
         transactionSaveOrUpdate(selected);
+        saveTransactionToDatabase(selected);
     }
 
     private void handleOutTransactions() throws Exception {
@@ -149,6 +210,34 @@ public class ReadyCashController {
         } else {
             readyCash.setMoney(readyCash.getMoney() - Float.valueOf(amountFiled.getText()));
             transactionSaveOrUpdate(readyCash);
+        }
+        saveTransactionToDatabase(readyCash);
+    }
+
+    private void saveTransactionToDatabase(ReadyCash readyCash) {
+        CashTransaction transaction = new CashTransaction();
+        transaction.setMoney(Float.valueOf(amountFiled.getText()));
+        transaction.setDate(new Date());
+        transaction.setCurrency(currencyComboBox.getSelectionModel().getSelectedItem());
+        transaction.setBeforeTransaction(Main.getLoggedUser().getLatestCashTransaction(currencyComboBox.getSelectionModel().getSelectedItem()));
+        if( transactionTypeComboBox.getSelectionModel().getSelectedItem().equals("in") ) {
+            transaction.setType(Constant.getCashInType());
+        } else {
+            transaction.setType(Constant.getCashOutType());
+        }
+        transaction.setCash(readyCash);
+
+        Session session = SessionUtil.getSession();
+        Transaction tx = session.beginTransaction();
+        session.save(transaction);
+        tx.commit();
+        session.close();
+
+        for(ReadyCash rc : Main.getLoggedUser().getReadycash()) {
+            if(rc.getCurrency().equals(currencyComboBox.getSelectionModel().getSelectedItem())) {
+                rc.getCashTransaction().add(transaction);
+                break;
+            }
         }
     }
 

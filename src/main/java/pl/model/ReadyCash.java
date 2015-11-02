@@ -1,22 +1,30 @@
 package pl.model;
 
 import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
-@Table(name = "readycash")
+@DiscriminatorValue("C")
 public class ReadyCash {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @ManyToOne
     @JoinColumn(name = "owner_id", nullable = true)
     private User owner;
+
     @Column(name = "money", nullable = false)
     private float money = 0.0f;
+
     @ManyToOne
     @JoinColumn(name = "currency_id", nullable = true)
     private Currency currency;
+
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "cash", cascade = CascadeType.ALL)
+    private Set<CashTransaction> cashTransaction = new HashSet<>(0);
 
     public ReadyCash() {
         money = 0.0f;
@@ -57,6 +65,14 @@ public class ReadyCash {
 
     public void setCurrency(Currency currency) {
         this.currency = currency;
+    }
+
+    public Set<CashTransaction> getCashTransaction() {
+        return cashTransaction;
+    }
+
+    public void setCashTransaction(Set<CashTransaction> cashTransaction) {
+        this.cashTransaction = cashTransaction;
     }
 
     @Override

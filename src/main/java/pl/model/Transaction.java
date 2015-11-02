@@ -1,77 +1,45 @@
 package pl.model;
 
+
 import javax.persistence.*;
 import java.util.Date;
 
 @Entity
-@Table(name = "transaction")
-public class Transaction {
+@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+public abstract class Transaction {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.TABLE)
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "account_id", nullable = true)
-    private Account account;
-
-    @Column(name = "another_account_no", nullable = true, updatable = false, length = 24)
-    private String anotherAccount;
-
-    @Column(name = "money", nullable = false, updatable = false)
-    private float money;
-
-    @Column(name = "before_money", nullable = false, updatable = false)
-    private float beforeMoney;
+    @JoinColumn(name = "type_id", nullable = false, updatable = false)
+    protected TransactionType type;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "date", nullable = false, updatable = false)
-    private Date date = new Date();
+    protected Date date = new Date();
 
-    @Column(name = "comment")
-    private String comment;
-
-    @ManyToOne
-    @JoinColumn(name = "type_id", nullable = false, updatable = false)
-    private TransactionType type;
+    @Column(name = "money", nullable = false, updatable = false)
+    protected float money;
 
     @ManyToOne
     @JoinColumn(name = "currency_id", nullable = false, updatable = false)
-    private Currency currency;
+    protected Currency currency;
+
+    @Column(name = "comment")
+    protected String comment;
 
     public Transaction() {
 
     }
 
-    public Transaction(Account account, String anotherAccount, float before, float money, Date date, String comment, TransactionType type, Currency curr) {
-        this.account = account;
-        this.anotherAccount = anotherAccount;
-        this.money = money;
-        this.beforeMoney = before;
-        this.date = date;
-        this.comment = comment;
+    public Transaction(TransactionType type, Date date, float money, Currency currency, String comment) {
         this.type = type;
-        this.currency = curr;
-    }
-    //Currency nélküli konstruktor
-    public Transaction(Account account, String anotherAccount, float before, float money, Date date, String comment, TransactionType type) {
-        this.account = account;
-        this.anotherAccount = anotherAccount;
+        this.date = date;
         this.money = money;
-        this.beforeMoney = before;
-        this.date = date;
+        this.currency = currency;
         this.comment = comment;
-        this.type = type;
-    }
-
-    // konstuktor a TreeTableView-hoz
-    public Transaction(Date date) {
-        this.date = date;
-        this.anotherAccount = "";
-        this.money = 0.0f;
-        this.beforeMoney = 0.0f;
-        this.comment = "";
-        this.type = new TransactionType("");
     }
 
     public Long getId() {
@@ -82,28 +50,12 @@ public class Transaction {
         this.id = id;
     }
 
-    public Account getAccount() {
-        return account;
+    public TransactionType getType() {
+        return type;
     }
 
-    public void setAccount(Account from) {
-        this.account = from;
-    }
-
-    public String getAnotherAccount() {
-        return anotherAccount;
-    }
-
-    public void setAnotherAccount(String to) {
-        this.anotherAccount = to;
-    }
-
-    public float getMoney() {
-        return money;
-    }
-
-    public void setMoney(float money) {
-        this.money = money;
+    public void setType(TransactionType type) {
+        this.type = type;
     }
 
     public Date getDate() {
@@ -114,6 +66,22 @@ public class Transaction {
         this.date = date;
     }
 
+    public float getMoney() {
+        return money;
+    }
+
+    public void setMoney(float money) {
+        this.money = money;
+    }
+
+    public Currency getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(Currency currency) {
+        this.currency = currency;
+    }
+
     public String getComment() {
         return comment;
     }
@@ -121,53 +89,4 @@ public class Transaction {
     public void setComment(String comment) {
         this.comment = comment;
     }
-
-    public TransactionType getType() {
-        return type;
-    }
-
-    public void setType(TransactionType type) {
-        this.type = type;
-    }
-
-    public float getBeforeMoney() {
-        return beforeMoney;
-    }
-
-    public void setBeforeMoney(float beforeMoney) {
-        this.beforeMoney = beforeMoney;
-    }
-
-    public Currency getCurrency() {return currency;}
-
-    public void setCurrency(Currency currency) {this.currency = currency;}
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Transaction)) return false;
-
-        Transaction that = (Transaction) o;
-
-        if (Float.compare(that.money, money) != 0) return false;
-        if (account != null ? !account.equals(that.account) : that.account != null) return false;
-        if (anotherAccount != null ? !anotherAccount.equals(that.anotherAccount) : that.anotherAccount != null)
-            return false;
-        if (comment != null ? !comment.equals(that.comment) : that.comment != null) return false;
-        if (!date.equals(that.date)) return false;
-        if (!type.equals(that.type)) return false;
-
-        return true;
-    }
-
-    /*@Override
-    public int hashCode() {
-        int result = account != null ? account.hashCode() : 0;
-        result = 31 * result + (anotherAccount != null ? anotherAccount.hashCode() : 0);
-        result = 31 * result + (money != +0.0f ? Float.floatToIntBits(money) : 0);
-        result = 31 * result + date.hashCode();
-        result = 31 * result + (comment != null ? comment.hashCode() : 0);
-        result = 31 * result + type.hashCode();
-        return result;
-    }*/
 }

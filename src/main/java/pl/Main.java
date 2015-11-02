@@ -6,6 +6,9 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
+import javafx.concurrent.WorkerStateEvent;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -86,6 +89,7 @@ public class Main extends Application {
             Platform.exit();
             System.exit(0);
         });
+
     }
 
     public static String getSHA512Hash(String pswd, String salt) throws NoSuchAlgorithmException {

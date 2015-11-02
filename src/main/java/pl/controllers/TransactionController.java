@@ -4,7 +4,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import org.hibernate.Session;
 import pl.Constant;
@@ -12,7 +11,7 @@ import pl.Main;
 import pl.jpa.SessionUtil;
 import pl.model.Account;
 import pl.model.Currency;
-import pl.model.Transaction;
+import pl.model.AccountTransaction;
 import pl.model.TransactionType;
 
 import java.time.ZoneId;
@@ -23,7 +22,7 @@ import java.util.stream.Collectors;
 
 public class TransactionController {
 
-    private Transaction transaction = new Transaction();
+    private AccountTransaction accountTransaction = new AccountTransaction();
 
     @FXML
     private ComboBox<String> accountTypeComboBox;
@@ -62,7 +61,7 @@ public class TransactionController {
             }
         });
 
-        List<Account> accountList = Main.getLoggedUser().getAccounts().stream().collect(Collectors.toCollection(() -> new LinkedList<>()));
+        List<Account> accountList = Main.getLoggedUser().getAccounts().stream().collect(Collectors.toCollection(LinkedList::new));
         accountComboBox.getItems().setAll(accountList);
         transactionTypeComboBox.getItems().setAll(Constant.getTransactionTypes());
         currencyComboBox.getItems().setAll(Constant.getCurrencies());
@@ -72,17 +71,16 @@ public class TransactionController {
     private void handleSave() {
 
         if( !accountComboBox.getSelectionModel().getSelectedItem().getName().equals("Készpénz") ) {
-            transaction.setAccount(accountComboBox.getSelectionModel().getSelectedItem());
-            transaction.setType(transactionTypeComboBox.getSelectionModel().getSelectedItem());
-            transaction.setMoney( Float.valueOf(amountField.getText()) );
-            transaction.setDate( Date.from(datePicker.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant()) );
-            transaction.setComment( commentField.getText() );
-            transaction.setBeforeMoney( accountComboBox.getSelectionModel().getSelectedItem().getMoney() );
+            accountTransaction.setAccount(accountComboBox.getSelectionModel().getSelectedItem());
+            accountTransaction.setType(transactionTypeComboBox.getSelectionModel().getSelectedItem());
+            accountTransaction.setMoney( Float.valueOf(amountField.getText()) );
+            accountTransaction.setDate( Date.from(datePicker.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant()) );
+            accountTransaction.setComment( commentField.getText() );
         }
 
         Session session = SessionUtil.getSession();
         org.hibernate.Transaction tx = session.beginTransaction();
-        session.saveOrUpdate(transaction);
+        session.saveOrUpdate(accountTransaction);
         tx.commit();
         session.close();
 
@@ -94,14 +92,14 @@ public class TransactionController {
 //        accountToAccount.setVisible(false);
     }
 
-    public void setTransaction(Transaction transaction) {
-        this.transaction = transaction;
+    public void setAccountTransaction(AccountTransaction accountTransaction) {
+        this.accountTransaction = accountTransaction;
 
-        accountComboBox.getSelectionModel().select(transaction.getAccount());
-        transactionTypeComboBox.getSelectionModel().select(transaction.getType());
-        amountField.setText( String.valueOf(transaction.getMoney()) );
+        accountComboBox.getSelectionModel().select(accountTransaction.getAccount());
+        transactionTypeComboBox.getSelectionModel().select(accountTransaction.getType());
+        amountField.setText( String.valueOf(accountTransaction.getMoney()) );
 
-        commentField.setText( transaction.getComment() );
+        commentField.setText( accountTransaction.getComment() );
     }
 
 }

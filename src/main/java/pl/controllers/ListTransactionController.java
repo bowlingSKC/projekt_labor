@@ -13,8 +13,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.util.Callback;
-import org.hibernate.Query;
-import org.hibernate.Session;
+import org.hibernate.*;
 import pl.Constant;
 import pl.Main;
 import pl.MessageBox;
@@ -22,7 +21,7 @@ import pl.animations.FadeInUpTransition;
 import pl.bundles.Bundles;
 import pl.jpa.SessionUtil;
 import pl.model.*;
-import pl.model.Currency;
+import pl.model.AccountTransaction;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -36,22 +35,22 @@ import java.util.*;
 public class ListTransactionController {
 
     private final SearchListener listener = new SearchListener();
-    private final List<Transaction> allTransactions = getAllTransactions();
+    private final List<AccountTransaction> allAccountTransactions = getAllAccountTransactions();
 
     @FXML
-    private TableView<Transaction> transactionTableView;
+    private TableView<AccountTransaction> transactionTableView;
     @FXML
     private TableColumn crudColumn;
     @FXML
-    private TableColumn<Transaction, Account> accountTableColumn;
+    private TableColumn<AccountTransaction, Account> accountTableColumn;
     @FXML
-    private TableColumn<Transaction, Float> moneyTableColumn;
+    private TableColumn<AccountTransaction, Float> moneyTableColumn;
     @FXML
-    private TableColumn<Transaction, Float> beforeMoneyColumn;
+    private TableColumn<AccountTransaction, Float> beforeMoneyColumn;
     @FXML
-    private TableColumn<Transaction, Date> dateTableColumn;
+    private TableColumn<AccountTransaction, Date> dateTableColumn;
     @FXML
-    private TableColumn<Transaction, TransactionType> transactionTypeColumn;
+    private TableColumn<AccountTransaction, TransactionType> transactionTypeColumn;
     @FXML
     private TextField searcMoneyFromField;
     @FXML
@@ -99,8 +98,10 @@ public class ListTransactionController {
     private TextField anotherAccNum2;
     @FXML
     private TextField anotherAccNum3;
-
     // ========= EDIT PANE VÉGE =========
+
+    private AccountTransaction editAccountTransaction = null;
+
 
     @FXML
     public void initialize() {
@@ -111,13 +112,13 @@ public class ListTransactionController {
         // TableView
         accountTableColumn.setCellValueFactory(new PropertyValueFactory<>("account"));
         moneyTableColumn.setCellValueFactory(new PropertyValueFactory<>("money"));
-        beforeMoneyColumn.setCellValueFactory(new PropertyValueFactory<>("beforeMoney"));
+        // TODO: itt volt a beforeMoney
         dateTableColumn.setCellValueFactory(new PropertyValueFactory<>("date"));
         transactionTypeColumn.setCellValueFactory(new PropertyValueFactory<>("type"));
 
-        transactionTableView.setRowFactory(tableView -> new TableRow<Transaction>() {
+        transactionTableView.setRowFactory(tableView -> new TableRow<AccountTransaction>() {
             @Override
-            protected void updateItem(Transaction item, boolean empty) {
+            protected void updateItem(AccountTransaction item, boolean empty) {
                 super.updateItem(item, empty);
                 if( item != null && !empty ) {
                     if( item.getType().getSign().equals("-") ) {
@@ -129,7 +130,7 @@ public class ListTransactionController {
             }
         });
 
-        moneyTableColumn.setCellFactory(col -> new TableCell<Transaction, Float>() {
+        moneyTableColumn.setCellFactory(col -> new TableCell<AccountTransaction, Float>() {
             @Override
             protected void updateItem(Float item, boolean empty) {
                 super.updateItem(item, empty);
@@ -142,7 +143,7 @@ public class ListTransactionController {
             }
         });
 
-        beforeMoneyColumn.setCellFactory(col -> new TableCell<Transaction, Float>() {
+        beforeMoneyColumn.setCellFactory(col -> new TableCell<AccountTransaction, Float>() {
             @Override
             protected void updateItem(Float item, boolean empty) {
                 super.updateItem(item, empty);
@@ -154,7 +155,7 @@ public class ListTransactionController {
             }
         });
 
-        dateTableColumn.setCellFactory(column -> new TableCell<Transaction, Date>() {
+        dateTableColumn.setCellFactory(column -> new TableCell<AccountTransaction, Date>() {
             @Override
             protected void updateItem(Date item, boolean empty) {
                 super.updateItem(item, empty);
@@ -208,12 +209,12 @@ public class ListTransactionController {
         newAccountComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> newTransactionFromPocket.getItems().setAll(newValue.getPockets()));
         newTransactionFromPocket.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> amointInPocketsLabel.setText( newValue.getMoney() + " " + newAccountComboBox.getSelectionModel().getSelectedItem().getCurrency()));
 
-        newTransactionTypeComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            hideAllTypePane();
-            if( newValue.getId() == 1 ) {
-                new FadeInUpTransition(transferPane).play();
-            }
-        });
+//        newTransactionTypeComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+//            hideAllTypePane();
+//            if( newValue.getId() == 1 ) {
+//                new FadeInUpTransition(transferPane).play();
+//            }
+//        });
 
     }
 
@@ -223,6 +224,7 @@ public class ListTransactionController {
 
     @FXML
     private void handleCancel() {
+        editAccountTransaction = null;
         loadTransactionsToTable();
         editPane.setOpacity(0);
         new FadeInUpTransition(tablePane).play();
@@ -230,23 +232,61 @@ public class ListTransactionController {
 
     @FXML
     private void handleNewTransaction() {
-        loadTransactionToFrom(new Transaction());
         tablePane.setOpacity(0);
         new FadeInUpTransition(editPane).play();
     }
 
     @FXML
     private void handleSaveTransaction() {
+        if( editAccountTransaction == null ) {
+            saveNewTransaction();
+        } else {
+            try {
+                checkAllFields();
+                checkValidTransaction();
 
+                fillTransactionFromFields(editAccountTransaction);
+                fillEmptyFields(editAccountTransaction);
+
+                updateTransactionToDatabase(editAccountTransaction);
+
+                loadTransactionsToTable();
+                clearAllFieldsOnEditPane();
+                editPane.setOpacity(0);
+                new FadeInUpTransition(tablePane).play();
+            } catch (Throwable ex) {
+                MessageBox.showErrorMessage("Hiba", "A tranzakciót nem lehet végrehajtani!", ex.getMessage(), false);
+            }
+        }
+        editAccountTransaction = null;
+    }
+
+    private void fillPrevTransaction(AccountTransaction editAccountTransaction) {
+        AccountTransaction prev = newAccountComboBox.getSelectionModel().getSelectedItem().getLatestTransaction();
+        if( prev != null ) {
+            editAccountTransaction.setBeforeAccountTransaction(prev);
+        }
+    }
+
+    private void updateTransactionToDatabase(AccountTransaction editAccountTransaction) {
+        Session session = SessionUtil.getSession();
+        org.hibernate.Transaction tx = session.beginTransaction();
+        session.update(editAccountTransaction);
+        tx.commit();
+        session.close();
+    }
+
+    private void saveNewTransaction() {
         try {
             checkAllFields();
             checkValidTransaction();
 
-            Transaction transaction = new Transaction();
-            fillTransactionFromFields(transaction);
-            fillEmptyFields(transaction);
+            AccountTransaction accountTransaction = new AccountTransaction();
+            fillTransactionFromFields(accountTransaction);
+            fillEmptyFields(accountTransaction);
+            fillPrevTransaction(accountTransaction);
 
-            saveTransactionToDatabase(transaction);
+            saveTransactionToDatabase(accountTransaction);
 
             loadTransactionsToTable();
             clearAllFieldsOnEditPane();
@@ -257,13 +297,13 @@ public class ListTransactionController {
         }
     }
 
-    private void saveTransactionToDatabase(Transaction transaction) {
-        Account account = transaction.getAccount();
+    private void saveTransactionToDatabase(AccountTransaction accountTransaction) {
+        Account account = accountTransaction.getAccount();
         Session session = SessionUtil.getSession();
         org.hibernate.Transaction tx = session.beginTransaction();
 
         if( newTransactionTypeComboBox.getSelectionModel().getSelectedItem().getId() == 1 ) {
-            account.setMoney( account.getMoney() - transaction.getMoney() );
+            account.setMoney( account.getMoney() - accountTransaction.getMoney() );
             session.update(account);
         }
 
@@ -279,16 +319,16 @@ public class ListTransactionController {
             if( readyCash == null ) {
                 readyCash = new ReadyCash();
                 readyCash.setCurrency(currencyComboBox.getSelectionModel().getSelectedItem());
-                readyCash.setMoney(transaction.getMoney());
+                readyCash.setMoney(accountTransaction.getMoney());
                 readyCash.setOwner(Main.getLoggedUser());
                 session.save(readyCash);
 
                 Main.getLoggedUser().getReadycash().add(readyCash);
             } else {
-                readyCash.setMoney( readyCash.getMoney() + transaction.getMoney() );
+                readyCash.setMoney( readyCash.getMoney() + accountTransaction.getMoney() );
                 session.update(readyCash);
             }
-            account.setMoney( account.getMoney() - transaction.getMoney() );
+            account.setMoney( account.getMoney() - accountTransaction.getMoney() );
             session.update(account);
 
         }
@@ -303,8 +343,8 @@ public class ListTransactionController {
             }
 
             if( readyCash != null ) {
-                readyCash.setMoney( readyCash.getMoney() - transaction.getMoney() );
-                account.setMoney( account.getMoney() + transaction.getMoney() );
+                readyCash.setMoney( readyCash.getMoney() - accountTransaction.getMoney() );
+                account.setMoney( account.getMoney() + accountTransaction.getMoney() );
 
                 session.update(account);
                 if( readyCash.getMoney() == 0.0f ) {
@@ -320,26 +360,26 @@ public class ListTransactionController {
             }
         }
 
-        session.save(transaction);
+        session.save(accountTransaction);
 
         tx.commit();
         session.close();
 
-        account.getTransactions().add(transaction);
+        account.getAccountTransactions().add(accountTransaction);
     }
 
-    private void fillTransactionFromFields(Transaction transaction) {
-        transaction.setAccount(newAccountComboBox.getSelectionModel().getSelectedItem());
-        transaction.setType(newTransactionTypeComboBox.getSelectionModel().getSelectedItem());
-        transaction.setMoney( Float.valueOf(newTransactionAmountTextField.getText()) );
-        transaction.setComment(newTransactionCommentField.getText());
+    private void fillTransactionFromFields(AccountTransaction accountTransaction) {
+        accountTransaction.setAccount(newAccountComboBox.getSelectionModel().getSelectedItem());
+        accountTransaction.setType(newTransactionTypeComboBox.getSelectionModel().getSelectedItem());
+        accountTransaction.setMoney( Float.valueOf(newTransactionAmountTextField.getText()) );
+        accountTransaction.setComment(newTransactionCommentField.getText());
         //New
-        transaction.setCurrency(currencyComboBox.getSelectionModel().getSelectedItem());
+        accountTransaction.setCurrency(currencyComboBox.getSelectionModel().getSelectedItem());
         if(newTransactionDatePicker.getValue() != null){
             LocalDate localDate = newTransactionDatePicker.getValue();
             Instant instant = Instant.from(localDate.atStartOfDay(ZoneId.systemDefault()));
             Date tmpdate = Date.from(instant);
-            transaction.setDate(tmpdate);
+            accountTransaction.setDate(tmpdate);
         }
     }
 
@@ -355,11 +395,10 @@ public class ListTransactionController {
         }
     }
 
-    private void fillEmptyFields(Transaction transaction) {
-        transaction.setBeforeMoney( newAccountComboBox.getSelectionModel().getSelectedItem().getMoney() );
+    private void fillEmptyFields(AccountTransaction accountTransaction) {
 
         if( newTransactionDatePicker.getValue() == null ) {
-            transaction.setDate(new Date());
+            accountTransaction.setDate(new Date());
         }
 
     }
@@ -390,8 +429,14 @@ public class ListTransactionController {
         }
     }
 
-    private void loadTransactionToFrom(Transaction transaction) {
-        // TODO
+    private void loadTransactionToFrom(AccountTransaction accountTransaction) {
+        editAccountTransaction = accountTransaction;
+        newAccountComboBox.getSelectionModel().select(accountTransaction.getAccount());
+        newTransactionTypeComboBox.getSelectionModel().select(accountTransaction.getType());
+        newTransactionAmountTextField.setText(String.valueOf(accountTransaction.getMoney()));
+        currencyComboBox.getSelectionModel().select(accountTransaction.getCurrency());
+        newTransactionDatePicker.setValue(Constant.localDateFromDate(accountTransaction.getDate()));
+        newTransactionCommentField.setText(accountTransaction.getComment());
     }
 
     private void clearAllFieldsOnEditPane() {
@@ -408,20 +453,20 @@ public class ListTransactionController {
 //        anotherAccNum3.setText("");
     }
 
-    private List<Transaction> getAllTransactions() {
-        List<Transaction> transactions = new LinkedList<>();
+    private List<AccountTransaction> getAllAccountTransactions() {
+        List<AccountTransaction> accountTransactions = new LinkedList<>();
         User logged = Main.getLoggedUser();
         for(Account account : logged.getAccounts()) {
-            transactions.addAll(account.getTransactions());
+            accountTransactions.addAll(account.getAccountTransactions());
         }
-        return transactions;
+        return accountTransactions;
     }
 
     private void loadTransactionsToTable() {
         transactionTableView.getItems().clear();
         User loggedUser = Main.getLoggedUser();
         for( Account account : loggedUser.getAccounts() ) {
-            transactionTableView.getItems().addAll(account.getTransactions());
+            transactionTableView.getItems().addAll(account.getAccountTransactions());
         }
     }
 
@@ -429,26 +474,26 @@ public class ListTransactionController {
         @Override
         public void changed(ObservableValue observable, Object oldValue, Object newValue) {
 
-            Set<Transaction> transactions = new HashSet<>(allTransactions);
+            Set<AccountTransaction> accountTransactions = new HashSet<>(allAccountTransactions);
 
             if( searcMoneyFromField.getText().length() > 0 ) {
-                for( Transaction transaction : allTransactions ) {
-                    if( transaction.getMoney() < Float.valueOf(searcMoneyFromField.getText()) ) {
-                        transactions.remove(transaction);
+                for( AccountTransaction accountTransaction : allAccountTransactions) {
+                    if( accountTransaction.getMoney() < Float.valueOf(searcMoneyFromField.getText()) ) {
+                        accountTransactions.remove(accountTransaction);
                     }
                 }
             }
 
             if( searcMoneyToField.getText().length() > 0 ) {
-                for( Transaction transaction : allTransactions ) {
-                    if( transaction.getMoney() > Float.valueOf(searcMoneyFromField.getText()) ) {
-                        transactions.remove(transaction);
+                for( AccountTransaction accountTransaction : allAccountTransactions) {
+                    if( accountTransaction.getMoney() > Float.valueOf(searcMoneyFromField.getText()) ) {
+                        accountTransactions.remove(accountTransaction);
                     }
                 }
             }
 
 
-            transactionTableView.getItems().setAll(transactions);
+            transactionTableView.getItems().setAll(accountTransactions);
 
         }
     }
@@ -468,12 +513,12 @@ public class ListTransactionController {
                 alert.setContentText("A törlés következtében az adat elveszik.");
                 Optional<ButtonType> result = alert.showAndWait();
                 if( result.get() == ButtonType.OK ) {
-                    Transaction transaction = transactionTableView.getItems().get(row);
-                    transactionTableView.getItems().remove(transaction);
+                    AccountTransaction accountTransaction = transactionTableView.getItems().get(row);
+                    transactionTableView.getItems().remove(accountTransaction);
 
                     Session session = SessionUtil.getSession();
                     org.hibernate.Transaction tx = session.beginTransaction();
-                    session.delete(transaction);
+                    session.delete(accountTransaction);
                     tx.commit();
                     session.close();
                 }
@@ -516,16 +561,20 @@ public class ListTransactionController {
                     writer.append(';');
                     writer.append(String.valueOf(transactionTableView.getItems().get(i).getMoney()));
                     writer.append(';');
-                    writer.append(String.valueOf(transactionTableView.getItems().get(i).getBeforeMoney()));
-                    writer.append(';');
                     writer.append(String.valueOf(transactionTableView.getItems().get(i).getCurrency()));
                     writer.append(';');
                     writer.append(transactionTableView.getItems().get(i).getDate().toString());
                     writer.append(';');
                     writer.append(transactionTableView.getItems().get(i).getType().toString());
                     writer.append(';');
-                    writer.append(transactionTableView.getItems().get(i).getAnotherAccount().toString());
-                    writer.append(';');
+                    if( transactionTableView.getItems().get(i).getAnotherAccount() != null ) {
+                        writer.append(transactionTableView.getItems().get(i).getAnotherAccount());
+                        writer.append(';');
+
+                    } else {
+                        writer.append("null");
+                        writer.append(';');
+                    }
                     writer.append(transactionTableView.getItems().get(i).getComment());
                     writer.append('\n');
                     writer.flush();

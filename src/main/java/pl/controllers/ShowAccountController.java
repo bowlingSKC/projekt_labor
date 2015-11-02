@@ -7,8 +7,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import pl.jpa.SessionUtil;
 import pl.model.Account;
-import pl.model.Transaction;
-import pl.model.TransactionType;
+import pl.model.AccountTransaction;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -31,26 +30,26 @@ public class ShowAccountController {
     private Label sumLabel;
 
     @FXML
-    private TreeTableView<Transaction> treeTableView;
+    private TreeTableView<AccountTransaction> treeTableView;
     @FXML
-    private TreeTableColumn<Transaction, Date> dateColumn;
+    private TreeTableColumn<AccountTransaction, Date> dateColumn;
     @FXML
-    private TreeTableColumn<Transaction, String> typeColumn;
+    private TreeTableColumn<AccountTransaction, String> typeColumn;
     @FXML
-    private TreeTableColumn<Transaction, Float> moneyColumn;
+    private TreeTableColumn<AccountTransaction, Float> moneyColumn;
     @FXML
-    private TreeTableColumn<Transaction, String> toColumn;
+    private TreeTableColumn<AccountTransaction, String> toColumn;
     @FXML
-    private TreeTableColumn<Transaction, String> commentColumn;
+    private TreeTableColumn<AccountTransaction, String> commentColumn;
 
     @FXML
     public void initialize() {
-        // dátum
-        dateColumn.setCellValueFactory((TreeTableColumn.CellDataFeatures<Transaction, Date> param) ->
+        // dï¿½tum
+        dateColumn.setCellValueFactory((TreeTableColumn.CellDataFeatures<AccountTransaction, Date> param) ->
             new ReadOnlyObjectWrapper<>(param.getValue().getValue().getDate())
         );
 
-        dateColumn.setCellFactory(cell -> new TreeTableCell<Transaction, Date>() {
+        dateColumn.setCellFactory(cell -> new TreeTableCell<AccountTransaction, Date>() {
             @Override
             protected void updateItem(Date item, boolean empty) {
                 super.updateItem(item, empty);
@@ -63,16 +62,16 @@ public class ShowAccountController {
             }
         });
 
-        // típus
-        typeColumn.setCellValueFactory((TreeTableColumn.CellDataFeatures<Transaction, String> param) ->
+        // tï¿½pus
+        typeColumn.setCellValueFactory((TreeTableColumn.CellDataFeatures<AccountTransaction, String> param) ->
             new ReadOnlyStringWrapper(param.getValue().getValue().getType().getName())
         );
 
-        // összeg
-        moneyColumn.setCellValueFactory((TreeTableColumn.CellDataFeatures<Transaction, Float> param) ->
+        // ï¿½sszeg
+        moneyColumn.setCellValueFactory((TreeTableColumn.CellDataFeatures<AccountTransaction, Float> param) ->
                 new ReadOnlyObjectWrapper<>(param.getValue().getValue().getMoney())
         );
-        moneyColumn.setCellFactory(cell -> new TreeTableCell<Transaction, Float>() {
+        moneyColumn.setCellFactory(cell -> new TreeTableCell<AccountTransaction, Float>() {
             @Override
             protected void updateItem(Float item, boolean empty) {
                 super.updateItem(item, empty);
@@ -86,49 +85,49 @@ public class ShowAccountController {
         });
 
         // kinek
-        toColumn.setCellValueFactory((TreeTableColumn.CellDataFeatures<Transaction, String> param) ->
+        toColumn.setCellValueFactory((TreeTableColumn.CellDataFeatures<AccountTransaction, String> param) ->
                         new ReadOnlyStringWrapper(param.getValue().getValue().getAnotherAccount())
         );
 
         // komment
-        commentColumn.setCellValueFactory((TreeTableColumn.CellDataFeatures<Transaction, String> param) ->
+        commentColumn.setCellValueFactory((TreeTableColumn.CellDataFeatures<AccountTransaction, String> param) ->
                         new ReadOnlyStringWrapper(param.getValue().getValue().getComment())
         );
     }
 
     @FXML
     private void getTransactionsFromDatabase() {
-        Map<Date, List<Transaction>> datas = new HashMap<>();
+        Map<Date, List<AccountTransaction>> datas = new HashMap<>();
         Session session = SessionUtil.getSession();
-        Query outQuery = session.createQuery("from Transaction where account = :account");
-        Query inQuery = session.createQuery("from Transaction where anotherAccount = :other");
+        Query outQuery = session.createQuery("from AccountTransaction where account = :account");
+        Query inQuery = session.createQuery("from AccountTransaction where anotherAccount = :other");
         outQuery.setParameter("account", account.getAccountNumber());
         inQuery.setParameter("other", account.getAccountNumber());
         for( Object transactionObj : outQuery.list() ) {
-            Transaction transaction = (Transaction) transactionObj;
-            if( !datas.containsKey(transaction.getDate()) ) {
-                datas.put(transaction.getDate(), new ArrayList<>());
+            AccountTransaction accountTransaction = (AccountTransaction) transactionObj;
+            if( !datas.containsKey(accountTransaction.getDate()) ) {
+                datas.put(accountTransaction.getDate(), new ArrayList<>());
             }
-            datas.get(transaction.getDate()).add(transaction);
+            datas.get(accountTransaction.getDate()).add(accountTransaction);
         }
         for( Object transactionObj : inQuery.list() ) {
-            Transaction transaction = (Transaction) transactionObj;
-            if( !datas.containsKey(transaction.getDate()) ) {
-                datas.put(transaction.getDate(), new ArrayList<>());
+            AccountTransaction accountTransaction = (AccountTransaction) transactionObj;
+            if( !datas.containsKey(accountTransaction.getDate()) ) {
+                datas.put(accountTransaction.getDate(), new ArrayList<>());
             }
-            datas.get(transaction.getDate()).add(transaction);
+            datas.get(accountTransaction.getDate()).add(accountTransaction);
         }
         session.close();
 
 
-        TreeItem<Transaction> root = new TreeItem<>( new Transaction() );
+        TreeItem<AccountTransaction> root = new TreeItem<>( new AccountTransaction() );
         treeTableView.setRoot(root);
         treeTableView.setShowRoot(false);
 
-        for(Map.Entry<Date, List<Transaction>> entry : datas.entrySet()) {
-            TreeItem<Transaction> transactionTreeItem = new TreeItem<>( new Transaction(entry.getKey()) );
-            for( Transaction transaction : entry.getValue() ) {
-                transactionTreeItem.getChildren().add(new TreeItem<>( transaction ));
+        for(Map.Entry<Date, List<AccountTransaction>> entry : datas.entrySet()) {
+            TreeItem<AccountTransaction> transactionTreeItem = new TreeItem<>( new AccountTransaction(entry.getKey()) );
+            for( AccountTransaction accountTransaction : entry.getValue() ) {
+                transactionTreeItem.getChildren().add(new TreeItem<>(accountTransaction));
             }
             root.getChildren().add(transactionTreeItem);
         }

@@ -63,6 +63,7 @@ public class LoggedController {
 
         String username = Main.getLoggedUser().getFirstname() + " " + Main.getLoggedUser().getLastname();
         nameLabel.setText(Bundles.getString("logged.beforeuser") + " " + username );
+        nameLabel.setText( Bundles.getString("logged") + username );
         titleLabel.setText( Bundles.getString("logged.welcome") );
 
         createMenu();
@@ -121,12 +122,13 @@ public class LoggedController {
         TreeItem<String> cashMenu = new TreeItem<>(Bundles.getString("menu.cash"));
         cashMenu.expandedProperty().addListener(expandedListener);
 
+        TreeItem<String> summaryMenu = new TreeItem<>(Bundles.getString("menu.cash.summary"));
         TreeItem<String> readyMenu = new TreeItem<>(Bundles.getString("menu.cash.ready"));
         TreeItem<String> accountsMenu = new TreeItem<>(Bundles.getString("menu.cash.account"));
         TreeItem<String> propertiesMenu = new TreeItem<>(Bundles.getString("menu.cash.property"));
         TreeItem<String> listPocketsMenu = new TreeItem<>(Bundles.getString("menu.cash.pocket"));
         TreeItem<String> debitMenu = new TreeItem<>(Bundles.getString("menu.debit.title"));
-        cashMenu.getChildren().addAll(readyMenu, accountsMenu, propertiesMenu, listPocketsMenu, debitMenu);
+        cashMenu.getChildren().addAll(summaryMenu, readyMenu, accountsMenu, propertiesMenu, listPocketsMenu, debitMenu);
 
         TreeItem<String> orderMenu = new TreeItem<>(Bundles.getString("menu.transaction"));
         orderMenu.expandedProperty().addListener(expandedListener);
@@ -280,6 +282,20 @@ public class LoggedController {
                 readDeletePanel();
             } else if( value.equals(Bundles.getString("menu.personal.logins.title")) ) {
                 readMyLoginsPanel();
+            } else if( value.equals(Bundles.getString("menu.cash.summary")) ) {
+                readSummaryPane();
+            }
+        }
+
+        private void readSummaryPane() {
+            try {
+                FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/PersonalSummary.fxml"), Bundles.getBundle() );
+                AnchorPane pane = loader.load();
+
+                layout.setCenter(pane);
+                titleLabel.setText( Bundles.getString("menu.cash") + " / " + Bundles.getString("menu.cash.summary") );
+            } catch (IOException ex) {
+                ex.printStackTrace();
             }
         }
 
@@ -313,7 +329,7 @@ public class LoggedController {
                 AnchorPane pane = loader.load();
 
                 layout.setCenter(pane);
-                titleLabel.setText( Bundles.getString("menu.debit.title") );
+                titleLabel.setText( Bundles.getString("menu.cash") + " / " + Bundles.getString("menu.debit.title") );
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
@@ -337,7 +353,7 @@ public class LoggedController {
                 AnchorPane pane = loader.load();
 
                 layout.setCenter(pane);
-                titleLabel.setText( Bundles.getString("readycash.title") );
+                titleLabel.setText( Bundles.getString("menu.cash") + " / " + Bundles.getString("readycash.title") );
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
@@ -349,7 +365,7 @@ public class LoggedController {
                 AnchorPane pane = loader.load();
 
                 layout.setCenter(pane);
-                titleLabel.setText(Bundles.getString("menu.properties.title"));
+                titleLabel.setText(Bundles.getString("menu.cash") + " / " + Bundles.getString("menu.properties.title"));
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
@@ -373,7 +389,7 @@ public class LoggedController {
                 AnchorPane pane = loader.load();
 
                 layout.setCenter(pane);
-                titleLabel.setText(Bundles.getString("menu.cash.pocket"));
+                titleLabel.setText(Bundles.getString("menu.cash") + " / " + Bundles.getString("menu.cash.pocket"));
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
@@ -409,7 +425,7 @@ public class LoggedController {
                 AnchorPane pane = loader.load();
 
                 layout.setCenter(pane);
-                titleLabel.setText(Bundles.getString("cash.bankaccount.title"));
+                titleLabel.setText(Bundles.getString("menu.cash") + " / " + Bundles.getString("cash.bankaccount.title"));
             } catch (IOException ex) {
                 ex.printStackTrace();
             }

@@ -11,27 +11,20 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import pl.Main;
 import pl.bundles.Bundles;
 import pl.jpa.SessionUtil;
 import pl.model.*;
 import pl.model.Currency;
 
-import javax.swing.*;
-import javax.swing.text.TabableView;
-import java.awt.event.ActionEvent;
 import java.io.*;
 import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
-import java.time.ZoneId;
 import java.util.*;
 
 
@@ -44,23 +37,21 @@ public class SyncDataController {
     private ComboBox<String> fileTypes;
 
     @FXML
-    private TableView<Transaction> transactionTableView;
+    private TableView<AccountTransaction> transactionTableView;
     @FXML
-    private TableColumn<Transaction, Account> szamlaTableColumn;
+    private TableColumn<AccountTransaction, Account> szamlaTableColumn;
     @FXML
-    private TableColumn<Transaction, Float> osszegTableColumn;
+    private TableColumn<AccountTransaction, Float> osszegTableColumn;
     @FXML
-    private TableColumn<Transaction, Currency> currencyTableColumn;
+    private TableColumn<AccountTransaction, Currency> currencyTableColumn;
     @FXML
-    private TableColumn<Transaction, Date> dateTableColumn;
+    private TableColumn<AccountTransaction, Date> dateTableColumn;
     @FXML
-    private TableColumn<Transaction, Float> presentTableColumn;
+    private TableColumn<AccountTransaction, Float> presentTableColumn;
     @FXML
-    private TableColumn<Transaction, Account> anotherTableColumn;
+    private TableColumn<AccountTransaction, Account> anotherTableColumn;
     @FXML
-    private TableColumn<Transaction, String> commentTableColumn;
-    @FXML
-    private TableColumn<Transaction, TransactionType> typeTableColumn;
+    private TableColumn<AccountTransaction, String> commentTableColumn;
     @FXML
     private Label filesLabel;
     @FXML
@@ -71,8 +62,10 @@ public class SyncDataController {
     private Button openButton;
     @FXML
     private Button dataProcess;
+    private TableColumn<AccountTransaction, TransactionType> typeTableColumn;
 
-    private ArrayList<Transaction> myTransactions;
+    private ArrayList<AccountTransaction> myAccountTransactions;
+    private ArrayList<AccountTransaction> myTransactions;
 
     @FXML
     public void initialize() {
@@ -90,6 +83,8 @@ public class SyncDataController {
                 }
             }
         });
+        myAccountTransactions = new ArrayList<>();
+        //fileTypes.setValue("OTP - CSV");
         myTransactions = new ArrayList<>();
         fileTypes.getItems().add("OTP - CSV");
         fileTypes.getItems().add("Coming soon...");
@@ -114,17 +109,17 @@ public class SyncDataController {
         typeTableColumn.setText(Bundles.getString("type"));
 
         transactionTableView.setRowFactory( tv -> {
-            TableRow<Transaction> row = new TableRow<>();
+            TableRow<AccountTransaction> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 2 && (! row.isEmpty()) ) {
-                    Transaction rowData = row.getItem();
+                    AccountTransaction rowData = row.getItem();
                     handleSelect(rowData);
                 }
             });
             return row ;
         });
         //Pénz formátum
-        osszegTableColumn.setCellFactory(column -> new TableCell<Transaction, Float>() {
+        osszegTableColumn.setCellFactory(column -> new TableCell<AccountTransaction, Float>() {
             @Override
             protected void updateItem(Float item, boolean empty) {
                 super.updateItem(item, empty);
@@ -139,7 +134,7 @@ public class SyncDataController {
                 }
             }
         });
-        presentTableColumn.setCellFactory(column -> new TableCell<Transaction, Float>() {
+        presentTableColumn.setCellFactory(column -> new TableCell<AccountTransaction, Float>() {
             @Override
             protected void updateItem(Float item, boolean empty) {
                 super.updateItem(item, empty);
@@ -178,7 +173,7 @@ public class SyncDataController {
                     break;
             }
             transactionTableView.getItems().clear();
-            for (Transaction tra : myTransactions) {
+            for(AccountTransaction tra : myAccountTransactions){
                 transactionTableView.getItems().addAll(tra);
             }
         } catch (Exception e) {
@@ -188,11 +183,11 @@ public class SyncDataController {
 
     }
     @FXML
-    private void handleSelect(Transaction raw){
+    private void handleSelect(AccountTransaction raw){
         //int index = transactionList.getSelectionModel().getSelectedIndex();
         int index = 0;
-        for(int i = 0; i < myTransactions.size(); i++){
-            if(myTransactions.get(i) == raw){
+        for(int i = 0; i < myAccountTransactions.size(); i++){
+            if(myAccountTransactions.get(i) == raw){
                 index = i;
                 //System.out.println(index);
                 try {
@@ -202,7 +197,7 @@ public class SyncDataController {
                     Scene scene = new Scene(pane);
                     dialogStage.setScene(scene);
                     ShowTransactionController showTransactionController = loader.getController();
-                    showTransactionController.setTransaction(myTransactions.get(index));
+                    showTransactionController.setTransaction(myAccountTransactions.get(index));
                     dialogStage.show();
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -231,6 +226,8 @@ public class SyncDataController {
                     // Számla kiválasztása
                     for (Account acc : Main.getLoggedUser().getAccounts()) {
                         if (compare == acc.getId()) {
+                            System.out.println("OK.");
+                            acc.setMoney(acc.getMoney() + myAccountTransactions.get(index).getMoney());
                             //System.out.println("OK.");
                             acc.setMoney(acc.getMoney() + myTransactions.get(index).getMoney());
                             myTransactions.get(index).setMoney(Math.abs(myTransactions.get(index).getMoney()));
@@ -245,7 +242,7 @@ public class SyncDataController {
                                     System.out.println("OK!");
                                 }
                             }*/
-                            session.save( myTransactions.get(index));
+                            session.save( myAccountTransactions.get(index));
 
                         }
                     }
@@ -302,7 +299,7 @@ public class SyncDataController {
     }
 
     private void processOTPCSV(){
-        myTransactions.clear();
+        myAccountTransactions.clear();
         TransactionType tempType = new TransactionType();
         Session session = SessionUtil.getSession();
         Query query = session.createQuery("from TransactionType");
@@ -367,9 +364,12 @@ public class SyncDataController {
                         }
                     }
                     Date date = format.parse(transaction[4]);
-                    myTransactions.add(new Transaction(tempAcc, transaction[7], Float.valueOf(transaction[6]),
+                    /** TODO
+                    myAccountTransactions.add(new AccountTransaction(
+                            tempAcc, transaction[7], Float.valueOf(transaction[6]),
                             Float.valueOf(transaction[2]), date,
                             transaction[9] + " " + transaction[10] + " " + transaction[12], tempType, myCurr));
+                     */
                 }
 
             } catch (FileNotFoundException e) {

@@ -152,7 +152,7 @@
                   <TableColumn fx:id="crudColumn" prefWidth="84.0" text="Művelet" />
                 <TableColumn fx:id="accountTableColumn" prefWidth="182.0" text="Saját számla" />
                 <TableColumn fx:id="moneyTableColumn" prefWidth="75.0" styleClass="money-cell" text="Összeg" />
-                  <TableColumn fx:id="beforeMoneyColumn" prefWidth="101.0" styleClass="money-cell" text="Tranzakció elötti összeg" />
+                  <TableColumn fx:id="beforeMoneyColumn" prefWidth="101.0" styleClass="money-cell" text="Tranzakció utáni összeg" />
                   <TableColumn fx:id="dateTableColumn" prefWidth="104.0" text="Dátum" />
                   <TableColumn fx:id="transactionTypeColumn" prefWidth="75.0" text="Típus" />
               </columns>

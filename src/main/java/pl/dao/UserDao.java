@@ -50,7 +50,7 @@ public class UserDao {
         Query accountsQuery = session.createQuery("from Account where owner = :user");
         accountsQuery.setParameter("user", Main.getLoggedUser());
         for( Account acc : (List<Account>)accountsQuery.list() ) {
-            Query transActionQuery = session.createQuery("from Transaction where account = :acc");
+            Query transActionQuery = session.createQuery("from AccountTransaction where account = :acc");
             transActionQuery.setParameter("acc", acc);
             transActionQuery.list().forEach(session::delete);
             session.delete(acc);

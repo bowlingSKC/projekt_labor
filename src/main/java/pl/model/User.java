@@ -182,11 +182,14 @@ public class User {
         float sum = 0;
         if( readycash != null ) {
             for(ReadyCash readyCash : readycash) {
+                /*
                 if( !readyCash.getCurrency().getCode().equals("HUF") ) {
                     sum += CurrencyExchange.toHuf(readyCash.getCurrency(), readyCash.getMoney());
                 } else {
                     sum += readyCash.getMoney();
                 }
+                */
+                sum += readyCash.getMoney();
             }
         }
         return sum;
@@ -202,6 +205,48 @@ public class User {
             sum += debit.getMoney();
         }
         return sum;
+    }
+
+    private Set<AccountTransaction> getAllTransactions() {
+        Set<AccountTransaction> accountTransactions = new HashSet<>();
+        for(Account account : accounts) {
+            accountTransactions.addAll(account.getAccountTransactions());
+        }
+        return accountTransactions;
+    }
+
+    public CashTransaction getLatestCashTransaction() {
+        CashTransaction tmp = null;
+        for( ReadyCash rc : readycash ) {
+            for( CashTransaction ct : rc.getCashTransaction() ) {
+                if( tmp == null ) {
+                    tmp = ct;
+                } else {
+                    if( tmp.getDate().after(ct.getDate()) ) {
+                        tmp = ct;
+                    }
+                }
+            }
+        }
+        return tmp;
+    }
+
+    public CashTransaction getLatestCashTransaction(Currency currency) {
+        CashTransaction tmp = null;
+        for( ReadyCash rc : readycash ) {
+            if( rc.getCurrency().equals(currency) ) {
+                for( CashTransaction ct : rc.getCashTransaction() ) {
+                    if( tmp == null ) {
+                        tmp = ct;
+                    } else {
+                        if( tmp.getDate().after(ct.getDate()) ) {
+                            tmp = ct;
+                        }
+                    }
+                }
+            }
+        }
+        return tmp;
     }
 
     @Override

@@ -19,10 +19,7 @@ import pl.animations.FadeInUpTransition;
 import pl.bundles.Bundles;
 import pl.dao.PropertyDao;
 import pl.jpa.SessionUtil;
-import pl.model.Account;
-import pl.model.Currency;
-import pl.model.Property;
-import pl.model.ReadyCash;
+import pl.model.*;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -155,36 +152,46 @@ public class PropertiesController {
     private void handleNewProperty() {
         tablePane.setOpacity(0);
         new FadeInUpTransition(editPane).play();
-        loadPropertyToEditPane(new Property());
     }
 
     @FXML
     private void handleSaveProperty() {
+        if( editedProperty == null ) {
+            saveNewPropertyToDatabase();
+        } else {
+            updatePropertyInDatabase();
+        }
+
+        loadPropertiesToTable();
+        handleBackToTablePane();
+    }
+
+    private void updatePropertyInDatabase() {
+        Session session = SessionUtil.getSession();
+        Transaction tx = session.beginTransaction();
+        session.update(editedProperty);
+        tx.commit();
+        session.close();
+    }
+
+    private void saveNewPropertyToDatabase() {
         try {
             checkAllField();
 
-            if( editedProperty == null ) {
-                editedProperty = new Property();
-            }
-
-            editedProperty.setName(nameField.getText());
-            editedProperty.setBought(Constant.dateFromLocalDate(datePicker.getValue()));
-            editedProperty.setMoney(Float.valueOf(moneyField.getText()));
-            editedProperty.setComment(commentField.getText());
-            editedProperty.setOwner(Main.getLoggedUser());
+            Property property = new Property();
+            property.setName(nameField.getText());
+            property.setBought(Constant.dateFromLocalDate(datePicker.getValue()));
+            property.setMoney(Float.valueOf(moneyField.getText()));
+            property.setComment(commentField.getText());
+            property.setOwner(Main.getLoggedUser());
 
             Session session = SessionUtil.getSession();
             Transaction tx = session.beginTransaction();
-            session.saveOrUpdate(editedProperty);
+            session.saveOrUpdate(property);
             tx.commit();
             session.close();
 
-            if( Main.getLoggedUser().getProperties().contains(editedProperty) ) {   // TODO: bug
-                Main.getLoggedUser().getProperties().add(editedProperty);
-            }
-
-            loadPropertiesToTable();
-            handleBackToTablePane();
+            Main.getLoggedUser().getProperties().add(property);
         } catch (Throwable ex) {
             MessageBox.showErrorMessage("Hiba", "A vagyonelemet nem lehet létrehozni!", ex.getMessage(), false);
         }
@@ -199,21 +206,20 @@ public class PropertiesController {
         Property property = propertyTableView.getSelectionModel().getSelectedItem();
 
         if( sellPropertyTypeBox.getSelectionModel().getSelectedItem().equals(Bundles.getString("account")) ) {
-            pl.model.Transaction transaction = new pl.model.Transaction();
-            transaction.setMoney(Float.valueOf(sellPropertyValueField.getText()));
-            transaction.setAccount(sellPropertyAccounts.getSelectionModel().getSelectedItem());
-            transaction.setDate(Constant.dateFromLocalDate(sellPropertyDate.getValue()));
-            transaction.setBeforeMoney(5.0f);
-            transaction.setType(Constant.getTransactionTypes().get(Constant.getTransactionTypes().size() - 1));
-            transaction.setComment("Vagyontargy eladasabol szarmazo jovedelem: " + property.getName() + "");
+            AccountTransaction accountTransaction = new AccountTransaction();
+            accountTransaction.setMoney(Float.valueOf(sellPropertyValueField.getText()));
+            accountTransaction.setAccount(sellPropertyAccounts.getSelectionModel().getSelectedItem());
+            accountTransaction.setDate(Constant.dateFromLocalDate(sellPropertyDate.getValue()));
+            accountTransaction.setType(Constant.getTransactionTypes().get(Constant.getTransactionTypes().size() - 1));
+            accountTransaction.setComment("Vagyontargy eladasabol szarmazo jovedelem: " + property.getName() + "");
 
             Account selected = sellPropertyAccounts.getSelectionModel().getSelectedItem();
             selected.setMoney(selected.getMoney() + Float.valueOf(sellPropertyValueField.getText()));
 
             session.update(selected);
-            session.save(transaction);
+            session.save(accountTransaction);
 
-            selected.getTransactions().add(transaction);
+            selected.getAccountTransactions().add(accountTransaction);
             Main.getLoggedUser().getProperties().remove(property);
         } else {
             ReadyCash readyCash = null;

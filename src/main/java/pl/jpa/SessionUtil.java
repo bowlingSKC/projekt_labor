@@ -15,8 +15,10 @@ public class SessionUtil {
             Configuration configuration = new Configuration().configure();
             StandardServiceRegistryBuilder builder = new StandardServiceRegistryBuilder().applySettings(configuration.getProperties());
             return configuration.buildSessionFactory(builder.build());
-        } catch (Throwable ex) {
-            MessageBox.showErrorMessage("Hiba", "Nem lehet csatlakozni a távoli adatbázis szerverhez!","Próbálja meg kés?bb", false);
+        } catch (Exception ex) {
+            MessageBox.showErrorMessage("Hiba", "Nem lehet csatlakozni a tï¿½voli adatbï¿½zis szerverhez!","Prï¿½bï¿½lja meg kï¿½s?bb", false);
+            System.out.println( ex.getMessage() );
+            ex.printStackTrace();
             throw new ExceptionInInitializerError(ex);
         }
     }

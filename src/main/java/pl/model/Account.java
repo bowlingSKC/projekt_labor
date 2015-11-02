@@ -3,7 +3,6 @@ package pl.model;
 import javax.persistence.*;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -40,7 +39,7 @@ public class Account {
     private Currency currency;
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "account")
-    private Set<Transaction> transactions = new HashSet<>(0);
+    private Set<AccountTransaction> accountTransactions = new HashSet<>(0);
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "account")
     private Set<Pocket> pockets = new HashSet<>(0);
@@ -128,12 +127,12 @@ public class Account {
         this.currency = currency;
     }
 
-    public Set<Transaction> getTransactions() {
-        return transactions;
+    public Set<AccountTransaction> getAccountTransactions() {
+        return accountTransactions;
     }
 
-    public void setTransactions(Set<Transaction> transactions) {
-        this.transactions = transactions;
+    public void setAccountTransactions(Set<AccountTransaction> accountTransactions) {
+        this.accountTransactions = accountTransactions;
     }
 
     public Set<Pocket> getPockets() {
@@ -142,6 +141,20 @@ public class Account {
 
     public void setPockets(Set<Pocket> pockets) {
         this.pockets = pockets;
+    }
+
+    public AccountTransaction getLatestTransaction() {
+        AccountTransaction tmp = null;
+        for( AccountTransaction tra : accountTransactions ) {
+            if( tmp == null ) {
+                tmp = tra;
+            } else {
+                if( tra.getDate().after(tmp.getDate()) ) {
+                    tmp = tra;
+                }
+            }
+        }
+        return tmp;
     }
 
     @Override

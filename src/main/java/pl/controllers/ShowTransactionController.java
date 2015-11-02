@@ -4,7 +4,6 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.control.Label;
 import javafx.stage.Stage;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -13,18 +12,14 @@ import pl.bundles.Bundles;
 import pl.jpa.SessionUtil;
 import pl.model.Account;
 import pl.model.Currency;
-import pl.model.Transaction;
+import pl.model.AccountTransaction;
 import pl.model.TransactionType;
 
 
-import java.text.DateFormat;
-import java.text.NumberFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 public class ShowTransactionController {
 
@@ -73,7 +68,7 @@ public class ShowTransactionController {
     @FXML
     private Label typeLabel;
 
-    private Transaction myTransaction;
+    private AccountTransaction myAccountTransaction;
 
     @FXML
     public void initialize() {
@@ -173,22 +168,22 @@ public class ShowTransactionController {
     }
 
 
-    public void setTransaction(Transaction trans){
-        myTransaction = trans;
+    public void setTransaction(AccountTransaction trans){
+        myAccountTransaction = trans;
         //szamlaText.setText(myTransaction.getAccount().getAccountNumber().toString().substring(0,24));
-        szamla1Text.setText(myTransaction.getAccount().getAccountNumber().toString().substring(0,8));
-        szamla2Text.setText(myTransaction.getAccount().getAccountNumber().toString().substring(8,16));
-        szamla3Text.setText(myTransaction.getAccount().getAccountNumber().toString().substring(16,24));
-        moneyText.setText(String.valueOf(myTransaction.getMoney()));
-        datumText.setValue(myTransaction.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+        szamla1Text.setText(myAccountTransaction.getAccount().getAccountNumber().toString().substring(0,8));
+        szamla2Text.setText(myAccountTransaction.getAccount().getAccountNumber().toString().substring(8,16));
+        szamla3Text.setText(myAccountTransaction.getAccount().getAccountNumber().toString().substring(16,24));
+        moneyText.setText(String.valueOf(myAccountTransaction.getMoney()));
+        datumText.setValue(myAccountTransaction.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
         //ellSzamlaText.setText(myTransaction.getAnotherAccount());
-        if( myTransaction.getAnotherAccount().toString().length() > 0 ) {
-            ellSzamlaText1.setText(myTransaction.getAnotherAccount().toString().substring(0,8));
-            ellSzamlaText2.setText(myTransaction.getAnotherAccount().toString().substring(8,16));
-            ellSzamlaText3.setText(myTransaction.getAnotherAccount().toString().substring(16,24));
+        if( myAccountTransaction.getAnotherAccount().toString().length() > 0 ) {
+            ellSzamlaText1.setText(myAccountTransaction.getAnotherAccount().toString().substring(0,8));
+            ellSzamlaText2.setText(myAccountTransaction.getAnotherAccount().toString().substring(8,16));
+            ellSzamlaText3.setText(myAccountTransaction.getAnotherAccount().toString().substring(16,24));
         }
-        commText.setText(myTransaction.getComment());
-        currencyComboBox.getSelectionModel().select(myTransaction.getCurrency());
+        commText.setText(myAccountTransaction.getComment());
+        currencyComboBox.getSelectionModel().select(myAccountTransaction.getCurrency());
 
     }
 
@@ -201,17 +196,17 @@ public class ShowTransactionController {
 
     public void updateData(){
         //myTransaction.setAccount(new Account(checkSzamla(szamlaText.getText())));
-        myTransaction.setAccount(new Account(checkSzamla(szamla1Text.getText() + szamla2Text.getText() + szamla3Text.getText())));
-        System.out.println(myTransaction.getAccount().getAccountNumber());
-        myTransaction.setMoney(Float.valueOf(moneyText.getText()));
+        myAccountTransaction.setAccount(new Account(checkSzamla(szamla1Text.getText() + szamla2Text.getText() + szamla3Text.getText())));
+        System.out.println(myAccountTransaction.getAccount().getAccountNumber());
+        myAccountTransaction.setMoney(Float.valueOf(moneyText.getText()));
         Date mydate = Date.from(datumText.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
         System.out.println(mydate.toString());
-        myTransaction.setDate(mydate);
+        myAccountTransaction.setDate(mydate);
         //myTransaction.setAnotherAccount(checkSzamla(ellSzamlaText.getText()));
-        myTransaction.setAnotherAccount(checkSzamla(ellSzamlaText1.getText() + ellSzamlaText2.getText() + ellSzamlaText3.getText()));
-        myTransaction.setComment(commText.getText());
-        myTransaction.setType(typeComboBox.getSelectionModel().getSelectedItem());
-        myTransaction.setCurrency(currencyComboBox.getSelectionModel().getSelectedItem());
+        myAccountTransaction.setAnotherAccount(checkSzamla(ellSzamlaText1.getText() + ellSzamlaText2.getText() + ellSzamlaText3.getText()));
+        myAccountTransaction.setComment(commText.getText());
+        myAccountTransaction.setType(typeComboBox.getSelectionModel().getSelectedItem());
+        myAccountTransaction.setCurrency(currencyComboBox.getSelectionModel().getSelectedItem());
     }
 
 
@@ -233,22 +228,27 @@ public class ShowTransactionController {
                 tempAcc = ac;
             }
         }
-        myTransaction.setAccount(tempAcc);
+        myAccountTransaction.setAccount(tempAcc);
 
-        String compare = myTransaction.getAccount().getAccountNumber();
+        String compare = myAccountTransaction.getAccount().getAccountNumber();
         session = SessionUtil.getSession();
         org.hibernate.Transaction tx = session.beginTransaction();
 
+        /** TODO
         try {
             // Számla kiválasztása
             for (Account acc : Main.getLoggedUser().getAccounts()) {
                 if (compare.equals(acc.getAccountNumber())) {
+                    System.out.println("OK");
+                    acc.setMoney(acc.getMoney() + myAccountTransaction.getMoney());
                     //System.out.println("OK");
                     acc.setMoney(acc.getMoney() + myTransaction.getMoney());
                     myTransaction.setMoney(Math.abs(myTransaction.getMoney()));
                     session.update(acc);
 
                     //myTransaction.setType(tempType);
+                    session.save(myAccountTransaction);
+                    System.out.println("OK");
                     session.save(myTransaction);
                     //System.out.println("OK");
                 }
@@ -261,6 +261,7 @@ public class ShowTransactionController {
         tx.commit();
         session.flush();
         session.close();
+         **/
         Stage stage = (Stage) closeButton.getScene().getWindow();
         stage.close();
 

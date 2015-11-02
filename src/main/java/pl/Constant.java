@@ -30,6 +30,9 @@ public class Constant {
 
     private static Currency hufCurrency;
 
+    private static TransactionType cashInType;
+    private static TransactionType cashOutType;
+
     public static void init() {
         Session session = SessionUtil.getSession();
         getBanksFromDatabase(session);
@@ -41,6 +44,13 @@ public class Constant {
     private static void getTransactionTypes(Session session) {
         Query query = session.createQuery("from TransactionType");
         transactionTypes.addAll(query.list());
+        for(TransactionType type : transactionTypes) {
+            if( type.getId() == 4 ) {
+                cashOutType = type;
+            } else if( type.getId() == 5 ) {
+                cashInType = type;
+            }
+        }
     }
 
     private static void getBanksFromDatabase(Session session) {
@@ -97,4 +107,13 @@ public class Constant {
     public static Currency getHufCurrency() {
         return hufCurrency;
     }
+
+    public static TransactionType getCashInType() {
+        return cashInType;
+    }
+
+    public static TransactionType getCashOutType() {
+        return cashOutType;
+    }
+
 }
