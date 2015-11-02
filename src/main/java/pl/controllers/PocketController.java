@@ -233,7 +233,7 @@ public class PocketController {
                         }
                     }
                 }
-                //Van ilyen a diagrammon, de nincsa az adatbázisban
+                //Van ilyen a diagrammon, de nincs az adatbázisban
                 if(wasPie && !wasPocket){
                     Pocket pocket = new Pocket(Float.valueOf(moneyText.getText()), Main.getLoggedUser(), pocketCombo.getSelectionModel().getSelectedItem(), szamlaCombo.getSelectionModel().getSelectedItem());
                     pockets.add(0,pocket);

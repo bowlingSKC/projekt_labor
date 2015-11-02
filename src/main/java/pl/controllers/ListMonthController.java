@@ -30,10 +30,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 public class ListMonthController {
 
@@ -209,6 +206,22 @@ public class ListMonthController {
                         o1.getXValue().compareTo(o2.getXValue());
         //allseries.add(new XYChart.Series());
         //allseries.get(allseries.size()-1).setName("Készpénz");
+
+        //Valid values
+        Map<Date, Long> valid = new HashMap<Date, Long>();
+        for(Account acc : Main.getLoggedUser().getAccounts()){
+            for(AccountTransaction tra : acc.getAccountTransactions()){
+                Float tmp = countMoney(acc, tra);
+                if(valid.containsKey(tra.getDate())){
+                    if(tra.getId() > valid.get(tra.getDate())){
+                        valid.replace(tra.getDate(), tra.getId());
+                    }
+                }else{
+                    valid.put(tra.getDate(), tra.getId());
+                }
+            }
+        }
+
         //Find transactions and add to series
         for (Account acc : Main.getLoggedUser().getAccounts()) {
             allseries.add(new XYChart.Series());
@@ -221,14 +234,19 @@ public class ListMonthController {
                     fromDate.setHours(fromDate.getHours() + 24);
                 }
                 fromDate = Date.from(searchFromDate.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
-                /** TODO
-                for (AccountTransaction tr : acc.getTransactions()) {
+                /** TODO */
+                for (AccountTransaction tr : acc.getAccountTransactions()) {
                     if ((tr.getDate().after(fromDate) || tr.getDate().equals(fromDate)) &&
-                            (tr.getDate().before(toDate) || tr.getDate().equals(toDate))) {
-                        allseries.get(allseries.size() - 1).getData().add(new XYChart.Data(tr.getDate().toString(), tr.getBeforeMoney()));
+                            (tr.getDate().before(toDate) || tr.getDate().equals(toDate)) &&
+                            valid.containsValue(tr.getId())) {
+                        //System.out.println(tr.getId() + " - " + tr.getDate().toString());
+                        Float tmp = countMoney(acc, tr);
+                        allseries.get(allseries.size() - 1).getData().add(new XYChart.Data(tr.getDate().toString(), tmp));
+
+                        //allseries.get(allseries.size() - 1).getData().add(new XYChart.Data(tr.getDate().toString(), tr.getBeforeMoney()));
                     }
                 }
-                 */
+
             } catch (Exception e) {
                 //e.printStackTrace();
             }
@@ -321,9 +339,23 @@ public class ListMonthController {
                 itemSelected();
             }
         }
+    }*/
+
+    public Float countMoney(Account acc, AccountTransaction tra){
+        Float tmp = acc.getMoney();
+        for(AccountTransaction tr : acc.getAccountTransactions()){
+            if(tra.getId() < tr.getId()){
+                Float tmpMoney = tr.getMoney();
+                if(tr.getType().getSign().equals("+")){
+                    tmpMoney = tmpMoney *-1;
+                }
+                tmp += tmpMoney;
+            }
+        }
+        return tmp;
     }
 
-    public void itemSelected(){
+    /*public void itemSelected(){
         for(XYChart.Series ser : allseries){
             if(accountListView.getSelectionModel().getSelectedItem().toString().equals(ser.getName())){
                 if(areaChart.getData().size() == 0){

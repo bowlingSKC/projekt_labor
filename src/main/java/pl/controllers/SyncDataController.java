@@ -46,12 +46,14 @@ public class SyncDataController {
     private TableColumn<AccountTransaction, Currency> currencyTableColumn;
     @FXML
     private TableColumn<AccountTransaction, Date> dateTableColumn;
-    @FXML
-    private TableColumn<AccountTransaction, Float> presentTableColumn;
+    //@FXML
+    //private TableColumn<AccountTransaction, Float> presentTableColumn;
     @FXML
     private TableColumn<AccountTransaction, Account> anotherTableColumn;
     @FXML
     private TableColumn<AccountTransaction, String> commentTableColumn;
+    @FXML
+    private TableColumn<AccountTransaction, TransactionType> typeTableColumn;
     @FXML
     private Label filesLabel;
     @FXML
@@ -62,10 +64,10 @@ public class SyncDataController {
     private Button openButton;
     @FXML
     private Button dataProcess;
-    private TableColumn<AccountTransaction, TransactionType> typeTableColumn;
+
 
     private ArrayList<AccountTransaction> myAccountTransactions;
-    private ArrayList<AccountTransaction> myTransactions;
+    //private ArrayList<AccountTransaction> myTransactions;
 
     @FXML
     public void initialize() {
@@ -85,7 +87,7 @@ public class SyncDataController {
         });
         myAccountTransactions = new ArrayList<>();
         //fileTypes.setValue("OTP - CSV");
-        myTransactions = new ArrayList<>();
+        //myTransactions = new ArrayList<>();
         fileTypes.getItems().add("OTP - CSV");
         fileTypes.getItems().add("Coming soon...");
         fileTypes.setValue("OTP - CSV");
@@ -99,8 +101,8 @@ public class SyncDataController {
         currencyTableColumn.setText(Bundles.getString("currency"));
         dateTableColumn.setCellValueFactory(new PropertyValueFactory<>("date"));
         dateTableColumn.setText(Bundles.getString("date"));
-        presentTableColumn.setCellValueFactory(new PropertyValueFactory<>("beforeMoney"));
-        presentTableColumn.setText(Bundles.getString("balance"));
+        //presentTableColumn.setCellValueFactory(new PropertyValueFactory<>("beforeMoney"));
+        //presentTableColumn.setText(Bundles.getString("balance"));
         anotherTableColumn.setCellValueFactory(new PropertyValueFactory<>("anotherAccount"));
         anotherTableColumn.setText(Bundles.getString("anotheracc"));
         commentTableColumn.setCellValueFactory(new PropertyValueFactory<>("comment"));
@@ -134,7 +136,7 @@ public class SyncDataController {
                 }
             }
         });
-        presentTableColumn.setCellFactory(column -> new TableCell<AccountTransaction, Float>() {
+        /*presentTableColumn.setCellFactory(column -> new TableCell<AccountTransaction, Float>() {
             @Override
             protected void updateItem(Float item, boolean empty) {
                 super.updateItem(item, empty);
@@ -148,7 +150,7 @@ public class SyncDataController {
                     //setText(Float.toString(item));
                 }
             }
-        });
+        });*/
     }
 
     @FXML
@@ -205,8 +207,6 @@ public class SyncDataController {
                 }
             }
         }
-
-
     }
 
     @FXML
@@ -216,21 +216,43 @@ public class SyncDataController {
             //Query query = session.createQuery("from TransactionType");
             //List<TransactionType> tTypes;
             //tTypes = query.list();
-            org.hibernate.Transaction tx = session.beginTransaction();
+            boolean first = true;
+            AccountTransaction tmp = null;
 
-            for (int index = 0; index < myTransactions.size(); index++){
-                Long compare = myTransactions.get(index).getAccount().getId();
+            org.hibernate.Transaction tx = session.beginTransaction();
+            for (int index = 0; index < myAccountTransactions.size(); index++){
+                Long compare = myAccountTransactions.get(index).getAccount().getId();
+
+                //Playing with before_id
+                AccountTransaction prev = myAccountTransactions.get(index).getAccount().getLatestTransaction();
+                if(!first){
+                    myAccountTransactions.get(index).setBeforeAccountTransaction(tmp);
+                    tmp = myAccountTransactions.get(index);
+                }
+                if( prev != null && first) {
+                    myAccountTransactions.get(index).setBeforeAccountTransaction(prev);
+                    first = false;
+                    tmp = myAccountTransactions.get(index);
+                    //System.out.println(myAccountTransactions.get(index).getDate().toString() + " - " + myAccountTransactions.get(index).getBeforeAccountTransaction().getDate().toString());
+                }
+                if(prev == null && first){
+                    //System.out.println(myAccountTransactions.get(index).getDate().toString() + " - null");
+                    first = false;
+                    tmp = myAccountTransactions.get(index);
+                }
+
                 //System.out.println(compare);
                 //compare = compare.substring(0, 24);
                 try {
                     // Számla kiválasztása
                     for (Account acc : Main.getLoggedUser().getAccounts()) {
+                        //System.out.println(acc.getId().toString() + " " + compare.toString());
                         if (compare == acc.getId()) {
                             System.out.println("OK.");
                             acc.setMoney(acc.getMoney() + myAccountTransactions.get(index).getMoney());
                             //System.out.println("OK.");
-                            acc.setMoney(acc.getMoney() + myTransactions.get(index).getMoney());
-                            myTransactions.get(index).setMoney(Math.abs(myTransactions.get(index).getMoney()));
+                            acc.setMoney(acc.getMoney() + myAccountTransactions.get(index).getMoney());
+                            myAccountTransactions.get(index).setMoney(Math.abs(myAccountTransactions.get(index).getMoney()));
                             session.update(acc);
 
                             // Tranzakció létrehozása a belépett felhasználónak
@@ -364,12 +386,13 @@ public class SyncDataController {
                         }
                     }
                     Date date = format.parse(transaction[4]);
-                    /** TODO
-                    myAccountTransactions.add(new AccountTransaction(
-                            tempAcc, transaction[7], Float.valueOf(transaction[6]),
-                            Float.valueOf(transaction[2]), date,
-                            transaction[9] + " " + transaction[10] + " " + transaction[12], tempType, myCurr));
-                     */
+                    /** TODO **/
+                    //Create new
+                    AccountTransaction toAdd = new AccountTransaction(
+                            tempAcc, transaction[7], Float.valueOf(transaction[2]), date,
+                            transaction[9] + " " + transaction[10] + " " + transaction[12], tempType, myCurr);
+                    myAccountTransactions.add(toAdd);
+
                 }
 
             } catch (FileNotFoundException e) {

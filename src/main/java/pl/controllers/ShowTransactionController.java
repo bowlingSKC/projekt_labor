@@ -229,12 +229,17 @@ public class ShowTransactionController {
             }
         }
         myAccountTransaction.setAccount(tempAcc);
+        //Get latest transaction
+        AccountTransaction prev = tempAcc.getLatestTransaction();
+        if( prev != null ) {
+            myAccountTransaction.setBeforeAccountTransaction(prev);
+        }
 
         String compare = myAccountTransaction.getAccount().getAccountNumber();
         session = SessionUtil.getSession();
         org.hibernate.Transaction tx = session.beginTransaction();
 
-        /** TODO
+        /** TODO */
         try {
             // Számla kiválasztása
             for (Account acc : Main.getLoggedUser().getAccounts()) {
@@ -242,14 +247,14 @@ public class ShowTransactionController {
                     System.out.println("OK");
                     acc.setMoney(acc.getMoney() + myAccountTransaction.getMoney());
                     //System.out.println("OK");
-                    acc.setMoney(acc.getMoney() + myTransaction.getMoney());
-                    myTransaction.setMoney(Math.abs(myTransaction.getMoney()));
+                    acc.setMoney(acc.getMoney() + myAccountTransaction.getMoney());
+                    myAccountTransaction.setMoney(Math.abs(myAccountTransaction.getMoney()));
                     session.update(acc);
 
                     //myTransaction.setType(tempType);
                     session.save(myAccountTransaction);
                     System.out.println("OK");
-                    session.save(myTransaction);
+                    session.save(myAccountTransaction);
                     //System.out.println("OK");
                 }
             }
@@ -261,7 +266,7 @@ public class ShowTransactionController {
         tx.commit();
         session.flush();
         session.close();
-         **/
+
         Stage stage = (Stage) closeButton.getScene().getWindow();
         stage.close();
 

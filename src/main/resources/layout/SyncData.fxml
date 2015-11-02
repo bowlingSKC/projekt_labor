@@ -19,11 +19,10 @@
           <TableColumn fx:id="szamlaTableColumn" prefWidth="136.0" text="Számlaszám" />
           <TableColumn fx:id="osszegTableColumn" prefWidth="63.0" text="Összeg" />
             <TableColumn fx:id="currencyTableColumn" prefWidth="62.0" text="Pénznem" />
-            <TableColumn fx:id="dateTableColumn" prefWidth="56.0" text="Dátum" />
-            <TableColumn fx:id="presentTableColumn" prefWidth="58.0" text="Könyvelt" />
-            <TableColumn fx:id="anotherTableColumn" prefWidth="132.0" text="Ellenoldal" />
-            <TableColumn fx:id="commentTableColumn" prefWidth="105.0" text="Komment" />
-            <TableColumn fx:id="typeTableColumn" prefWidth="141.0" text="Típus" />
+            <TableColumn fx:id="dateTableColumn" prefWidth="66.0" text="Dátum" />
+            <TableColumn fx:id="anotherTableColumn" prefWidth="111.0" text="Ellenoldal" />
+            <TableColumn fx:id="commentTableColumn" prefWidth="150.0" text="Komment" />
+            <TableColumn fx:id="typeTableColumn" prefWidth="168.0" text="Típus" />
         </columns>
       </TableView>
     </children>
