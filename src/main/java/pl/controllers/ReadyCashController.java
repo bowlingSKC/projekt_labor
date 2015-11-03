@@ -54,6 +54,8 @@ public class ReadyCashController {
     private TableColumn<CashTransaction, Currency> currencyTableColumn;
     @FXML
     private TableColumn<CashTransaction, String> commentTableColumn;
+    @FXML
+    private TextField commentField;
 
 
     @FXML
@@ -102,6 +104,21 @@ public class ReadyCashController {
     }
 
     private void initTablePane() {
+
+        readyCashTableView.setRowFactory(row -> new TableRow<ReadyCash>() {
+            @Override
+            protected void updateItem(ReadyCash item, boolean empty) {
+                super.updateItem(item, empty);
+                if( item != null && !empty ) {
+                    if( item.getMoney() == 0.0 ) {
+                        setVisible(false);
+                    } else {
+                        setVisible(true);
+                    }
+                }
+            }
+        });
+
         currencyColumn.setCellValueFactory(new PropertyValueFactory<>("currency"));
         amountColumn.setCellValueFactory(new PropertyValueFactory<>("money"));
 
@@ -219,6 +236,7 @@ public class ReadyCashController {
         transaction.setMoney(Float.valueOf(amountFiled.getText()));
         transaction.setDate(new Date());
         transaction.setCurrency(currencyComboBox.getSelectionModel().getSelectedItem());
+        transaction.setComment(commentField.getText());
         transaction.setBeforeTransaction(Main.getLoggedUser().getLatestCashTransaction(currencyComboBox.getSelectionModel().getSelectedItem()));
         if( transactionTypeComboBox.getSelectionModel().getSelectedItem().equals("in") ) {
             transaction.setType(Constant.getCashInType());
