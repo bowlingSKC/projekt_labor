@@ -81,8 +81,8 @@ public class RootLayoutController {
             return;
         }
 
+        Session session = SessionUtil.getSession();
         try {
-            Session session = SessionUtil.getSession();
             Criteria criteria = session.createCriteria(User.class);
             User user = (User) criteria.add(Restrictions.eq("email", emailTextField.getText())).uniqueResult();
 
@@ -102,10 +102,10 @@ public class RootLayoutController {
             Transaction tx = session.beginTransaction();
             session.save(login);
             tx.commit();
-            session.close();
-
         } catch (Throwable ex) {
             ex.printStackTrace();
+        } finally {
+            session.close();
         }
     }
 

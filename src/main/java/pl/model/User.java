@@ -239,7 +239,7 @@ public class User {
                     if( tmp == null ) {
                         tmp = ct;
                     } else {
-                        if( tmp.getDate().after(ct.getDate()) ) {
+                        if( ct.getDate().after(tmp.getDate()) ) {
                             tmp = ct;
                         }
                     }

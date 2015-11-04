@@ -143,7 +143,7 @@ public class Account {
         this.pockets = pockets;
     }
 
-    public AccountTransaction getLatestTransaction() {
+    public AccountTransaction testgetLatestTransaction() {
         AccountTransaction tmp = null;
         for( AccountTransaction tra : accountTransactions ) {
             if( tmp == null ) {

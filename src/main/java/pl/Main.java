@@ -131,7 +131,6 @@ public class Main extends Application {
 
             new Thread(() -> {
                 loggedUser.get().getLogins();
-                System.out.println( loggedUser.get().getLogins().size() );
             }).start();
 
         } catch (IOException e) {
