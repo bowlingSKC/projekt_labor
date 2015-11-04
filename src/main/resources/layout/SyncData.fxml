@@ -25,5 +25,6 @@
             <TableColumn fx:id="typeTableColumn" prefWidth="168.0" text="Típus" />
         </columns>
       </TableView>
+      <Label fx:id="errorLabel" layoutX="213.0" layoutY="169.0" prefHeight="17.0" prefWidth="550.0" text="ErrorLabel" textAlignment="RIGHT" textFill="RED" />
     </children>
 </AnchorPane>

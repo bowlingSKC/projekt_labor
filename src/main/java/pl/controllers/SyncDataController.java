@@ -61,6 +61,8 @@ public class SyncDataController {
     @FXML
     private Label typeLabel;
     @FXML
+    private Label errorLabel;
+    @FXML
     private Button openButton;
     @FXML
     private Button dataProcess;
@@ -76,18 +78,23 @@ public class SyncDataController {
         typeLabel.setText(Bundles.getString("filetype"));
         openButton.setText(Bundles.getString("openfile"));
         dataProcess.setText(Bundles.getString("processall"));
+        errorLabel.setVisible(false);
 
         fileList.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
                 if (mouseEvent.getButton().equals(MouseButton.PRIMARY) && !fileList.getSelectionModel().isEmpty()) {
+                    errorLabel.setVisible(false);
                     handleProcess();
+                    if(errorLabel.isVisible()){
+                        checkExist(1);
+                    }else{
+                        checkExist(2);
+                    }
                 }
             }
         });
         myAccountTransactions = new ArrayList<>();
-        //fileTypes.setValue("OTP - CSV");
-        //myTransactions = new ArrayList<>();
         fileTypes.getItems().add("OTP - CSV");
         fileTypes.getItems().add("Coming soon...");
         fileTypes.setValue("OTP - CSV");
@@ -282,44 +289,6 @@ public class SyncDataController {
         }
     }
 
-    /*private boolean confirmTransaction(){
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Megerősítés");
-        alert.setHeaderText("Biztosan fel akarod venni a kiválasztott tételt?");
-        alert.setContentText(transactionList.getSelectionModel().getSelectedItem().toString());
-        Optional<ButtonType> result = alert.showAndWait();
-        if( result.get() == ButtonType.OK ) {
-            return true;
-        }
-        return false;
-    }*/
-
-    private boolean confirmAll(){
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle(Bundles.getString("error.syncdata.title"));
-        alert.setHeaderText(Bundles.getString("error.syncdata.question"));
-        alert.setContentText(Bundles.getString("error.syncdata.content"));
-        Optional<ButtonType> result = alert.showAndWait();
-        if( result.get() == ButtonType.OK ) {
-            return true;
-        }
-        return false;
-    }
-
-    private String checkSzamla(String szamla){
-        if(szamla.length() == 18 ){
-            szamla = szamla.substring(1,17);
-            szamla = szamla + "00000000";
-        }
-        if(szamla.length() == 16 ){
-            szamla = szamla + "00000000";
-        }
-        if(szamla.length() == 26 ){
-            szamla = szamla.substring(1,25);
-        }
-        return szamla;
-    }
-
     private void processOTPCSV(){
         myAccountTransactions.clear();
         TransactionType tempType = new TransactionType();
@@ -354,13 +323,8 @@ public class SyncDataController {
                     transaction[7] = checkSzamla(transaction[7]);
                     DateFormat format = new SimpleDateFormat("yyyyMMdd", Locale.ENGLISH);       //dátum helyes formátumra hozása
                     //Find account
-                    Account tempAcc = new Account();
-                    session = SessionUtil.getSession();
-                    query = session.createQuery("from Account");
-                    List<Account> tempAccounts;
-                    tempAccounts = query.list();
-                    session.close();
-                    for(Account ac : tempAccounts) {
+                    Account tempAcc = null;
+                    for(Account ac : Main.getLoggedUser().getAccounts()) {
                         if(ac.getAccountNumber().toString().equals(transaction[0]) ){
                             tempAcc = ac;
                         }
@@ -386,13 +350,17 @@ public class SyncDataController {
                         }
                     }
                     Date date = format.parse(transaction[4]);
-                    /** TODO **/
-                    //Create new
-                    AccountTransaction toAdd = new AccountTransaction(
-                            tempAcc, transaction[7], Float.valueOf(transaction[2]), date,
-                            transaction[9] + " " + transaction[10] + " " + transaction[12], tempType, myCurr);
-                    myAccountTransactions.add(toAdd);
 
+                    //Create new
+                    if(tempAcc != null){
+                        AccountTransaction toAdd = new AccountTransaction(
+                                tempAcc, transaction[7], Float.valueOf(transaction[2]), date,
+                                transaction[9] + " " + transaction[10] + " " + transaction[12], tempType, myCurr);
+                        myAccountTransactions.add(toAdd);
+                    }else{
+                        errorLabel.setVisible(true);
+                        errorLabel.setText(Bundles.getString("importmissingvalues"));
+                    }
                 }
 
             } catch (FileNotFoundException e) {
@@ -413,6 +381,74 @@ public class SyncDataController {
             System.out.println("Hiba!");
         }
     }
+
+    private boolean confirmAll(){
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle(Bundles.getString("error.syncdata.title"));
+        alert.setHeaderText(Bundles.getString("error.syncdata.question"));
+        alert.setContentText(Bundles.getString("error.syncdata.content"));
+        Optional<ButtonType> result = alert.showAndWait();
+        if( result.get() == ButtonType.OK ) {
+            return true;
+        }
+        return false;
+    }
+
+    private String checkSzamla(String szamla){
+        if(szamla.length() == 18 ){
+            szamla = szamla.substring(1,17);
+            szamla = szamla + "00000000";
+        }
+        if(szamla.length() == 16 ){
+            szamla = szamla + "00000000";
+        }
+        if(szamla.length() == 26 ){
+            szamla = szamla.substring(1,25);
+        }
+        return szamla;
+    }
+
+    private void checkExist(int function){
+        boolean exist;
+        boolean error = true;
+        for(AccountTransaction acctra : myAccountTransactions){
+            exist = false;
+            for(Account acc : Main.getLoggedUser().getAccounts()){
+                for(AccountTransaction tra : acc.getAccountTransactions()){
+                    if(tra.getMoney() == Math.abs(acctra.getMoney())){
+                        exist = true;
+                    }
+                }
+            }
+            if(!exist){
+                error = false;
+            }
+        }
+        if(error){
+            errorLabel.setVisible(true);
+            switch (function){
+                case 1:
+                    errorLabel.setText(errorLabel.getText() + " + " + Bundles.getString("importexist"));
+                    break;
+                case 2:
+                    errorLabel.setText(Bundles.getString("importexist"));
+                    break;
+            }
+
+        }
+    }
+
+    /*private boolean confirmTransaction(){
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Megerősítés");
+        alert.setHeaderText("Biztosan fel akarod venni a kiválasztott tételt?");
+        alert.setContentText(transactionList.getSelectionModel().getSelectedItem().toString());
+        Optional<ButtonType> result = alert.showAndWait();
+        if( result.get() == ButtonType.OK ) {
+            return true;
+        }
+        return false;
+    }*/
 
     //OLD
     /*@FXML

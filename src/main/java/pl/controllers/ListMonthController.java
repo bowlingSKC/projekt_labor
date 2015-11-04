@@ -23,6 +23,8 @@ import pl.bundles.Bundles;
 import pl.jpa.SessionUtil;
 import pl.model.Account;
 import pl.model.AccountTransaction;
+import pl.model.CashTransaction;
+import pl.model.ReadyCash;
 
 import java.text.Format;
 import java.text.SimpleDateFormat;
@@ -53,6 +55,7 @@ public class ListMonthController {
 
 
     private List<AccountTransaction> allTransactions;
+    private List<CheckBox> checkBoxes = new ArrayList<>();
     private ArrayList<XYChart.Series> allseries;
     private String selected;
     private Date lastDate;
@@ -69,7 +72,7 @@ public class ListMonthController {
             Date dateToSet = Date.from(instant);*/
             Date date = Date.from(newDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
             //System.out.println("Listen. " + date.toString());
-            refreshAreaChart2();
+            refreshAreaChart();
             //refreshChart();
 
         });
@@ -79,7 +82,7 @@ public class ListMonthController {
             Date dateToSet = Date.from(instant);*/
             Date date = Date.from(newDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
             //System.out.println("Listen. " + date.toString());
-            refreshAreaChart2();
+            refreshAreaChart();
             //refreshChart();
 
         });
@@ -88,14 +91,16 @@ public class ListMonthController {
         for (Account acc : Main.getLoggedUser().getAccounts()) {
             CheckBox checkBox = new CheckBox(acc.toString());
             checkBox.setSelected(true);
+            checkBoxes.add(checkBox);
             checkBox.setOnAction(new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent event) {
                     for (XYChart.Series ser : allseries) {
                         if (checkBox.getText().equals(ser.getName())) {
-                            if (checkBox.isSelected()) {
+                            if (checkBox.isSelected() && !areaChart.getData().contains(ser)) {
                                 areaChart.getData().add(ser);
-                            } else {
+                            }
+                            if(!checkBox.isSelected() && areaChart.getData().contains(ser)) {
                                 areaChart.getData().remove(ser);
                             }
                         }
@@ -105,96 +110,40 @@ public class ListMonthController {
             vbox.getChildren().add(checkBox);
         }
         scrollPane.setContent(vbox);
+        //Készpénz hozzáadása
+        for (ReadyCash cash : Main.getLoggedUser().getReadycash()) {
+            CheckBox checkBox = new CheckBox(cash.getCurrency().toString());
+            checkBox.setSelected(true);
+            checkBoxes.add(checkBox);
+            checkBox.setOnAction(new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent event) {
+                    for (XYChart.Series ser : allseries) {
+                        if (checkBox.getText().equals(ser.getName())) {
+                            if (checkBox.isSelected() && !areaChart.getData().contains(ser)) {
+                                areaChart.getData().add(ser);
+                            }
+                            if(!checkBox.isSelected() && areaChart.getData().contains(ser)) {
+                                areaChart.getData().remove(ser);
+                            }
+                        }
+                    }
+                }
+            });
+            vbox.getChildren().add(checkBox);
+        }
 
         allseries = new ArrayList<>();
         lastDate = new Date();
-        lastDate.setHours(lastDate.getHours() - (60 * 24));
+        lastDate.setHours(lastDate.getHours() - (45 * 24));
         searchToDate.setValue(lastDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
         lastDate.setHours(lastDate.getHours() - (30 * 24));
         searchFromDate.setValue(lastDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
-        refreshAreaChart2();
+        refreshAreaChart();
 
     }
 
-    /*public void refreshAreaChart(int function, Date date) {
-        areaChart.getData().clear();
-        allseries.clear();
-
-        areaChart.setTitle(Bundles.getString("balance"));
-        final Comparator<XYChart.Data<String, Number>> comparator =
-                (XYChart.Data<String, Number> o1, XYChart.Data<String, Number> o2) ->
-                        o1.getXValue().compareTo(o2.getXValue());
-        //Make series
-        for (Account acc : Main.getLoggedUser().getAccounts()) {
-            //accounts.add(acc);
-            allseries.add(new XYChart.Series());
-            allseries.get(allseries.size() - 1).setName(acc.toString());
-        }
-        //allseries.add(new XYChart.Series());
-        //allseries.get(allseries.size()-1).setName("Készpénz");
-        //Find transactions and add to series
-        Session session;
-        Query query;
-        if (function == 1) {
-            session = SessionUtil.getSession();
-            query = session.createQuery("from Transaction");
-            allTransactions = new ArrayList<>();
-            allTransactions = query.list();
-            session.close();
-        }
-
-        for (Transaction tra : allTransactions) {
-            for (Account acc : Main.getLoggedUser().getAccounts()) {
-                if (acc.getId() == tra.getAccount().getId()) {
-                    for (XYChart.Series ser : allseries) {
-                        if (tra.getDate().after(lastDate)) {
-                            lastDate = tra.getDate();
-                        }
-                        switch (function) {
-                            case 1:
-                                if (ser.getName().equals(acc.toString())) {
-                                    ser.getData().add(new XYChart.Data(tra.getDate().toString(), tra.getBeforeMoney()));
-                                }
-                                break;
-                            case 2:
-                                if (ser.getName().equals(acc.toString()) && (tra.getDate().after(date) || tra.getDate().equals(date))) {
-                                    if (searchToDate.getValue() == null) {
-                                        ser.getData().add(new XYChart.Data(tra.getDate().toString(), tra.getBeforeMoney()));
-                                    } else {
-                                        Date anotherDate = Date.from(searchToDate.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
-                                        if (tra.getDate().before(anotherDate) || tra.getDate().equals(anotherDate)) {
-                                            ser.getData().add(new XYChart.Data(tra.getDate().toString(), tra.getBeforeMoney()));
-                                        }
-                                    }
-
-                                }
-                                break;
-                            case 3:
-                                if (ser.getName().equals(acc.toString()) && (tra.getDate().before(date) || tra.getDate().equals(date))) {
-                                    if (searchFromDate.getValue() == null) {
-                                        ser.getData().add(new XYChart.Data(tra.getDate().toString(), tra.getBeforeMoney()));
-                                    } else {
-                                        Date anotherDate = Date.from(searchFromDate.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
-                                        if (tra.getDate().after(anotherDate) || tra.getDate().equals(anotherDate)) {
-                                            ser.getData().add(new XYChart.Data(tra.getDate().toString(), tra.getBeforeMoney()));
-                                        }
-                                    }
-                                }
-                                break;
-                        }
-
-                    }
-                }
-            }
-        }
-        //Add series to chart
-        for (XYChart.Series ser : allseries) {
-            ser.getData().sort(comparator);
-            areaChart.getData().add(ser);
-        }
-    }*/
-
-    public void refreshAreaChart2() {
+    public void refreshAreaChart() {
         areaChart.getData().clear();
         allseries.clear();
         Format formatter = new SimpleDateFormat("yyyy-MM-dd");
@@ -221,34 +170,71 @@ public class ListMonthController {
                 }
             }
         }
-
-        //Find transactions and add to series
-        for (Account acc : Main.getLoggedUser().getAccounts()) {
-            allseries.add(new XYChart.Series());
-            allseries.get(allseries.size() - 1).setName(acc.toString());
-            try {
+        //Valid names
+        Set<String> validNames = new HashSet<>();
+        for(CheckBox check : checkBoxes){
+            if(check.isSelected()){
+                validNames.add(check.getText());
+            }
+        }
+        // TODO Egy napon belüli készpénzes tranzakviók kezelése
+        //Find cash transactions
+        for (ReadyCash cash : Main.getLoggedUser().getReadycash()) {
+            boolean added = false;
+            try{
                 fromDate = Date.from(searchFromDate.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
                 toDate = Date.from(searchToDate.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
-                while (!fromDate.after(toDate)) {
-                    allseries.get(allseries.size() - 1).getData().add(new XYChart.Data(formatter.format(fromDate), 0.0f));
-                    fromDate.setHours(fromDate.getHours() + 24);
-                }
-                fromDate = Date.from(searchFromDate.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
-                /** TODO */
-                for (AccountTransaction tr : acc.getAccountTransactions()) {
-                    if ((tr.getDate().after(fromDate) || tr.getDate().equals(fromDate)) &&
-                            (tr.getDate().before(toDate) || tr.getDate().equals(toDate)) &&
-                            valid.containsValue(tr.getId())) {
-                        //System.out.println(tr.getId() + " - " + tr.getDate().toString());
-                        Float tmp = countMoney(acc, tr);
-                        allseries.get(allseries.size() - 1).getData().add(new XYChart.Data(tr.getDate().toString(), tmp));
-
-                        //allseries.get(allseries.size() - 1).getData().add(new XYChart.Data(tr.getDate().toString(), tr.getBeforeMoney()));
+                for (CashTransaction cashTra : cash.getCashTransaction()){
+                    if(validNames.contains(cashTra.getCurrency().toString())){
+                        if(!added){
+                            allseries.add(new XYChart.Series());
+                            allseries.get(allseries.size() - 1).setName(cashTra.getCurrency().toString());
+                            while (!fromDate.after(toDate)) {
+                                allseries.get(allseries.size() - 1).getData().add(new XYChart.Data(formatter.format(fromDate), 0.0f));
+                                fromDate.setHours(fromDate.getHours() + 24);
+                            }
+                            fromDate = Date.from(searchFromDate.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
+                            added = true;
+                        }
+                        if((cashTra.getDate().after(fromDate) || cashTra.getDate().equals(fromDate)) &&
+                                (cashTra.getDate().before(toDate) || cashTra.getDate().equals(toDate))){
+                            allseries.get(allseries.size() - 1).getData().add(new XYChart.Data(cashTra.getDate().toString(), cashTra.getMoney()));
+                        }
                     }
                 }
+            }catch (NullPointerException e){
+            }
+        }
 
-            } catch (Exception e) {
-                //e.printStackTrace();
+        //Find account transactions and add to series
+        for (Account acc : Main.getLoggedUser().getAccounts()) {
+            if(validNames.contains(acc.toString())){
+                allseries.add(new XYChart.Series());
+                allseries.get(allseries.size() - 1).setName(acc.toString());
+                try {
+                    fromDate = Date.from(searchFromDate.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
+                    toDate = Date.from(searchToDate.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
+                    while (!fromDate.after(toDate)) {
+                        allseries.get(allseries.size() - 1).getData().add(new XYChart.Data(formatter.format(fromDate), 0.0f));
+                        fromDate.setHours(fromDate.getHours() + 24);
+                    }
+                    fromDate = Date.from(searchFromDate.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+                    for (AccountTransaction tr : acc.getAccountTransactions()) {
+                        if ((tr.getDate().after(fromDate) || tr.getDate().equals(fromDate)) &&
+                                (tr.getDate().before(toDate) || tr.getDate().equals(toDate)) &&
+                                valid.containsValue(tr.getId())) {
+                            //System.out.println(tr.getId() + " - " + tr.getDate().toString());
+                            Float tmp = countMoney(acc, tr);
+                            allseries.get(allseries.size() - 1).getData().add(new XYChart.Data(tr.getDate().toString(), tmp));
+
+                            //allseries.get(allseries.size() - 1).getData().add(new XYChart.Data(tr.getDate().toString(), tr.getBeforeMoney()));
+                        }
+                    }
+
+                } catch (Exception e) {
+                    //e.printStackTrace();
+                }
             }
         }
 
@@ -301,7 +287,7 @@ public class ListMonthController {
                 for (XYChart.Data<String, Float> d : se.getData()) {
                     Tooltip.install(d.getNode(), new Tooltip(
                             s.getName()  + "\n" +
-                            d.getXValue().toString() + "\n" +
+                                    d.getXValue().toString() + "\n" +
                                     Bundles.getString("accountedmoney") + ": " + d.getYValue() + " Ft"));
                 }
             }

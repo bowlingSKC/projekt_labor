@@ -239,7 +239,6 @@ public class ShowTransactionController {
         session = SessionUtil.getSession();
         org.hibernate.Transaction tx = session.beginTransaction();
 
-        /** TODO */
         try {
             // Számla kiválasztása
             for (Account acc : Main.getLoggedUser().getAccounts()) {

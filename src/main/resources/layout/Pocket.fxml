@@ -36,5 +36,6 @@
         </columns>
       </TableView>
       <Button layoutX="23.0" layoutY="374.0" mnemonicParsing="false" onAction="#exportCSV" text="Export to CSV" />
+      <Label fx:id="errorLabel" layoutX="14.0" layoutY="308.0" prefHeight="17.0" prefWidth="256.0" text="ErrorLabel" textFill="RED" />
     </children>
 </AnchorPane>
