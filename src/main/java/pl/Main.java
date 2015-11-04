@@ -128,6 +128,12 @@ public class Main extends Application {
             loginStage.setScene(scene);
             loginStage.initStyle(StageStyle.UNDECORATED);
             loginStage.show();
+
+            new Thread(() -> {
+                loggedUser.get().getLogins();
+                System.out.println( loggedUser.get().getLogins().size() );
+            }).start();
+
         } catch (IOException e) {
             e.printStackTrace();
         }

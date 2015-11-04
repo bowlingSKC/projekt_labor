@@ -6,9 +6,11 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import org.hibernate.Session;
 import pl.Constant;
 import pl.Main;
 import pl.bundles.Bundles;
+import pl.jpa.SessionUtil;
 import pl.model.Login;
 
 import java.util.Date;
@@ -73,6 +75,10 @@ public class MyLoginsController {
 
         ipTableColumn.setCellValueFactory(new PropertyValueFactory<>("ip"));
 
+        getLoggerUserLogins();
+    }
+
+    private void getLoggerUserLogins() {
         loginTableView.getItems().setAll(Main.getLoggedUser().getLogins());
     }
 
