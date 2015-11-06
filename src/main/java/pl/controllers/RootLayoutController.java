@@ -77,7 +77,7 @@ public class RootLayoutController {
     @FXML
     private void handleLogin() {
         if( emailTextField.getText().length() == 0 || pswdTextField.getText().length() == 0 ) {
-            MessageBox.showErrorMessage("Hiba", "Nem tölttél ki minden mez?t!", "Minden mez? kitöltése kötelez?", false);
+            MessageBox.showErrorMessage("Hiba", "Nem tï¿½lttï¿½l ki minden mez?t!", "Minden mez? kitï¿½ltï¿½se kï¿½telez?", false);
             return;
         }
 
@@ -89,11 +89,11 @@ public class RootLayoutController {
             Login login = null;
             if( user == null ) {
                 login = new Login(null, InetAddress.getLocalHost().getHostAddress(), new Date(), false);
-                MessageBox.showErrorMessage("Hiba", "Rossz bejelentkezési adatok", "Ilyen E-mail cím nem található a rendszerben!", false);
+                MessageBox.showErrorMessage("Hiba", "Rossz bejelentkezï¿½si adatok", "Ilyen E-mail cï¿½m nem talï¿½lhatï¿½ a rendszerben!", false);
             } else {
                 if( !(Main.getSHA512Hash( pswdTextField.getText(), user.getSalt() ).equals(user.getPassword())) ) {
                     login = new Login(user, InetAddress.getLocalHost().getHostAddress(), new Date(), false);
-                    MessageBox.showErrorMessage("Hiba", "Rossz bejelentkezési adatok", "Hibás E-mail cím és jelszó páros!", false);
+                    MessageBox.showErrorMessage("Hiba", "Rossz bejelentkezï¿½si adatok", "Hibï¿½s E-mail cï¿½m ï¿½s jelszï¿½ pï¿½ros!", false);
                 } else {
                     login = new Login(user, InetAddress.getLocalHost().getHostAddress(), new Date(), true);
                     Main.login(user);
@@ -102,6 +102,7 @@ public class RootLayoutController {
             Transaction tx = session.beginTransaction();
             session.save(login);
             tx.commit();
+
         } catch (Throwable ex) {
             ex.printStackTrace();
         } finally {
@@ -138,7 +139,7 @@ public class RootLayoutController {
     private void handleRegistration() {
         try {
             Stage stage = new Stage();
-            stage.setTitle("Regisztráció");
+            stage.setTitle("Regisztrï¿½ciï¿½");
             stage.initOwner( Main.getPrimaryStage() );
             stage.initModality(Modality.WINDOW_MODAL);
             stage.initStyle(StageStyle.UNDECORATED);

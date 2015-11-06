@@ -7,9 +7,9 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane prefHeight="596.0" prefWidth="745.0" stylesheets="@../styles/login.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pl.controllers.ListMonthController">
+<AnchorPane prefHeight="636.0" prefWidth="920.0" stylesheets="@../styles/login.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pl.controllers.ListMonthController">
     <children>
-      <Pane layoutX="46.0" layoutY="432.0">
+      <Pane layoutX="45.0" layoutY="414.0">
          <children>
               <Label fx:id="startLabel" layoutX="19.0" layoutY="30.0" text="Intervallum kezdete:" />
               <DatePicker fx:id="searchToDate" layoutX="160.0" layoutY="55.0" />
@@ -22,7 +22,7 @@
               <DatePicker fx:id="searchFromDate" layoutX="160.0" layoutY="23.0" />
          </children>
       </Pane>
-      <AreaChart fx:id="areaChart" layoutX="28.0" layoutY="14.0" prefHeight="400.0" prefWidth="700.0">
+      <AreaChart fx:id="areaChart" layoutX="28.0" layoutY="14.0" prefHeight="400.0" prefWidth="874.0">
         <xAxis>
           <CategoryAxis side="BOTTOM" />
         </xAxis>
@@ -30,11 +30,12 @@
           <NumberAxis side="LEFT" />
         </yAxis>
       </AreaChart>
-      <Label fx:id="accountsLabel" layoutX="421.0" layoutY="432.0" text="Számlák:">
+      <Label fx:id="accountsLabel" layoutX="578.0" layoutY="414.0" text="Számlák:">
          <font>
             <Font name="System Bold" size="12.0" />
          </font>
       </Label>
-      <ScrollPane fx:id="scrollPane" layoutX="421.0" layoutY="449.0" prefHeight="166.0" prefWidth="301.0" />
+      <ScrollPane fx:id="scrollPane" layoutX="578.0" layoutY="431.0" prefHeight="166.0" prefWidth="301.0" />
+      <Label fx:id="errorLabel" layoutX="45.0" layoutY="603.0" prefHeight="39.0" prefWidth="841.0" text="ErrorLabel" textFill="#fc0000" wrapText="true" />
     </children>
 </AnchorPane>
