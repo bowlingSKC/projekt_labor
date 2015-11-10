@@ -7,9 +7,11 @@ import javafx.scene.input.MouseEvent;
 
 public class SplashController {
 
-
     @FXML
     private Label closeAppLabel;
+
+    @FXML
+    private Label statusLabel;
 
     @FXML
     public void initialize() {
@@ -19,6 +21,10 @@ public class SplashController {
                 System.exit(0);
             });
         });
+    }
+
+    public void setStatusLabel(String text) {
+        statusLabel.setText(text);
     }
 
 }

@@ -6,9 +6,6 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
-import javafx.concurrent.WorkerStateEvent;
-import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -18,6 +15,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import pl.bundles.Bundles;
 import pl.controllers.LoggedController;
+import pl.controllers.SplashController;
 import pl.model.User;
 
 import java.io.IOException;
@@ -45,50 +43,57 @@ public class Main extends Application {
     }
 
     private void initLayout() {
+        final SplashController controller;
         try {
             FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/Splash.fxml"), Bundles.getBundle());
             AnchorPane pane = loader.load();
+
+            controller = loader.getController();
 
             splashScene = new Scene(pane);
             primaryStage.setScene(splashScene);
             primaryStage.initStyle(StageStyle.UNDECORATED);
 
             primaryStage.sceneProperty().addListener((observable, oldValue, newValue) -> primaryStage.centerOnScreen());
-
             primaryStage.show();
+
+            Service service = new Service() {
+                @Override
+                protected Task createTask() {
+                    return new Task() {
+                        @Override
+                        protected Object call() throws Exception {
+                            Constant.init();
+
+                            readSettingsFromFile();
+
+                            FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/RootLayout.fxml"), Bundles.getBundle() );
+                            AnchorPane pane = loader.load();
+                            loginScene = new Scene(pane);
+
+                            return null;
+                        }
+                    };
+                }
+            };
+
+            service.start();
+            service.setOnSucceeded(event -> {
+                primaryStage.setScene(loginScene);
+            });
+
+            service.setOnFailed(event -> {
+                MessageBox.showErrorMessage(
+                        Bundles.getString("error.nodb.title"), Bundles.getString("error.nodb.header"), Bundles.getString("error.nodb.text"), true);
+                Platform.exit();
+                System.exit(0);
+            });
         } catch (IOException ex) {
             ex.printStackTrace();
         }
+    }
 
-        Service service = new Service() {
-            @Override
-            protected Task createTask() {
-                return new Task() {
-                    @Override
-                    protected Object call() throws Exception {
-                        Constant.init();
-
-                        FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/RootLayout.fxml"), Bundles.getBundle() );
-                        AnchorPane pane = loader.load();
-                        loginScene = new Scene(pane);
-
-                        return null;
-                    }
-                };
-            }
-        };
-
-        service.start();
-        service.setOnSucceeded(event -> {
-            primaryStage.setScene(loginScene);
-        });
-
-        service.setOnFailed(event -> {
-            MessageBox.showErrorMessage(
-                    Bundles.getString("error.nodb.title"), Bundles.getString("error.nodb.header"), Bundles.getString("error.nodb.text"), true);
-            Platform.exit();
-            System.exit(0);
-        });
+    private void readSettingsFromFile() {
 
     }
 
@@ -128,11 +133,6 @@ public class Main extends Application {
             loginStage.setScene(scene);
             loginStage.initStyle(StageStyle.UNDECORATED);
             loginStage.show();
-
-            new Thread(() -> {
-                loggedUser.get().getLogins();
-            }).start();
-
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -144,6 +144,7 @@ public class Main extends Application {
 
         loginStage.close();
         primaryStage.show();
+        System.gc();
     }
 
     public static Stage getPrimaryStage() {

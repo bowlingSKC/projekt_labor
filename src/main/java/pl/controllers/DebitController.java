@@ -27,6 +27,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.Optional;
 
 public class DebitController {
 
@@ -70,6 +71,7 @@ public class DebitController {
 
     private void initEditPane() {
         currencyComboBox.getItems().setAll(Constant.getCurrencies());
+        currencyComboBox.getSelectionModel().select(Constant.getHufCurrency());
     }
 
     private void initTablePane() {
@@ -205,7 +207,25 @@ public class DebitController {
             });
 
             deleteLink.setOnAction((ActionEvent event) -> {
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                alert.setTitle( Bundles.getString("confirmation") );
+                alert.setHeaderText("Biztosan tötölni szeretné a tartozást?");
+                alert.setContentText("A műveletet később nem lehet visszavonni.");
 
+                Optional<ButtonType> result = alert.showAndWait();
+                if( result.get() == ButtonType.OK ) {
+                    int row = getTableRow().getIndex();
+                    Debit selected = debitTableView.getItems().get(row);
+
+                    Main.getLoggedUser().getDebits().remove(selected);
+                    Session session = SessionUtil.getSession();
+                    Transaction tx = session.beginTransaction();
+                    session.delete(selected);
+                    tx.commit();
+                    session.close();
+
+                    updateTableItems();
+                }
             });
         }
 

@@ -1,11 +1,11 @@
 package pl.model;
 
+import org.hibernate.*;
 import pl.CurrencyExchange;
+import pl.jpa.SessionUtil;
 
 import javax.persistence.*;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "user")
@@ -37,7 +37,7 @@ public class User {
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "owner", cascade = CascadeType.ALL)
     private Set<ReadyCash> readycash;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "user", cascade = CascadeType.ALL)
     private Set<Login> logins = new HashSet<>(0);
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "owner", cascade = CascadeType.ALL)
@@ -247,6 +247,29 @@ public class User {
             }
         }
         return tmp;
+    }
+
+    public void normalizeProfil() {
+        deleteOldLogins();
+
+        updateProfile();
+    }
+
+    private void updateProfile() {
+        Session session = SessionUtil.getSession();
+        org.hibernate.Transaction tx = session.beginTransaction();
+        session.update(this);
+        tx.commit();
+        session.close();
+    }
+
+    private void deleteOldLogins() {
+        if( logins.size() > 30 ) {
+            List<Login> tmpList = new ArrayList<>(logins);
+            tmpList.sort(Login::compareTo);
+            tmpList = tmpList.subList(tmpList.size()-30, tmpList.size()-1);
+            logins = new HashSet<>(tmpList);
+        }
     }
 
     @Override

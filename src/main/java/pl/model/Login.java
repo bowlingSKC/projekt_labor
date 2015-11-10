@@ -5,7 +5,7 @@ import java.util.Date;
 
 @Entity
 @Table(name = "login")
-public class Login {
+public class Login implements Comparable<Login> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -91,5 +91,10 @@ public class Login {
         int result = 31 * ip.hashCode();
         result = 31 * result + date.hashCode();
         return result;
+    }
+
+    @Override
+    public int compareTo(Login o) {
+        return getDate().compareTo(o.getDate());
     }
 }

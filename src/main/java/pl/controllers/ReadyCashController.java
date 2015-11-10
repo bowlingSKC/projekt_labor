@@ -14,6 +14,7 @@ import pl.jpa.SessionUtil;
 import pl.model.CashTransaction;
 import pl.model.Currency;
 import pl.model.ReadyCash;
+import pl.model.TransactionType;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -47,7 +48,7 @@ public class ReadyCashController {
     @FXML
     private TableColumn<CashTransaction, Date> dateTableColumn;
     @FXML
-    private TableColumn<CashTransaction, String> typeTableColumn;
+    private TableColumn<CashTransaction, TransactionType> typeTableColumn;
     @FXML
     private TableColumn<CashTransaction, Float> amountTableColumn;
     @FXML
@@ -92,6 +93,8 @@ public class ReadyCashController {
         dateTableColumn.setCellValueFactory(new PropertyValueFactory<>("date"));
         currencyTableColumn.setCellValueFactory(new PropertyValueFactory<>("currency"));
         commentTableColumn.setCellValueFactory(new PropertyValueFactory<>("comment"));
+        typeTableColumn.setCellValueFactory(new PropertyValueFactory<>("type"));
+
 
         updateTransactionTableItems();
     }
@@ -238,7 +241,7 @@ public class ReadyCashController {
         transaction.setCurrency(currencyComboBox.getSelectionModel().getSelectedItem());
         transaction.setComment(commentField.getText());
         transaction.setBeforeTransaction(Main.getLoggedUser().getLatestCashTransaction(currencyComboBox.getSelectionModel().getSelectedItem()));
-        if( transactionTypeComboBox.getSelectionModel().getSelectedItem().equals("in") ) {
+        if( transactionTypeComboBox.getSelectionModel().getSelectedItem().equals(Bundles.getString("in")) ) {
             transaction.setType(Constant.getCashInType());
         } else {
             transaction.setType(Constant.getCashOutType());

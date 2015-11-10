@@ -85,6 +85,7 @@ public class RootLayoutController {
         try {
             Criteria criteria = session.createCriteria(User.class);
             User user = (User) criteria.add(Restrictions.eq("email", emailTextField.getText())).uniqueResult();
+            session.close();
 
             Login login = null;
             if( user == null ) {
@@ -97,15 +98,19 @@ public class RootLayoutController {
                 } else {
                     login = new Login(user, InetAddress.getLocalHost().getHostAddress(), new Date(), true);
                     Main.login(user);
+                    user.normalizeProfil();
                 }
             }
+
+            session = SessionUtil.getSession();
             Transaction tx = session.beginTransaction();
             session.save(login);
+            if( user != null ) user.getLogins().add(login);
             tx.commit();
         } catch (Throwable ex) {
             ex.printStackTrace();
         } finally {
-            session.close();
+            if(session.isConnected()) session.close();
         }
     }
 
