@@ -52,13 +52,11 @@ public class ListMonthController {
     private Label startLabel;
     @FXML
     private Label endLabel;
+    @FXML
+    private Label errorLabel;
 
-
-    private List<AccountTransaction> allTransactions;
     private List<CheckBox> checkBoxes = new ArrayList<>();
     private ArrayList<XYChart.Series> allseries;
-    private String selected;
-    private Date lastDate;
 
     @FXML
     public void initialize() {
@@ -66,25 +64,16 @@ public class ListMonthController {
         filterLabel.setText(Bundles.getString("filter"));
         startLabel.setText(Bundles.getString("startintervall"));
         endLabel.setText(Bundles.getString("endintervall"));
+        errorLabel.setVisible(false);
         searchFromDate.valueProperty().addListener((obs, oldDate, newDate) -> {
-            /*ZonedDateTime zonedDateTime = newDate.atStartOfDay(ZoneId.systemDefault());
-            Instant instant = Instant.from(zonedDateTime);
-            Date dateToSet = Date.from(instant);*/
-            Date date = Date.from(newDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-            //System.out.println("Listen. " + date.toString());
+            //Date date = Date.from(newDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
             refreshAreaChart();
-            //refreshChart();
-
+            //searchToDate.setValue(searchFromDate.getValue().plusMonths(1));
         });
         searchToDate.valueProperty().addListener((obs, oldDate, newDate) -> {
-            /*ZonedDateTime zonedDateTime = newDate.atStartOfDay(ZoneId.systemDefault());
-            Instant instant = Instant.from(zonedDateTime);
-            Date dateToSet = Date.from(instant);*/
-            Date date = Date.from(newDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-            //System.out.println("Listen. " + date.toString());
+            //Date date = Date.from(newDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
             refreshAreaChart();
-            //refreshChart();
-
+            //searchFromDate.setValue(searchToDate.getValue().minusMonths(1));
         });
         //Számlák hozzáadása
         VBox vbox = new VBox();
@@ -92,17 +81,14 @@ public class ListMonthController {
             CheckBox checkBox = new CheckBox(acc.toString());
             checkBox.setSelected(true);
             checkBoxes.add(checkBox);
-            checkBox.setOnAction(new EventHandler<ActionEvent>() {
-                @Override
-                public void handle(ActionEvent event) {
-                    for (XYChart.Series ser : allseries) {
-                        if (checkBox.getText().equals(ser.getName())) {
-                            if (checkBox.isSelected() && !areaChart.getData().contains(ser)) {
-                                areaChart.getData().add(ser);
-                            }
-                            if(!checkBox.isSelected() && areaChart.getData().contains(ser)) {
-                                areaChart.getData().remove(ser);
-                            }
+            checkBox.setOnAction(event -> {
+                for (XYChart.Series ser : allseries) {
+                    if (checkBox.getText().equals(ser.getName())) {
+                        if (checkBox.isSelected() && !areaChart.getData().contains(ser)) {
+                            areaChart.getData().add(ser);
+                        }
+                        if(!checkBox.isSelected() && areaChart.getData().contains(ser)) {
+                            areaChart.getData().remove(ser);
                         }
                     }
                 }
@@ -134,16 +120,14 @@ public class ListMonthController {
         }
 
         allseries = new ArrayList<>();
-        lastDate = new Date();
-        lastDate.setHours(lastDate.getHours() - (45 * 24));
-        searchToDate.setValue(lastDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
-        lastDate.setHours(lastDate.getHours() - (30 * 24));
-        searchFromDate.setValue(lastDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+        searchToDate.setValue(searchToDate.getValue().now().minusDays(45));
+        searchFromDate.setValue(searchToDate.getValue().minusMonths(1));
         refreshAreaChart();
 
     }
 
     public void refreshAreaChart() {
+        errorLabel.setVisible(false);
         areaChart.getData().clear();
         allseries.clear();
         Format formatter = new SimpleDateFormat("yyyy-MM-dd");
@@ -153,42 +137,54 @@ public class ListMonthController {
         final Comparator<XYChart.Data<String, Number>> comparator =
                 (XYChart.Data<String, Number> o1, XYChart.Data<String, Number> o2) ->
                         o1.getXValue().compareTo(o2.getXValue());
-        //allseries.add(new XYChart.Series());
-        //allseries.get(allseries.size()-1).setName("Készpénz");
 
         //Valid values
-        Map<Date, Long> valid = new HashMap<Date, Long>();
+        Map<Date, Long> valid = new HashMap<>();
         for(Account acc : Main.getLoggedUser().getAccounts()){
             for(AccountTransaction tra : acc.getAccountTransactions()){
                 Float tmp = countMoney(acc, tra);
-                if(valid.containsKey(tra.getDate())){
-                    if(tra.getId() > valid.get(tra.getDate())){
-                        valid.replace(tra.getDate(), tra.getId());
-                    }
+                if(valid.containsKey(tra.getDate()) && tra.getId() > valid.get(tra.getDate())){
+                    valid.replace(tra.getDate(), tra.getId());
                 }else{
                     valid.put(tra.getDate(), tra.getId());
                 }
             }
         }
-        //Valid names
+        Map<Date, Long> validCash = new HashMap<>();
+        for (ReadyCash cash : Main.getLoggedUser().getReadycash()) {
+            for (CashTransaction cashTra : cash.getCashTransaction()) {
+                Float tmp = countCashMoney(cash, cashTra);
+                if(validCash.containsKey(cashTra.getDate())){
+                    if(cashTra.getId() > validCash.get(cashTra.getDate())){
+                        validCash.replace(cashTra.getDate(), cashTra.getId());
+                    }
+                }else{
+                    validCash.put(cashTra.getDate(), cashTra.getId());
+                }
+            }
+        }
+        //Valid checkbox names
         Set<String> validNames = new HashSet<>();
         for(CheckBox check : checkBoxes){
             if(check.isSelected()){
                 validNames.add(check.getText());
             }
         }
-        // TODO Egy napon belüli készpénzes tranzakviók kezelése
         //Find cash transactions
+        Map<String, String> seriesID = new HashMap<>();
+        Map<String, String> firstCashDates = new HashMap<>();
         for (ReadyCash cash : Main.getLoggedUser().getReadycash()) {
             boolean added = false;
             try{
                 fromDate = Date.from(searchFromDate.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
                 toDate = Date.from(searchToDate.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
+                CashTransaction first = null;
                 for (CashTransaction cashTra : cash.getCashTransaction()){
                     if(validNames.contains(cashTra.getCurrency().toString())){
                         if(!added){
                             allseries.add(new XYChart.Series());
                             allseries.get(allseries.size() - 1).setName(cashTra.getCurrency().toString());
+                            seriesID.put(cashTra.getCurrency().toString(), "Cash");
                             while (!fromDate.after(toDate)) {
                                 allseries.get(allseries.size() - 1).getData().add(new XYChart.Data(formatter.format(fromDate), 0.0f));
                                 fromDate.setHours(fromDate.getHours() + 24);
@@ -197,20 +193,33 @@ public class ListMonthController {
                             added = true;
                         }
                         if((cashTra.getDate().after(fromDate) || cashTra.getDate().equals(fromDate)) &&
-                                (cashTra.getDate().before(toDate) || cashTra.getDate().equals(toDate))){
-                            allseries.get(allseries.size() - 1).getData().add(new XYChart.Data(cashTra.getDate().toString(), cashTra.getMoney()));
+                                (cashTra.getDate().before(toDate) || cashTra.getDate().equals(toDate)) &&
+                                validCash.containsValue(cashTra.getId())){
+                            Float tmp = countCashMoney(cash, cashTra);
+                            allseries.get(allseries.size() - 1).getData().add(new XYChart.Data(cashTra.getDate().toString(), tmp));
+                        }
+
+                    }
+                    //Find first transaction
+                    if(first == null){
+                        first = cashTra;
+                    }else{
+                        if(first.getDate().after(cashTra.getDate())){
+                            first = cashTra;
                         }
                     }
                 }
+                firstCashDates.put(first.getCurrency().toString(), formatter.format(first.getDate()));
             }catch (NullPointerException e){
+                //e.printStackTrace();
             }
         }
-
         //Find account transactions and add to series
         for (Account acc : Main.getLoggedUser().getAccounts()) {
             if(validNames.contains(acc.toString())){
                 allseries.add(new XYChart.Series());
                 allseries.get(allseries.size() - 1).setName(acc.toString());
+                seriesID.put(acc.toString(), "Account");
                 try {
                     fromDate = Date.from(searchFromDate.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
                     toDate = Date.from(searchToDate.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
@@ -247,7 +256,6 @@ public class ListMonthController {
         for (XYChart.Series<String, Float> s : areaChart.getData()) {
             float ertek = 0;
             for (XYChart.Data<String, Float> d : s.getData()) {
-                //System.out.println(ertek + " - " + d.getYValue() + " - " + d.getXValue());
                 if (ertek > 0 && d.getYValue() == 0) {
                     d.setYValue(ertek);
                 }
@@ -258,74 +266,118 @@ public class ListMonthController {
             }
             //Set null values
             boolean was = false;
+            boolean wasCash = false;
             for (int i = s.getData().size() - 2; i >= 0; i--) {
                 if (s.getData().get(i).getYValue() == 0) {
                     //Set money before first transaction
-                    for(Account acc : Main.getLoggedUser().getAccounts()){
-                        for(AccountTransaction tra : acc.getAccountTransactions()){
-                            if(formatter.format(tra.getDate()).equals(s.getData().get(i+1).getXValue()) && s.getData().get(i).getYValue() == 0
-                                    && acc.toString().equals(s.getName()) && !was){
+                    for (Account acc : Main.getLoggedUser().getAccounts()) {
+                        for (AccountTransaction tra : acc.getAccountTransactions()) {
+                            if (formatter.format(tra.getDate()).equals(s.getData().get(i + 1).getXValue()) && s.getData().get(i).getYValue() == 0
+                                    && acc.toString().equals(s.getName()) && !was) {
                                 Float tmp;
                                 tmp = tra.getMoney();
-                                if(tra.getType().getSign().equals("+")){
-                                    tmp = tmp *-1;
+                                if (tra.getType().getSign().equals("+")) {
+                                    tmp = tmp * -1;
                                 }
                                 //System.out.println(formatter.format(tra.getDate()) + " ---- " + acc.toString() + " - " + tmp.toString());
-                                s.getData().get(i).setYValue(s.getData().get(i+1).getYValue()+tmp);
+                                s.getData().get(i).setYValue(s.getData().get(i + 1).getYValue() + tmp);
                                 was = true;
                             }
                         }
                     }
-                    if(s.getData().get(i).getYValue() == 0){
+                    //Set money before first cashtransaction
+                    for(ReadyCash red : Main.getLoggedUser().getReadycash()){
+                        for(CashTransaction cash : red.getCashTransaction()){
+                            if (formatter.format(cash.getDate()).equals(s.getData().get(i + 1).getXValue()) && s.getData().get(i).getYValue() == 0
+                                    && cash.getCurrency().toString().equals(s.getName()) && !wasCash) {
+                                Float tmp;
+                                tmp = cash.getMoney();
+                                if (cash.getType().getSign().equals("+")) {
+                                    tmp = tmp * -1;
+                                }
+                                s.getData().get(i).setYValue(s.getData().get(i + 1).getYValue() + tmp);
+                                wasCash = true;
+                            }
+                        }
+                    }
+                    //Set 0 values
+                    if (s.getData().get(i).getYValue() == 0 &&
+                            ( seriesID.get(s.getName()).equals("Account") || !firstCashDates.get(s.getName()).equals(s.getData().get(i).getXValue()))) {
                         s.getData().get(i).setYValue(s.getData().get(i + 1).getYValue());
                     }
                 }
-
-            }
-            //Placing tooltip
-            for (XYChart.Series<String, Float> se : areaChart.getData()) {
-                for (XYChart.Data<String, Float> d : se.getData()) {
-                    Tooltip.install(d.getNode(), new Tooltip(
-                            s.getName()  + "\n" +
-                                    d.getXValue().toString() + "\n" +
-                                    Bundles.getString("accountedmoney") + ": " + d.getYValue() + " Ft"));
-                }
             }
         }
 
-        /*List<XYChart.Data<String, Float>> rem = new ArrayList<>();
+        //Error handling
         for (XYChart.Series<String, Float> s : areaChart.getData()) {
+            //boolean empty = true;
             for (XYChart.Data<String, Float> d : s.getData()) {
-                //int ertek = d.getXValue().compareTo(formatter.format(toDate));
+                //Correct accountTransactions
+                if(seriesID.get(s.getName()).equals("Account") && d.getYValue() == 0){
+                    AccountTransaction before = null;
+                    for(Account acc : Main.getLoggedUser().getAccounts()) {
+                        if(acc.toString().equals(s.getName())){
+                            for (AccountTransaction tra : acc.getAccountTransactions()) {
+                                if(before == null && valid.containsValue(tra.getId()) && formatter.format(tra.getDate()).compareTo(d.getXValue()) < 0){
+                                    before = tra;
+                                }
+                                if(before != null && tra.getId() > before.getId() && formatter.format(tra.getDate()).compareTo(d.getXValue()) < 0){
+                                    before = tra;
+                                }
+                            }
+                        }
+                    }
+                    if(before != null){
+                        d.setYValue(countMoney(before.getAccount(), before));
+                    }
+                }
+                //Correct cashTransactions
+                if(seriesID.get(s.getName()).equals("Cash") && d.getYValue() == 0){
+                    CashTransaction before = null;
+                    for(ReadyCash red : Main.getLoggedUser().getReadycash()) {
+                        if(red.getCurrency().toString().equals(s.getName())){
+                            for (CashTransaction tra : red.getCashTransaction()) {
+                                if(before == null && validCash.containsValue(tra.getId()) && formatter.format(tra.getDate()).compareTo(d.getXValue()) < 0){
+                                    before = tra;
+                                }
+                                if(before != null && tra.getId() > before.getId() && formatter.format(tra.getDate()).compareTo(d.getXValue()) < 0){
+                                    before = tra;
+                                }
+                            }
+                        }
+                    }
+                    if(before != null){
+                        d.setYValue(countCashMoney(before.getCash(), before));
+                    }
+                }
+                /*if(d.getYValue() > 0){
+                    empty = false;
+                }*/
+            }
+            /*if(empty && !errorLabel.isVisible()){
+                errorLabel.setVisible(true);
+                errorLabel.setText(Bundles.getString("errorlistmonth"));
+            }
+            if(empty && errorLabel.isVisible()){
+                if(errorLabel.getText().equals(Bundles.getString("errorlistmonth"))){
+                    errorLabel.setText(errorLabel.getText() + " " + s.getName());
+                }else{
+                    errorLabel.setText(errorLabel.getText() + ", " + s.getName());
+                }
+            }*/
+        }
 
-                //if (ertek == 1) {
-                    //rem.add(d);
-                    //s.getData().remove(d);
-                //}
+        //Placing tooltip
+        for (XYChart.Series<String, Float> se : areaChart.getData()) {
+            for (XYChart.Data<String, Float> d : se.getData()) {
+                Tooltip.install(d.getNode(), new Tooltip(
+                        //s.getName()  + "\n" +
+                        d.getXValue().toString() + "\n" +
+                                Bundles.getString("accountedmoney") + ": " + d.getYValue() + " Ft"));
             }
         }
-        for (XYChart.Data<String, Float> d : rem) {
-            System.out.println(d.getXValue());
-            areaChart.getData().remove(d);
-        }*/
     }
-
-    /*public void refreshChart(){
-        for(int i = 0; i < accountListView.getItems().size(); i++){
-            if(!accountListView.getItems().get(i).equals(selected)){
-                accountListView.getSelectionModel().select(i);
-                i = accountListView.getItems().size();
-                itemSelected();
-            }
-        }
-        for(int i = 0; i < accountListView.getItems().size(); i++){
-            if(accountListView.getItems().get(i).equals(selected)){
-                accountListView.getSelectionModel().select(i);
-                i = accountListView.getItems().size();
-                itemSelected();
-            }
-        }
-    }*/
 
     public Float countMoney(Account acc, AccountTransaction tra){
         Float tmp = acc.getMoney();
@@ -341,22 +393,17 @@ public class ListMonthController {
         return tmp;
     }
 
-    /*public void itemSelected(){
-        for(XYChart.Series ser : allseries){
-            if(accountListView.getSelectionModel().getSelectedItem().toString().equals(ser.getName())){
-                if(areaChart.getData().size() == 0){
-                    areaChart.getData().add(ser);
-                }else{
-                    if(areaChart.getData().get(0).getName().equals(accountListView.getSelectionModel().getSelectedItem().toString())){
-                    }else {
-                        areaChart.getData().clear();
-                        //areaChart.setTitle("Egyenleg");
-                        areaChart.getData().add(ser);
-                    }
+    public Float countCashMoney(ReadyCash ready, CashTransaction tra){
+        Float tmp = ready.getMoney();
+        for(CashTransaction tr : ready.getCashTransaction()){
+            if(tra.getId() < tr.getId()){
+                Float tmpMoney = tr.getMoney();
+                if(tr.getType().getSign().equals("+")){
+                    tmpMoney = tmpMoney *-1;
                 }
-
+                tmp += tmpMoney;
             }
         }
-    }*/
-
+        return tmp;
+    }
 }

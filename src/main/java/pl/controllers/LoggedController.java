@@ -69,7 +69,7 @@ public class LoggedController {
         createMenu();
 
         try {
-            FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/PersonalSummary.fxml") );
+            FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/PersonalSummary.fxml"), Bundles.getBundle() );
             AnchorPane pane = loader.load();
 
             layout.setCenter(pane);
@@ -349,7 +349,7 @@ public class LoggedController {
 
         private void readReadyCashPane() {
             try {
-                FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/ReadyCash.fxml") );
+                FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/ReadyCash.fxml"), Bundles.getBundle() );
                 AnchorPane pane = loader.load();
 
                 layout.setCenter(pane);
@@ -361,7 +361,7 @@ public class LoggedController {
 
         private void readPropertiesPanel() {
             try {
-                FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/Properties.fxml") );
+                FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/Properties.fxml"), Bundles.getBundle() );
                 AnchorPane pane = loader.load();
 
                 layout.setCenter(pane);
@@ -373,7 +373,7 @@ public class LoggedController {
 
         private void readListTransactions() {
             try {
-                FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/ListTransactions.fxml") );
+                FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/ListTransactions.fxml"), Bundles.getBundle() );
                 AnchorPane pane = loader.load();
 
                 layout.setCenter(pane);

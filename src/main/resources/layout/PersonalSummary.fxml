@@ -10,7 +10,7 @@
    <children>
       <HBox alignment="BASELINE_CENTER" layoutX="242.0" layoutY="160.0" spacing="10.0" AnchorPane.leftAnchor="192.0" AnchorPane.rightAnchor="192.0">
          <children>
-            <Label text="Önnek jelenleg">
+            <Label text="%youhave">
                <font>
                   <Font size="15.0" />
                </font>
@@ -20,7 +20,7 @@
                   <Font size="22.0" />
                </font>
             </Label>
-            <Label text="forintja van.">
+            <Label text="%huf">
                <font>
                   <Font size="15.0" />
                </font>
@@ -40,9 +40,9 @@
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <Label text="készpénz" />
-            <Label text="bankszámlá(ko)n" GridPane.rowIndex="1" />
-            <Label text="vagyontárgyakban" GridPane.rowIndex="2" />
+            <Label text="%inreadycash" />
+            <Label text="%inaccounts" GridPane.rowIndex="1" />
+            <Label text="%inassets" GridPane.rowIndex="2" />
             <Label text="Ft" GridPane.columnIndex="2" />
             <Label text="Ft" GridPane.columnIndex="2" GridPane.rowIndex="1" />
             <Label text="Ft" GridPane.columnIndex="2" GridPane.rowIndex="2" />
@@ -70,7 +70,7 @@
                   <Insets right="8.0" />
                </GridPane.margin>
             </HBox>
-            <Label text="tartozások" GridPane.rowIndex="3" />
+            <Label text="%indebits" GridPane.rowIndex="3" />
             <Label text="Ft" GridPane.columnIndex="2" GridPane.rowIndex="3" />
             <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
                <children>
@@ -82,5 +82,6 @@
             </HBox>
          </children>
       </GridPane>
+      <Button layoutX="588.0" layoutY="99.0" mnemonicParsing="false" onAction="#handleToCSV" text="%csv" />
    </children>
 </AnchorPane>

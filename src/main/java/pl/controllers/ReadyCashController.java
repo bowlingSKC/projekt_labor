@@ -297,6 +297,7 @@ public class ReadyCashController {
 
     public void handleToCSV(){
         FileWriter writer = null;
+        //Write first table
         try {
             FileChooser fileChooser = new FileChooser();
             FileChooser.ExtensionFilter extFilter =
@@ -311,8 +312,36 @@ public class ReadyCashController {
                     writer.append(readyCashTableView.getItems().get(i).getCurrency().toString());
                     writer.append(';');
                     writer.append(String.valueOf(readyCashTableView.getItems().get(i).getMoney()));
-                    //writer.append(';');
-                    //writer.append(readyCashTableView.getItems().get(i).g);
+                    writer.append('\n');
+                    writer.flush();
+                }
+                writer.close();
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        //Write second table
+        try {
+            FileChooser fileChooser = new FileChooser();
+            FileChooser.ExtensionFilter extFilter =
+                    new FileChooser.ExtensionFilter("CSV file (*.csv)", "*.csv");
+            fileChooser.getExtensionFilters().add(extFilter);
+            File file = fileChooser.showSaveDialog(Main.getPrimaryStage());
+            if(file != null){
+
+                writer = new FileWriter(file);
+                writer.append("Date;Currency;Money;Type;Comment\n");
+                for(int i = 0; i < transactionTableView.getItems().size(); i++){
+                    writer.append(transactionTableView.getItems().get(i).getDate().toString());
+                    writer.append(';');
+                    writer.append(transactionTableView.getItems().get(i).getCurrency().toString());
+                    writer.append(';');
+                    writer.append(String.valueOf(transactionTableView.getItems().get(i).getMoney()));
+                    writer.append(';');
+                    writer.append(String.valueOf(transactionTableView.getItems().get(i).getType().toString()));
+                    writer.append(';');
+                    writer.append(String.valueOf(transactionTableView.getItems().get(i).getComment()));
                     writer.append('\n');
                     writer.flush();
                 }
