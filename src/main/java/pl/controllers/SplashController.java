@@ -11,9 +11,6 @@ public class SplashController {
     private Label closeAppLabel;
 
     @FXML
-    private Label statusLabel;
-
-    @FXML
     public void initialize() {
         Platform.runLater(() -> {
             closeAppLabel.setOnMouseClicked((MouseEvent event) -> {
@@ -21,10 +18,6 @@ public class SplashController {
                 System.exit(0);
             });
         });
-    }
-
-    public void setStatusLabel(String text) {
-        statusLabel.setText(text);
     }
 
 }

@@ -14,10 +14,12 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import org.controlsfx.control.Notifications;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Restrictions;
+import pl.Constant;
 import pl.Main;
 import pl.MessageBox;
 import pl.animations.FadeInLeftTransition;
@@ -26,6 +28,7 @@ import pl.animations.FadeInRightTransition;
 import pl.animations.FadeInUpTransition;
 import pl.bundles.Bundles;
 import pl.jpa.SessionUtil;
+import pl.model.Debit;
 import pl.model.Login;
 import pl.model.User;
 
@@ -99,6 +102,38 @@ public class RootLayoutController {
                     login = new Login(user, InetAddress.getLocalHost().getHostAddress(), new Date(), true);
                     Main.login(user);
                     user.normalizeProfil();
+
+                    if( Main.getLoggedUser().getLogins() != null && Main.getLoggedUser().getLogins().size() != 0 ) {
+                        Notifications.create()
+                                .title("Utolsó bejelentkezése")
+                                .text(Constant.getDateTimeFormat().format(user.getLastLogin()))
+                                .showInformation();
+                    }
+
+                    if( Main.getLoggedUser().getDebits() != null && Main.getLoggedUser().getDebits().size() != 0 ) {
+                        for(Debit debit : Main.getLoggedUser().getDebits()) {
+                            long nowTime = new Date().getTime();
+                            long deadlineTime = debit.getDeadline().getTime();
+                            int diffDays = (int)((deadlineTime - nowTime) / (1000 * 60 * 60 * 24));
+                            if(diffDays == 0) {
+                                Notifications.create()
+                                        .title("Lejáró tartozás!")
+                                        .text(debit.getName() + " tartozás ma lejár!")
+                                        .showError();
+                            } else if(diffDays < 3) {
+                                Notifications.create()
+                                        .title("Hamarosan lejáró tartozás!")
+                                        .text(debit.getName() + " tartozás három napon belül lejár!")
+                                        .showWarning();
+                            } else if(diffDays < 7) {
+                                Notifications.create()
+                                        .title("Hamarosan lejáró tartozás!")
+                                        .text(debit.getName() + " tartozás hét napon belül lejár!")
+                                        .showInformation();
+                            }
+                        }
+                    }
+
                 }
             }
 

@@ -1,6 +1,8 @@
 package pl.controllers;
 
+import com.sun.media.sound.EmergencySoundbank;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -18,8 +20,10 @@ import pl.MessageBox;
 import pl.animations.FadeInUpTransition;
 import pl.bundles.Bundles;
 import pl.jpa.SessionUtil;
+import pl.model.Account;
 import pl.model.Currency;
 import pl.model.Debit;
+import pl.model.ReadyCash;
 
 import javax.xml.soap.Text;
 import java.io.File;
@@ -35,6 +39,8 @@ public class DebitController {
     private AnchorPane tablePane;
     @FXML
     private AnchorPane editPane;
+    @FXML
+    private AnchorPane payPane;
 
     @FXML
     private TableView<Debit> debitTableView;
@@ -61,12 +67,46 @@ public class DebitController {
     private TextField commentField;
 
     @FXML
+    private Label payTitleLabel;
+    @FXML
+    private TextField payAmountField;
+    @FXML
+    private ComboBox<Currency> payCurrencyComboBox;
+    @FXML
+    private ComboBox<String> payCashTypeComboBox;
+    @FXML
+    private Label payAccoutLabel;
+    @FXML
+    private ComboBox<Account> payAccountComboBox;
+
+    private Debit payDebit = null;
+
+    @FXML
     public void initialize() {
 
         new FadeInUpTransition(tablePane).play();
 
         initTablePane();
         initEditPane();
+        initPayPane();
+    }
+
+    private void initPayPane() {
+        payCashTypeComboBox.getItems().setAll(Bundles.getString("account"), Bundles.getString("cash"));
+        payCashTypeComboBox.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue) -> {
+            if( newValue.equals(Bundles.getString("account")) ) {
+                payAccoutLabel.setVisible(false);
+                payAccountComboBox.setVisible(false);
+            } else {
+                payAccoutLabel.setVisible(true);
+                payAccountComboBox.setVisible(true);
+            }
+        });
+
+        payCurrencyComboBox.getItems().setAll(Constant.getCurrencies());
+
+        payAccountComboBox.getItems().setAll(Main.getLoggedUser().getAccounts());
+        payAccountComboBox.getSelectionModel().select(0);
     }
 
     private void initEditPane() {
@@ -124,8 +164,10 @@ public class DebitController {
 
     @FXML
     private void handleBackToTablePane() {
+        payDebit = null;
         updateTableItems();
         editPane.setOpacity(0);
+        payPane.setOpacity(0);
         new FadeInUpTransition(tablePane).play();
     }
 
@@ -197,7 +239,8 @@ public class DebitController {
     private class ButtonCell extends TableCell<Object, Boolean> {
         final Hyperlink editLink = new Hyperlink(Bundles.getString("menu.debit.edit"));
         final Hyperlink deleteLink = new Hyperlink(Bundles.getString("menu.debit.delete"));
-        final HBox hbox = new HBox(editLink, deleteLink);
+        final Hyperlink payLink = new Hyperlink("Kiegyenlítés");
+        final HBox hbox = new HBox(payLink, editLink, deleteLink);
 
         ButtonCell(final TableView tbl) {
             hbox.setSpacing(4);
@@ -226,6 +269,13 @@ public class DebitController {
 
                     updateTableItems();
                 }
+            });
+
+            payLink.setOnAction((ActionEvent e) -> {
+                payDebit = debitTableView.getItems().get(getTableRow().getIndex());
+                loadToPayPane(debitTableView.getItems().get(getTableRow().getIndex()));
+                tablePane.setOpacity(0);
+                new FadeInUpTransition(payPane).play();
             });
         }
 
@@ -272,6 +322,82 @@ public class DebitController {
 
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void loadToPayPane(Debit debit) {
+        payTitleLabel.setText(debit.getName());
+        payAmountField.setText(debit.getMoney() + "");
+        payCurrencyComboBox.getSelectionModel().select(debit.getCurrency());
+
+        payDebit = debit;
+    }
+
+    @FXML
+    private void handlePay() {
+        try {
+            checkPayFields();
+            checkMoneyInCash();
+
+            float newValue = Float.valueOf(payAmountField.getText());
+
+            Session session = SessionUtil.getSession();
+            Transaction tx = session.beginTransaction();
+            if( (payDebit.getMoney() - newValue) == 0 ) {
+                session.delete(payDebit);
+                Main.getLoggedUser().getDebits().remove(payDebit);
+            } else {
+                payDebit.setMoney(Float.valueOf(payAmountField.getText()));
+            }
+            session.close();
+
+            handleBackToTablePane();
+        } catch (Exception ex) {
+            MessageBox.showErrorMessage("Hiba", "Hiba történt a feldolgozás közben!", ex.getMessage(), false);
+        }
+    }
+
+    private void checkMoneyInCash() throws Exception {
+        float amount = Float.valueOf(payAmountField.getText());
+        if( payCashTypeComboBox.getSelectionModel().getSelectedItem().equals(Bundles.getString("account")) ) {
+            if( (payAccountComboBox.getSelectionModel().getSelectedItem().getMoney() - amount) < 0 ) {
+                throw new Exception("Nincs elég pénz ezen a bankszámlán a tranzakció végrehajtásáhpz!");
+            }
+        } else {
+            ReadyCash selected = null;
+            for(ReadyCash readyCash : Main.getLoggedUser().getReadycash()) {
+                if( payCurrencyComboBox.getSelectionModel().getSelectedItem().equals(readyCash.getCurrency()) ) {
+                    selected = readyCash;
+                    break;
+                }
+            }
+            if( selected == null ) {
+                throw new Exception("Nincs ilyen készpénz valutád regisztrálva!");
+            }
+
+            if( selected.getMoney() < amount ) {
+                throw new Exception("Nincs elég készpénzed ebből a valutából!");
+            }
+        }
+    }
+
+    private void checkPayFields() throws Exception {
+        StringBuffer buffer = new StringBuffer();
+
+        try {
+            if( Float.valueOf(payAmountField.getText()) < 0 ) {
+                buffer.append("A tartozás mezőbe nem lehet mínusz összeg!\n");
+            }
+            if( payDebit.getMoney() < Float.valueOf(payAmountField.getText()) ) {
+                buffer.append("A tartozás mezőben több pénz szerepel, mint az eredeti tartozás!\n");
+                buffer.append("Az eredeti tartozás összege: "+ payDebit.getMoney() +"\n");
+            }
+        } catch (NumberFormatException ex ) {
+            buffer.append("A tartozás mezőbe csak számot írhat be!\n");
+        }
+
+        if( buffer.toString().length() != 0 ) {
+            throw new Exception(buffer.toString());
         }
     }
 

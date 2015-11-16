@@ -84,6 +84,7 @@ public class PropertiesController {
 
     private void initSellPane() {
         sellProCurrencyComboBoxComboBox.getItems().setAll(Constant.getCurrencies());
+        sellProCurrencyComboBoxComboBox.getSelectionModel().select(Constant.getHufCurrency());
         sellPropertyTypeBox.getItems().add(Bundles.getString("readycash"));
         sellPropertyTypeBox.getItems().add(Bundles.getString("account"));
         sellPropertyAccounts.setVisible(false);

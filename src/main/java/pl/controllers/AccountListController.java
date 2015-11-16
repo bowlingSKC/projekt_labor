@@ -9,9 +9,11 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import pl.Constant;
+import pl.CurrencyExchange;
 import pl.Main;
 import pl.MessageBox;
 import pl.animations.FadeInUpTransition;
@@ -44,6 +46,8 @@ public class AccountListController {
     private TableColumn<Account, String> accountNameColumn;
     @FXML
     private TableColumn<Account, String> valutaColumn;
+    @FXML
+    private TableColumn inHufColumn;
     @FXML
     private Label sumLabel;
     // ============= TÁBLÁZAT VÉGE =============
@@ -101,6 +105,33 @@ public class AccountListController {
         accountMoneyColumn.setCellValueFactory(new PropertyValueFactory<>("money"));
         valutaColumn.setCellValueFactory(new PropertyValueFactory<>("currency"));
 
+        inHufColumn.setCellFactory(new Callback<TableColumn, TableCell>() {
+            @Override
+            public TableCell call(TableColumn param) {
+                return new TableCell() {
+                    @Override
+                    protected void updateItem(Object item, boolean empty) {
+                        super.updateItem(item, empty);
+
+                        try {
+                            if( this.getTableRow() != null ) {
+                                Account account = accountTableView.getItems().get(this.getTableRow().getIndex());
+                                if( account.getCurrency().getCode().equals("HUF") ) {
+                                    setText( Constant.getNumberFormat().format(account.getMoney()) );
+                                } else if(CurrencyExchange.isContainsKey(account.getCurrency())) {
+                                    setText( Constant.getNumberFormat().format( CurrencyExchange.getValue(account.getCurrency()) * account.getMoney() ) );
+                                } else {
+                                    setText("???");
+                                }
+                            }
+                        } catch (Exception ex) {
+                            // nem kell kezelni, csak nem éri el a listából, JavaFX hibája
+                        }
+                    }
+                };
+            }
+        });
+
         accountNoColumn.setCellFactory(t -> new TableCell<Account, String>() {
             @Override
             protected void updateItem(String item, boolean empty) {
@@ -111,32 +142,6 @@ public class AccountListController {
                     setText("");
                 }
             }
-        });
-
-        // dupla katt, TODO: szerkeszteni valahogy
-        accountTableView.setRowFactory(tv -> {
-            TableRow<Account> row = new TableRow<>();
-            row.setOnMouseClicked(event -> {
-                if( event.getClickCount() == 2 && (!row.isEmpty()) ) {
-                    try {
-                        Stage dialogStage = new Stage();
-
-                        FXMLLoader loader = new FXMLLoader(Main.class.getResource("../layout/ShowAccount.fxml"), Bundles.getBundle());
-                        BorderPane pane = loader.load();
-
-                        Scene scene = new Scene(pane);
-                        dialogStage.setScene(scene);
-
-                        ShowAccountController showAccountController = loader.getController();
-                        showAccountController.setAccount(row.getItem());
-
-                        dialogStage.show();
-                    } catch (Throwable ex) {
-                        ex.printStackTrace();
-                    }
-                }
-            });
-            return row;
         });
 
         accountMoneyColumn.setCellFactory( cell -> new TableCell<Account, Float>() {
@@ -153,12 +158,19 @@ public class AccountListController {
                 }
             }
         });
+
     }
 
     private void computeSumMoneyOnAccounts() {
         float money = 0;
         for(Account account : Main.getLoggedUser().getAccounts()) {
-            money += account.getMoney();
+            if( account.getCurrency().equals(Constant.getHufCurrency()) ) {
+                money += account.getMoney();
+            } else {
+                if( CurrencyExchange.isContainsKey( account.getCurrency() ) ) {
+                    money += CurrencyExchange.getValue(account.getCurrency()) * account.getMoney();
+                }
+            }
         }
 
         NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.getDefault());
@@ -174,6 +186,7 @@ public class AccountListController {
     @FXML
     private void handleBackToTableView() {
         refershTableItems();
+        computeSumMoneyOnAccounts();
         editPane.setOpacity(0);
         new FadeInUpTransition(tablePane).play();
     }

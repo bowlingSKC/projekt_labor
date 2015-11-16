@@ -68,7 +68,7 @@
                   <TableColumn fx:id="accountBankColumn" prefWidth="113.0" text="%cash.bankaccount.table.bank" />
                 <TableColumn fx:id="accountMoneyColumn" prefWidth="127.0" styleClass="money-cell" text="%cash.bankaccount.table.amount" />
                   <TableColumn fx:id="valutaColumn" prefWidth="81.0" text="%cash.bankaccount.table.currency" />
-                  <TableColumn styleClass="money-cell" text="%hufvalue" />
+                  <TableColumn fx:id="inHufColumn" styleClass="money-cell" text="%hufvalue" />
               </columns>
                <columnResizePolicy>
                   <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />

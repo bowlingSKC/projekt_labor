@@ -6,7 +6,7 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 
-public class Bundles {
+public final class Bundles {
 
     private static ResourceBundle bundle;
     private static Locale locale = new Locale(Locale.getDefault().getLanguage(), Locale.getDefault().getCountry());
@@ -28,5 +28,18 @@ public class Bundles {
             bundle = ResourceBundle.getBundle(packageName + ".bundle", locale, new UTF8Control()); //NOI18N
         }
         return bundle;
+    }
+
+    public static synchronized String getDefaultLanguage() {
+        return Locale.getDefault().getLanguage();
+    }
+
+    public static void setLanguage(String lang) {
+        bundle = null;
+        if( lang.equals("hu") ) {
+            locale = new Locale(lang, "HU");
+        } else {
+            locale = new Locale(lang, "EN");
+        }
     }
 }

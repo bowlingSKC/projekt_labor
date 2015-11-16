@@ -1,15 +1,50 @@
 package pl;
 
+import javafx.application.Platform;
+import pl.model.Account;
 import pl.model.Currency;
+import pl.model.Debit;
+import pl.model.ReadyCash;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class CurrencyExchange {
 
     private static final String WEB_URL = "http://www.webservicex.com/currencyconvertor.asmx/ConversionRate?";
+
+    private static Map<Currency, Float> currencies = new HashMap<>();
+
+    private static synchronized void addCurrenciesToMap(Currency currency, Float value) {
+        currencies.put(currency, value);
+    }
+
+    public static synchronized boolean isContainsKey(Currency currency) {
+        return currencies.containsKey(currency);
+    }
+
+    public static synchronized float getValue(Currency currency) {
+        return currencies.get(currency);
+    }
+
+    public static void updateCurrencies() {
+        Set<Currency> currencySet = Main.getLoggedUser().getReadycash().stream().map(ReadyCash::getCurrency).collect(Collectors.toSet());
+        currencySet.addAll(Main.getLoggedUser().getAccounts().stream().map(Account::getCurrency).collect(Collectors.toList()));
+        currencySet.addAll(Main.getLoggedUser().getDebits().stream().map(Debit::getCurrency).collect(Collectors.toList()));
+
+        long start = System.currentTimeMillis();
+        for(Currency currency : currencySet) {
+            new Thread(() -> CurrencyExchange.addCurrenciesToMap(currency, toHuf(currency))).start();
+        }
+        System.out.println( (System.currentTimeMillis() - start) + " msec-ig tartott." );
+    }
 
     public static float toHuf(Currency currency, float amount) {
         return xToY(currency, Constant.getHufCurrency(), amount);

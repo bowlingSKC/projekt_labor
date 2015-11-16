@@ -13,15 +13,19 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import org.controlsfx.control.Notifications;
 import pl.bundles.Bundles;
 import pl.controllers.LoggedController;
 import pl.controllers.SplashController;
+import pl.model.Debit;
 import pl.model.User;
 
+import java.io.File;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.Date;
 
 public class Main extends Application {
 
@@ -32,6 +36,8 @@ public class Main extends Application {
     private Scene loginScene;
 
     private static ObjectProperty<User> loggedUser = new SimpleObjectProperty<>();
+
+    private static final File settingsFile = new File("settings.dat");
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -94,7 +100,17 @@ public class Main extends Application {
     }
 
     private void readSettingsFromFile() {
+        if( !settingsFile.exists() ) {
+            handleCreateSettingsFile();
+        }
+    }
 
+    private void handleCreateSettingsFile() {
+        try {
+            settingsFile.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public static String getSHA512Hash(String pswd, String salt) throws NoSuchAlgorithmException {
@@ -121,10 +137,11 @@ public class Main extends Application {
         loggedUser.setValue(user);
         primaryStage.hide();
 
+
         try {
             loginStage = new Stage();
 
-            FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/Logged.fxml"), Bundles.getBundle() );
+            FXMLLoader loader = new FXMLLoader(Main.class.getResource("../layout/Logged.fxml"), Bundles.getBundle());
             Parent loggedpane = loader.load();
             LoggedController controller = loader.getController();
             controller.setDialogStage(loginStage);
@@ -133,6 +150,9 @@ public class Main extends Application {
             loginStage.setScene(scene);
             loginStage.initStyle(StageStyle.UNDECORATED);
             loginStage.show();
+
+            Platform.runLater(CurrencyExchange::updateCurrencies);
+
         } catch (IOException e) {
             e.printStackTrace();
         }

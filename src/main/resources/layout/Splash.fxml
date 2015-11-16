@@ -38,14 +38,5 @@
             <Font name="Segoe UI Light" size="14.0" />
          </font>
       </Label>
-      <HBox alignment="CENTER" layoutY="206.0" prefHeight="33.0" prefWidth="493.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
-         <children>
-            <Label fx:id="statusLabel" text="Label" textFill="WHITE">
-               <font>
-                  <Font name="Segoe UI Semilight" size="14.0" />
-               </font>
-            </Label>
-         </children>
-      </HBox>
    </children>
 </AnchorPane>

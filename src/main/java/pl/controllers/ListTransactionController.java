@@ -485,13 +485,37 @@ public class ListTransactionController {
             }
 
             if( searcMoneyToField.getText().length() > 0 ) {
-                for( AccountTransaction accountTransaction : allAccountTransactions) {
-                    if( accountTransaction.getMoney() > Float.valueOf(searcMoneyFromField.getText()) ) {
-                        accountTransactions.remove(accountTransaction);
-                    }
-                }
+                allAccountTransactions.stream().filter(
+                        accountTransaction ->
+                                accountTransaction.getMoney() > Float.valueOf(searcMoneyToField.getText())).forEach(accountTransactions::remove);
             }
 
+            if(searchFromDate.getValue() != null) {
+                Date from = Constant.dateFromLocalDate(searchFromDate.getValue());
+                new HashSet<>(allAccountTransactions).stream().filter(
+                        accountTransaction ->
+                                accountTransaction.getDate().before(from)).forEach(allAccountTransactions::remove);
+            }
+
+            if(searchToDate.getValue() != null) {
+                Date to = Constant.dateFromLocalDate(searchToDate.getValue());
+                new HashSet<>(allAccountTransactions).stream().filter(
+                        accountTransaction ->
+                                accountTransaction.getDate().after(to)).forEach(allAccountTransactions::remove);
+            }
+
+            if( searchCommentField.getText().length() != 0 ) {
+                new HashSet<>(allAccountTransactions).stream().filter(
+                        accountTransaction ->
+                                accountTransaction.getComment().toLowerCase().contains(searchCommentField.getText().trim().toLowerCase())).forEach(allAccountTransactions::remove);
+            }
+
+            if( newValue instanceof Boolean ) {
+                System.out.println("checkbox");
+            }
+
+            System.out.println(searchFromDate.getValue());
+            System.out.println(searchToDate.getValue());
 
             transactionTableView.getItems().setAll(accountTransactions);
 

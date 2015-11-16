@@ -284,6 +284,20 @@ public class LoggedController {
                 readMyLoginsPanel();
             } else if( value.equals(Bundles.getString("menu.cash.summary")) ) {
                 readSummaryPane();
+            } else if( value.equals(Bundles.getString("menu.settings.personal")) ) {
+                readPersonalSettingsPane();
+            }
+        }
+
+        private void readPersonalSettingsPane() {
+            try {
+                FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/PersonalSettings.fxml"), Bundles.getBundle() );
+                AnchorPane pane = loader.load();
+
+                layout.setCenter(pane);
+                titleLabel.setText( Bundles.getString("menu.settings") + " / " + Bundles.getString("menu.settings.personal") );
+            } catch (IOException ex) {
+                ex.printStackTrace();
             }
         }
 
@@ -305,7 +319,7 @@ public class LoggedController {
                 AnchorPane pane = loader.load();
 
                 layout.setCenter(pane);
-                titleLabel.setText( Bundles.getString("menu.personal.logins.title") );
+                titleLabel.setText(Bundles.getString("menu.settings") + " / " + Bundles.getString("menu.personal.logins.title") );
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
@@ -317,7 +331,7 @@ public class LoggedController {
                 AnchorPane pane = loader.load();
 
                 layout.setCenter(pane);
-                titleLabel.setText( Bundles.getString("menu.personal.delete") );
+                titleLabel.setText( Bundles.getString("menu.settings") + " / " + Bundles.getString("menu.personal.delete") );
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
@@ -341,7 +355,7 @@ public class LoggedController {
                 AnchorPane pane = loader.load();
 
                 layout.setCenter(pane);
-                titleLabel.setText( Bundles.getString("menu.personal.newpass.title") );
+                titleLabel.setText( Bundles.getString("menu.settings") + " / " + Bundles.getString("menu.personal.newpass.title") );
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
@@ -377,7 +391,7 @@ public class LoggedController {
                 AnchorPane pane = loader.load();
 
                 layout.setCenter(pane);
-                titleLabel.setText(Bundles.getString("menu.transaction"));
+                titleLabel.setText(Bundles.getString("menu.transaction") + " / " + Bundles.getString("menu.transaction"));
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
@@ -401,7 +415,7 @@ public class LoggedController {
                 AnchorPane pane = loader.load();
 
                 layout.setCenter(pane);
-                titleLabel.setText( Bundles.getString("menu.syn.title") );
+                titleLabel.setText( Bundles.getString("menu.importexport") );
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
@@ -413,7 +427,7 @@ public class LoggedController {
                 AnchorPane pane = loader.load();
 
                 layout.setCenter(pane);
-                //titleLabel.setText(Bundles.getString("menu.demonstration.title"));
+                titleLabel.setText( Bundles.getString("menu.transaction") + " / " + Bundles.getString("menu.demonstration.title"));
             } catch (IOException ex) {
                 ex.printStackTrace();
             }

@@ -4,9 +4,11 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.FileChooser;
+import javafx.util.Callback;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import pl.Constant;
+import pl.CurrencyExchange;
 import pl.Main;
 import pl.MessageBox;
 import pl.bundles.Bundles;
@@ -40,7 +42,9 @@ public class ReadyCashController {
     @FXML
     private TableColumn<ReadyCash, Float> amountColumn;
     @FXML
-    private TableColumn<ReadyCash, Integer> inHufColumn;
+    private TableColumn inHufColumn;
+    @FXML
+    private Label sumLabel;
 
     // Tranzakciók
     @FXML
@@ -67,6 +71,26 @@ public class ReadyCashController {
     }
 
     private void initTransactionTablePane() {
+
+        readyCashTableView.setRowFactory(new Callback<TableView<ReadyCash>, TableRow<ReadyCash>>() {
+            @Override
+            public TableRow<ReadyCash> call(TableView<ReadyCash> param) {
+                return new TableRow<ReadyCash>() {
+                    @Override
+                    protected void updateItem(ReadyCash item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if( item != null && !empty ) {
+                            if( Float.compare(item.getMoney(), 0.0f) == 0 ) {
+                                setVisible(false);
+                            } else {
+                                setVisible(true);
+                            }
+                        }
+                    }
+                };
+            }
+        });
+
         dateTableColumn.setCellFactory(t -> new TableCell<CashTransaction, Date>() {
             @Override
             protected void updateItem(Date item, boolean empty) {
@@ -89,6 +113,36 @@ public class ReadyCashController {
                 }
             }
         });
+
+        inHufColumn.setCellFactory(new Callback<TableColumn, TableCell>() {
+            @Override
+            public TableCell call(TableColumn param) {
+                return new TableCell() {
+                    @Override
+                    protected void updateItem(Object item, boolean empty) {
+                        super.updateItem(item, empty);
+
+                        try {
+                            if( this.getTableRow() != null ) {
+                                ReadyCash readyCash = readyCashTableView.getItems().get(getTableRow().getIndex());
+                                if( !readyCash.getCurrency().equals(Constant.getHufCurrency()) ) {
+                                    if( CurrencyExchange.isContainsKey(readyCash.getCurrency()) ) {
+                                        setText(Constant.getNumberFormat().format(CurrencyExchange.getValue(readyCash.getCurrency()) * readyCash.getMoney()));
+                                    }
+                                } else if( readyCash.getCurrency().equals(Constant.getHufCurrency()) ) {
+                                    setText(Constant.getNumberFormat().format(readyCash.getMoney()));
+                                } else {
+                                    setText("???");
+                                }
+                            }
+                        } catch (Exception ex) {
+                            // nem kell kezelni, csak nem éri el a listából, JavaFX hibája
+                        }
+                    }
+                };
+            }
+        });
+
         amountTableColumn.setCellValueFactory(new PropertyValueFactory<>("money"));
         dateTableColumn.setCellValueFactory(new PropertyValueFactory<>("date"));
         currencyTableColumn.setCellValueFactory(new PropertyValueFactory<>("currency"));
@@ -107,6 +161,8 @@ public class ReadyCashController {
     }
 
     private void initTablePane() {
+
+        sumLabel.setText(Constant.getNumberFormat().format(Main.getLoggedUser().getAllMoneyInReadyCash()));
 
         readyCashTableView.setRowFactory(row -> new TableRow<ReadyCash>() {
             @Override
@@ -225,8 +281,8 @@ public class ReadyCashController {
         }
 
         if( Float.compare(readyCash.getMoney() - Float.valueOf(amountFiled.getText()), 0) == 0 ) {
-            transactionDelete(readyCash);
-            Main.getLoggedUser().getReadycash().remove(readyCash);
+//            transactionDelete(readyCash);
+//            Main.getLoggedUser().getReadycash().remove(readyCash);
         } else {
             readyCash.setMoney(readyCash.getMoney() - Float.valueOf(amountFiled.getText()));
             transactionSaveOrUpdate(readyCash);

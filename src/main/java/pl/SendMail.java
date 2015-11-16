@@ -3,6 +3,8 @@ package pl;
 /**
  * Created by andru on 9/18/2015.
  */
+import javafx.application.Platform;
+
 import java.util.Properties;
 
 import javax.mail.Message;
@@ -43,7 +45,13 @@ public class SendMail {
             message.setSubject(title);
             message.setText(mymessage);
 
-            Transport.send(message);
+            Platform.runLater(() -> {
+                try {
+                    Transport.send(message);
+                } catch (Exception e) {
+                    System.out.println("Az E-mail kuldes sikertelen volt.");
+                }
+            });
         } catch (MessagingException e) {
             throw new RuntimeException(e);
         }

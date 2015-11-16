@@ -1,6 +1,7 @@
 package pl.model;
 
 import org.hibernate.*;
+import pl.Constant;
 import pl.CurrencyExchange;
 import pl.jpa.SessionUtil;
 
@@ -29,6 +30,9 @@ public class User {
 
     @Column(name = "salt", nullable = false, length = 20)
     private String salt;
+
+    @Column(name = "lang", nullable = false, length = 2)
+    private String language;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "registred", nullable = false)
@@ -158,6 +162,14 @@ public class User {
         this.debits = debits;
     }
 
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
+    }
+
     public float getAllMoneyInProperties() {
         float money = 0;
         if( properties != null ) {
@@ -172,7 +184,13 @@ public class User {
         float sum = 0;
         if( accounts != null ) {
             for(Account acc : accounts) {
-                sum += acc.getMoney();
+                if( acc.getCurrency().equals(Constant.getHufCurrency()) ) {
+                    sum += acc.getMoney();
+                } else {
+                    if( CurrencyExchange.isContainsKey(acc.getCurrency()) ) {
+                        sum += CurrencyExchange.getValue(acc.getCurrency()) * acc.getMoney();
+                    }
+                }
             }
         }
         return sum;
@@ -182,14 +200,13 @@ public class User {
         float sum = 0;
         if( readycash != null ) {
             for(ReadyCash readyCash : readycash) {
-                /*
-                if( !readyCash.getCurrency().getCode().equals("HUF") ) {
-                    sum += CurrencyExchange.toHuf(readyCash.getCurrency(), readyCash.getMoney());
-                } else {
+                if(readyCash.getCurrency().equals(Constant.getHufCurrency())) {
                     sum += readyCash.getMoney();
+                } else {
+                    if( CurrencyExchange.isContainsKey(readyCash.getCurrency()) ) {
+                        sum += CurrencyExchange.getValue(readyCash.getCurrency()) * readyCash.getMoney();
+                    }
                 }
-                */
-                sum += readyCash.getMoney();
             }
         }
         return sum;
@@ -202,7 +219,13 @@ public class User {
     public float getAllDebitsInValue() {
         float sum = 0;
         for(Debit debit : debits) {
-            sum += debit.getMoney();
+            if( debit.getCurrency().equals(Constant.getHufCurrency()) ) {
+                sum += debit.getMoney();
+            } else {
+                if( CurrencyExchange.isContainsKey(debit.getCurrency()) ) {
+                    sum += CurrencyExchange.getValue(debit.getCurrency()) * debit.getMoney();
+                }
+            }
         }
         return sum;
     }
@@ -270,6 +293,19 @@ public class User {
             tmpList = tmpList.subList(tmpList.size()-30, tmpList.size()-1);
             logins = new HashSet<>(tmpList);
         }
+    }
+
+    public Date getLastLogin() {
+        Date last = null;
+        for(Login login : logins) {
+            if( last == null ) {
+                last = login.getDate();
+            }
+            if( last.before(login.getDate()) ) {
+                last = login.getDate();
+            }
+        }
+        return last;
     }
 
     @Override
