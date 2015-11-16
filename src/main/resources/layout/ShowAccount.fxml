@@ -8,7 +8,7 @@
    <center>
       <TabPane prefHeight="414.0" prefWidth="359.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
         <tabs>
-          <Tab text="Alapadatok">
+          <Tab text="%basicdata">
             <content>
               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
@@ -25,15 +25,15 @@
                               <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                           </rowConstraints>
                            <children>
-                              <Label text="Számlaszám" />
-                              <Label text="Bank neve" GridPane.rowIndex="1" />
-                              <Label text="Számla nyitása" GridPane.rowIndex="3" />
+                              <Label text="%accountL" />
+                              <Label text="%bankname" GridPane.rowIndex="1" />
+                              <Label text="%createdate" GridPane.rowIndex="3" />
                               <Label fx:id="accNoLabel" text="Label" wrapText="true" GridPane.columnIndex="1" />
                               <Label fx:id="bankLabel" text="Label" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                               <Label fx:id="regDateLabel" text="Label" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                              <Label text="Pénzösszeg" GridPane.rowIndex="4" />
+                              <Label text="%moneyL" GridPane.rowIndex="4" />
                               <Label fx:id="sumLabel" text="Label" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                              <Label text="Számla neve" GridPane.rowIndex="2" />
+                              <Label text="%accountname" GridPane.rowIndex="2" />
                               <Label fx:id="nameLabel" text="Label" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                            </children>
                         </GridPane>
@@ -41,17 +41,17 @@
                   </AnchorPane>
             </content>
           </Tab>
-          <Tab onSelectionChanged="#getTransactionsFromDatabase" text="Tranzakciók">
+          <Tab onSelectionChanged="#getTransactionsFromDatabase" text="%transaction">
             <content>
               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
                         <TreeTableView fx:id="treeTableView" layoutX="34.0" layoutY="27.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                           <columns>
-                            <TreeTableColumn fx:id="dateColumn" prefWidth="75.0" text="Dátum" />
-                            <TreeTableColumn fx:id="typeColumn" prefWidth="75.0" text="Típus" />
-                              <TreeTableColumn fx:id="moneyColumn" prefWidth="75.0" style="-fx-alignment: CENTER-RIGHT;" text="Összeg" />
-                              <TreeTableColumn fx:id="toColumn" prefWidth="75.0" text="Kedvezményezett" />
-                              <TreeTableColumn fx:id="commentColumn" prefWidth="75.0" text="Komment" />
+                            <TreeTableColumn fx:id="dateColumn" prefWidth="75.0" text="%date" />
+                            <TreeTableColumn fx:id="typeColumn" prefWidth="75.0" text="%type" />
+                              <TreeTableColumn fx:id="moneyColumn" prefWidth="75.0" style="-fx-alignment: CENTER-RIGHT;" text="%moneyC" />
+                              <TreeTableColumn fx:id="toColumn" prefWidth="75.0" text="%otherside" />
+                              <TreeTableColumn fx:id="commentColumn" prefWidth="75.0" text="%comment" />
                           </columns>
                            <columnResizePolicy>
                               <TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY" />

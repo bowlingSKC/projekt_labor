@@ -121,7 +121,7 @@ public class AccountListController {
                     try {
                         Stage dialogStage = new Stage();
 
-                        FXMLLoader loader = new FXMLLoader(Main.class.getResource("../layout/ShowAccount.fxml"));
+                        FXMLLoader loader = new FXMLLoader(Main.class.getResource("../layout/ShowAccount.fxml"), Bundles.getBundle());
                         BorderPane pane = loader.load();
 
                         Scene scene = new Scene(pane);
