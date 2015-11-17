@@ -32,7 +32,7 @@
         <mapping class="pl.model.Property" />
         <mapping class="pl.model.Depriciation" />
         <mapping class="pl.model.Debit" />
-
+        <mapping class="pl.model.PropertyValue" />
 
     </session-factory>
 </hibernate-configuration>

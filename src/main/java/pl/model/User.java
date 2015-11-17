@@ -174,7 +174,7 @@ public class User {
         float money = 0;
         if( properties != null ) {
             for(Property prop : properties) {
-                money += prop.getMoney();
+                money += prop.getLatestValue();
             }
         }
         return money;

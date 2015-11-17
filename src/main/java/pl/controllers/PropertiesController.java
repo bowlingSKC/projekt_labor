@@ -110,21 +110,30 @@ public class PropertiesController {
     private void initPropertyTable() {
 
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-        moneyColumn.setCellValueFactory(new PropertyValueFactory<>("money"));
-        dateTableColumn.setCellValueFactory(new PropertyValueFactory<>("bought"));
 
-        moneyColumn.setCellFactory( cell -> new TableCell<Property, Float>() {
+        moneyColumn.setCellFactory(new Callback<TableColumn<Property, Float>, TableCell<Property, Float>>() {
             @Override
-            protected void updateItem(Float item, boolean empty) {
-                super.updateItem(item, empty);
-
-                if( item != null && !empty ) {
-                    setText(Constant.getNumberFormat().format(item));
-                } else {
-                    setText("");
-                }
+            public TableCell<Property, Float> call(TableColumn<Property, Float> param) {
+                return new TableCell<Property, Float>() {
+                    @Override
+                    protected void updateItem(Float item, boolean empty) {
+                        super.updateItem(item, empty);
+                        try {
+                            if( this.getTableRow() != null ) {
+                                Property property = propertyTableView.getItems().get( this.getTableRow().getIndex() );
+                                setText( Constant.getNumberFormat().format(property.getLatestValue()) );
+                            } else {
+                                setText("");
+                            }
+                        } catch (Exception ex) {
+                            // nem kell semmit sem csinalni
+                        }
+                    }
+                };
             }
         });
+
+        dateTableColumn.setCellValueFactory(new PropertyValueFactory<>("bought"));
 
         dateTableColumn.setCellFactory(cell -> new TableCell<Property, Date>() {
             @Override
@@ -182,13 +191,16 @@ public class PropertiesController {
             Property property = new Property();
             property.setName(nameField.getText());
             property.setBought(Constant.dateFromLocalDate(datePicker.getValue()));
-            property.setMoney(Float.valueOf(moneyField.getText()));
             property.setComment(commentField.getText());
             property.setOwner(Main.getLoggedUser());
+
+            PropertyValue value = new PropertyValue(property, Float.valueOf(moneyField.getText()), new Date(), null);
+            property.getValues().add(value);
 
             Session session = SessionUtil.getSession();
             Transaction tx = session.beginTransaction();
             session.saveOrUpdate(property);
+            session.save(value);
             tx.commit();
             session.close();
 
@@ -294,7 +306,7 @@ public class PropertiesController {
     private void loadPropertyToEditPane(Property property) {
         editedProperty = property;
         nameField.setText( property.getName() );
-        moneyField.setText( Float.toString(property.getMoney()) );
+        moneyField.setText( Float.toString(property.getLatestValue()) );
         datePicker.setValue(Constant.localDateFromDate(property.getBought()));
         commentField.setText( property.getComment() );
     }
@@ -363,7 +375,7 @@ public class PropertiesController {
                 for(int i = 0; i < propertyTableView.getItems().size(); i++){
                     writer.append(propertyTableView.getItems().get(i).getName());
                     writer.append(';');
-                    writer.append(String.valueOf(propertyTableView.getItems().get(i).getMoney()));
+                    writer.append(String.valueOf(propertyTableView.getItems().get(i).getLatestValue()));
                     writer.append(';');
                     writer.append(propertyTableView.getItems().get(i).getBought().toString());
                     /*writer.append(';');

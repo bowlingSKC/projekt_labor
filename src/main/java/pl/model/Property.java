@@ -2,6 +2,8 @@ package pl.model;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "property")
@@ -15,8 +17,6 @@ public class Property {
     private User owner;
     @Column(name = "name", length = 100, nullable = false)
     private String name;
-    @Column(name = "money",  nullable = false)
-    private float money;
     @Column(name = "bought", nullable = false)
     @Temporal(TemporalType.DATE)
     private Date bought = new Date();
@@ -25,15 +25,16 @@ public class Property {
     @OneToOne
     @PrimaryKeyJoinColumn
     private Depriciation depriciation;
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "property")
+    private Set<PropertyValue> values = new HashSet<>(0);
 
     public Property() {
 
     }
 
-    public Property(User owner, String name, float money, Date bought, String comment, Depriciation depriciation) {
+    public Property(User owner, String name, Date bought, String comment, Depriciation depriciation) {
         this.owner = owner;
         this.name = name;
-        this.money = money;
         this.bought = bought;
         this.comment = comment;
         this.depriciation = depriciation;
@@ -63,14 +64,6 @@ public class Property {
         this.name = name;
     }
 
-    public float getMoney() {
-        return money;
-    }
-
-    public void setMoney(float money) {
-        this.money = money;
-    }
-
     public Date getBought() {
         return bought;
     }
@@ -93,6 +86,27 @@ public class Property {
 
     public void setDepriciation(Depriciation depriciation) {
         this.depriciation = depriciation;
+    }
+
+    public Set<PropertyValue> getValues() {
+        return values;
+    }
+
+    public void setValues(Set<PropertyValue> values) {
+        this.values = values;
+    }
+
+    public Float getLatestValue() {
+        PropertyValue last = null;
+        for(PropertyValue pvalue : values) {
+            if( last == null ) {
+                last = pvalue;
+            }
+            if( last.getDate().before(pvalue.getDate()) ) {
+                last = pvalue;
+            }
+        }
+        return (last == null) ? null : last.getValue();
     }
 
     @Override

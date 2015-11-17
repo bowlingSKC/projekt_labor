@@ -42,7 +42,7 @@ public class ReadyCashController {
     @FXML
     private TableColumn<ReadyCash, Float> amountColumn;
     @FXML
-    private TableColumn inHufColumn;
+    private TableColumn<ReadyCash, Float> inHufColumn;
     @FXML
     private Label sumLabel;
 
@@ -114,25 +114,24 @@ public class ReadyCashController {
             }
         });
 
-        inHufColumn.setCellFactory(new Callback<TableColumn, TableCell>() {
+        inHufColumn.setCellFactory(new Callback<TableColumn<ReadyCash, Float>, TableCell<ReadyCash, Float>>() {
             @Override
-            public TableCell call(TableColumn param) {
-                return new TableCell() {
+            public TableCell<ReadyCash, Float> call(TableColumn<ReadyCash, Float> param) {
+                return new TableCell<ReadyCash, Float>() {
                     @Override
-                    protected void updateItem(Object item, boolean empty) {
+                    protected void updateItem(Float item, boolean empty) {
                         super.updateItem(item, empty);
-
                         try {
                             if( this.getTableRow() != null ) {
                                 ReadyCash readyCash = readyCashTableView.getItems().get(getTableRow().getIndex());
                                 if( !readyCash.getCurrency().equals(Constant.getHufCurrency()) ) {
                                     if( CurrencyExchange.isContainsKey(readyCash.getCurrency()) ) {
-                                        setText(Constant.getNumberFormat().format(CurrencyExchange.getValue(readyCash.getCurrency()) * readyCash.getMoney()));
+                                        setText(Constant.getNumberFormat().format(Math.floor(CurrencyExchange.getValue(readyCash.getCurrency()) * readyCash.getMoney())));
                                     }
                                 } else if( readyCash.getCurrency().equals(Constant.getHufCurrency()) ) {
                                     setText(Constant.getNumberFormat().format(readyCash.getMoney()));
                                 } else {
-                                    setText("???");
+                                    setText("N/A");
                                 }
                             }
                         } catch (Exception ex) {
