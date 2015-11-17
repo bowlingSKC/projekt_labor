@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.*;
 
-public class PocketController {
+public class PocketSelectController {
 
     @FXML
     private ComboBox<Account> szamlaCombo;
@@ -47,10 +47,6 @@ public class PocketController {
     private TableColumn<Account, Float> egyenlegTableColumn;
     //LANGUAGE
     @FXML
-    private Label totalLabel;
-    @FXML
-    private Label totalLabelValue;
-    @FXML
     private Label addpocketLabel;
     @FXML
     private Label chooseaccLabel;
@@ -77,7 +73,6 @@ public class PocketController {
     @FXML
     public void initialize() {
         //LANGUAGE
-        totalLabel.setText(Bundles.getString("totalremained"));
         addpocketLabel.setText(Bundles.getString("addpocket"));
         chooseaccLabel.setText(Bundles.getString("chooseacc"));
         choosepocketLabel.setText(Bundles.getString("choosepocket"));
@@ -93,9 +88,6 @@ public class PocketController {
         allMoney = 0;
         for (Account acc : Main.getLoggedUser().getAccounts()) {
             szamlaCombo.getItems().add(acc);
-            sumMoney += acc.getMoney();
-            allMoney += acc.getMoney();
-            accountsMap.put(acc.getId(), acc.getMoney());
         }
 
         // Kategóriák lekérdezése
@@ -108,7 +100,7 @@ public class PocketController {
         }
 
         // Zsebek lekérdezése
-        List<Pocket> segedPockets = new ArrayList<>();
+        /*List<Pocket> segedPockets = new ArrayList<>();
         for (Account acc : Main.getLoggedUser().getAccounts()) {
             for(Pocket poc : acc.getPockets()){
                 boolean pocWas = false;
@@ -136,7 +128,7 @@ public class PocketController {
         pocketPie.getData().add(new PieChart.Data(Bundles.getString("remained"), sumMoney));
         if(pockets != null){
             updateArea();
-        }
+        }*/
 
         //Placing tooltips
         Tooltip tp = new Tooltip();
@@ -188,6 +180,10 @@ public class PocketController {
         });
 
         errorLabel.setVisible(false);
+        szamlaCombo.setOnAction((event) -> {
+            pocketPie.getData().clear();
+            calculate(szamlaCombo.getSelectionModel().getSelectedItem());
+        });
 
     }
 
@@ -405,7 +401,7 @@ public class PocketController {
         pocketTableView.getItems().clear();
         remainedTableView.getItems().clear();
         for(Pocket poc : pockets){
-            pocketTableView.getItems().addAll(poc);
+            pocketTableView.getItems().add(poc);
         }
         for (Map.Entry<Long,Float> acc : accountsMap.entrySet()) {
             Account tmp = new Account();
@@ -428,7 +424,6 @@ public class PocketController {
                     tooltip.setText(data.getPieValue() + " Ft - " + round((data.getPieValue() / allMoney)*100,2) + " %"));
 
         });
-        totalLabelValue.setText(String.valueOf(sumMoney));
     }
 
     public void exportCSV(){
@@ -458,5 +453,39 @@ public class PocketController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    void calculate(Account selected){
+        accountsMap = new HashMap<>();
+        for (Account acc : Main.getLoggedUser().getAccounts()) {
+            if(selected.getId() == acc.getId()){
+                sumMoney = acc.getMoney();
+                allMoney = acc.getMoney();
+                accountsMap.put(acc.getId(), acc.getMoney());
+                accountsMap.put(acc.getId(), acc.getMoney());
+            }
+        }
+
+        List<Pocket> segedPockets = new ArrayList<>();
+        for (Account acc : Main.getLoggedUser().getAccounts()) {
+            for (Pocket poc : acc.getPockets()) {
+                if(poc.getAccount().getId() == selected.getId()){
+                    segedPockets.add(poc);
+                    pocketPie.getData().add(new PieChart.Data(poc.getCategory().getName(), poc.getMoney()));
+                    sumMoney -= poc.getMoney();
+                    for (Map.Entry<Long,Float> acc2 : accountsMap.entrySet()) {
+                        if(acc2.getKey() == poc.getAccount().getId()){
+                            acc2.setValue(acc2.getValue()- poc.getMoney());
+                        }
+                    }
+                }
+            }
+        }
+        pockets = segedPockets;
+        pocketPie.getData().add(new PieChart.Data(Bundles.getString("remained"), sumMoney));
+        if(pockets != null){
+            updateArea();
+        }
+
     }
 }

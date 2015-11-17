@@ -21,10 +21,7 @@ import pl.model.TransactionType;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 public class ReadyCashController {
 
@@ -62,6 +59,7 @@ public class ReadyCashController {
     @FXML
     private TextField commentField;
 
+    private Map<String,Float> hufvalues = new HashMap<>();
 
     @FXML
     public void initialize() {
@@ -127,9 +125,11 @@ public class ReadyCashController {
                                 if( !readyCash.getCurrency().equals(Constant.getHufCurrency()) ) {
                                     if( CurrencyExchange.isContainsKey(readyCash.getCurrency()) ) {
                                         setText(Constant.getNumberFormat().format(Math.floor(CurrencyExchange.getValue(readyCash.getCurrency()) * readyCash.getMoney())));
-                                    }
+                                        hufvalues.put(readyCash.getCurrency().toString(), (float) Math.floor(CurrencyExchange.getValue(readyCash.getCurrency()) * readyCash.getMoney()));
+                                         }
                                 } else if( readyCash.getCurrency().equals(Constant.getHufCurrency()) ) {
                                     setText(Constant.getNumberFormat().format(readyCash.getMoney()));
+                                    hufvalues.put(readyCash.getCurrency().toString(), readyCash.getMoney());
                                 } else {
                                     setText("N/A");
                                 }
@@ -364,20 +364,31 @@ public class ReadyCashController {
             if(file != null){
 
                 writer = new FileWriter(file);
-                writer.append("Currency;Money\n");
+                writer.append("Currency;Money;HUF value\n");
                 for(int i = 0; i < readyCashTableView.getItems().size(); i++){
                     writer.append(readyCashTableView.getItems().get(i).getCurrency().toString());
                     writer.append(';');
                     writer.append(String.valueOf(readyCashTableView.getItems().get(i).getMoney()));
+                    writer.append(';');
+                    String tmp = readyCashTableView.getColumns().get(0).getCellData(i).toString();
+                    writer.append(String.valueOf(hufvalues.get(tmp)));
                     writer.append('\n');
                     writer.flush();
                 }
+                writer.append('\n');
+                writer.append('\n');
+                writer.append("Total\n");
+                writer.append(sumLabel.getText());
                 writer.close();
             }
 
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void handleToCSV2(){
+        FileWriter writer = null;
         //Write second table
         try {
             FileChooser fileChooser = new FileChooser();

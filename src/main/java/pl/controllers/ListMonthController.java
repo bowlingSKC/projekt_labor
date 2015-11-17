@@ -16,16 +16,17 @@ import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import pl.Main;
 import pl.bundles.Bundles;
 import pl.jpa.SessionUtil;
-import pl.model.Account;
-import pl.model.AccountTransaction;
-import pl.model.CashTransaction;
-import pl.model.ReadyCash;
+import pl.model.*;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -54,16 +55,19 @@ public class ListMonthController {
     private Label endLabel;
     @FXML
     private Label errorLabel;
+    @FXML
+    private Button csvButton;
 
     private List<CheckBox> checkBoxes = new ArrayList<>();
     private ArrayList<XYChart.Series> allseries;
 
     @FXML
     public void initialize() {
-        accountsLabel.setText(Bundles.getString("accounts"));
+        accountsLabel.setText(Bundles.getString("items"));
         filterLabel.setText(Bundles.getString("filter"));
         startLabel.setText(Bundles.getString("startintervall"));
         endLabel.setText(Bundles.getString("endintervall"));
+        csvButton.setText(Bundles.getString("csv"));
         errorLabel.setVisible(false);
         searchFromDate.valueProperty().addListener((obs, oldDate, newDate) -> {
             //Date date = Date.from(newDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
@@ -118,9 +122,31 @@ public class ListMonthController {
             });
             vbox.getChildren().add(checkBox);
         }
+        //Vagyontárgyak hozzáadása
+        for(Property prop : Main.getLoggedUser().getProperties()){
+            CheckBox checkBox = new CheckBox(prop.getName());
+            checkBox.setSelected(true);
+            checkBoxes.add(checkBox);
+            checkBox.setOnAction(new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent event) {
+                    for (XYChart.Series ser : allseries) {
+                        if (checkBox.getText().equals(ser.getName())) {
+                            if (checkBox.isSelected() && !areaChart.getData().contains(ser)) {
+                                areaChart.getData().add(ser);
+                            }
+                            if(!checkBox.isSelected() && areaChart.getData().contains(ser)) {
+                                areaChart.getData().remove(ser);
+                            }
+                        }
+                    }
+                }
+            });
+            vbox.getChildren().add(checkBox);
+        }
 
         allseries = new ArrayList<>();
-        searchToDate.setValue(searchToDate.getValue().now().minusDays(45));
+        searchToDate.setValue(searchToDate.getValue().now().minusDays(1));
         searchFromDate.setValue(searchToDate.getValue().minusMonths(1));
         refreshAreaChart();
 
@@ -160,6 +186,19 @@ public class ListMonthController {
                     }
                 }else{
                     validCash.put(cashTra.getDate(), cashTra.getId());
+                }
+            }
+        }
+        Map<Date, Long> validAsset = new HashMap<>();
+        for (Property prop : Main.getLoggedUser().getProperties()) {
+            for (PropertyValue pv : prop.getValues()) {
+                Float tmp = pv.getValue();
+                if(validAsset.containsKey(pv.getDate())){
+                    if(pv.getId() > validAsset.get(pv.getDate())){
+                        validAsset.replace(pv.getDate(), pv.getId());
+                    }
+                }else{
+                    validAsset.put(pv.getDate(), pv.getId());
                 }
             }
         }
@@ -246,6 +285,38 @@ public class ListMonthController {
                 }
             }
         }
+        //Find asset transactions
+        for (Property prop : Main.getLoggedUser().getProperties()) {
+            if(validNames.contains(prop.getName())){
+                allseries.add(new XYChart.Series());
+                allseries.get(allseries.size() - 1).setName(prop.getName());
+                seriesID.put(prop.getName(), "Asset");
+                try {
+                    fromDate = Date.from(searchFromDate.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
+                    toDate = Date.from(searchToDate.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
+                    while (!fromDate.after(toDate)) {
+                        allseries.get(allseries.size() - 1).getData().add(new XYChart.Data(formatter.format(fromDate), 0.0f));
+                        fromDate.setHours(fromDate.getHours() + 24);
+                    }
+                    fromDate = Date.from(searchFromDate.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+                    for (PropertyValue pv : prop.getValues()) {
+                        if ((pv.getDate().after(fromDate) || pv.getDate().equals(fromDate)) &&
+                                (pv.getDate().before(toDate) || pv.getDate().equals(toDate)) &&
+                                validAsset.containsValue(pv.getId())) {
+                            //System.out.println(tr.getId() + " - " + tr.getDate().toString());
+                            Float tmp = pv.getValue();
+                            allseries.get(allseries.size() - 1).getData().add(new XYChart.Data(pv.getDate().toString(), tmp));
+
+                            //allseries.get(allseries.size() - 1).getData().add(new XYChart.Data(tr.getDate().toString(), tr.getBeforeMoney()));
+                        }
+                    }
+
+                } catch (Exception e) {
+                    //e.printStackTrace();
+                }
+            }
+        }
 
         //Add series to chart
         for (XYChart.Series ser : allseries) {
@@ -262,11 +333,11 @@ public class ListMonthController {
                 if (d.getYValue() > 0) {
                     ertek = d.getYValue();
                 }
-
             }
             //Set null values
             boolean was = false;
             boolean wasCash = false;
+            boolean wasAss = false;
             for (int i = s.getData().size() - 2; i >= 0; i--) {
                 if (s.getData().get(i).getYValue() == 0) {
                     //Set money before first transaction
@@ -301,10 +372,13 @@ public class ListMonthController {
                         }
                     }
                     //Set 0 values
-                    if (s.getData().get(i).getYValue() == 0 &&
-                            ( seriesID.get(s.getName()).equals("Account") || !firstCashDates.get(s.getName()).equals(s.getData().get(i).getXValue()))) {
-                        s.getData().get(i).setYValue(s.getData().get(i + 1).getYValue());
+                    if(seriesID.containsValue(s.getName()) ){
+                        if (s.getData().get(i).getYValue() == 0 &&
+                                ( seriesID.get(s.getName()).equals("Account") || !firstCashDates.get(s.getName()).equals(s.getData().get(i).getXValue()))) {
+                            s.getData().get(i).setYValue(s.getData().get(i + 1).getYValue());
+                        }
                     }
+
                 }
             }
         }
@@ -349,6 +423,25 @@ public class ListMonthController {
                     }
                     if(before != null){
                         d.setYValue(countCashMoney(before.getCash(), before));
+                    }
+                }
+                //Correct assets
+                if(seriesID.get(s.getName()).equals("Asset") && d.getYValue() == 0){
+                    PropertyValue before = null;
+                    for(Property prop : Main.getLoggedUser().getProperties()) {
+                        if(prop.getName().equals(s.getName())){
+                            for (PropertyValue pv : prop.getValues()) {
+                                if(before == null && validAsset.containsValue(pv.getId()) && formatter.format(pv.getDate()).compareTo(d.getXValue()) < 0){
+                                    before = pv;
+                                }
+                                if(before != null && pv.getId() > before.getId() && formatter.format(pv.getDate()).compareTo(d.getXValue()) < 0){
+                                    before = pv;
+                                }
+                            }
+                        }
+                    }
+                    if(before != null){
+                        d.setYValue(before.getValue());
                     }
                 }
                 /*if(d.getYValue() > 0){
@@ -405,5 +498,36 @@ public class ListMonthController {
             }
         }
         return tmp;
+    }
+
+    public void exportCSV(){
+        FileWriter writer = null;
+        try {
+            FileChooser fileChooser = new FileChooser();
+            FileChooser.ExtensionFilter extFilter =
+                    new FileChooser.ExtensionFilter("CSV file (*.csv)", "*.csv");
+            fileChooser.getExtensionFilters().add(extFilter);
+            File file = fileChooser.showSaveDialog(Main.getPrimaryStage());
+            if(file != null){
+
+                writer = new FileWriter(file);
+                writer.append("Account;Money;Date\n");
+                for (XYChart.Series<String, Float> se : areaChart.getData()) {
+                    for (XYChart.Data<String, Float> d : se.getData()) {
+                        writer.append(se.getName());
+                        writer.append(';');
+                        writer.append(String.valueOf(d.getYValue()));
+                        writer.append(';');
+                        writer.append(d.getXValue());
+                        writer.append('\n');
+                        writer.flush();
+                    }
+                }
+                writer.close();
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

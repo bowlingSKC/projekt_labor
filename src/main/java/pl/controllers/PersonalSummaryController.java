@@ -64,15 +64,15 @@ public class PersonalSummaryController {
             if (file != null) {
 
                 writer = new FileWriter(file);
-                writer.append("Sum_of_Money;Sum_of_Cash;Sum_of_Accounts;Sum_of_Asset;Sum_of_Debit\n");
-                writer.append(sumOfMoneyLabel.getText());
-                writer.append(';');
-                writer.append(inReadyCashLabel.getText());
-                writer.append(';');
-                writer.append(inAccountsLabel.getText());
-                writer.append(';');
-                writer.append(inPropertiesLabel.getText());
-                writer.append(';');
+                writer.append("Sum_of_Money;");
+                writer.append(sumOfMoneyLabel.getText() + "\n");
+                writer.append("Sum_of_Cash;");
+                writer.append(inReadyCashLabel.getText() + "\n");
+                writer.append("Sum_of_Accounts;");
+                writer.append(inAccountsLabel.getText() + "\n");
+                writer.append("Sum_of_Asset;");
+                writer.append(inPropertiesLabel.getText() + "\n");
+                writer.append("Sum_of_Debit;");
                 writer.append(debitLabel.getText());
                 writer.append('\n');
                 writer.flush();

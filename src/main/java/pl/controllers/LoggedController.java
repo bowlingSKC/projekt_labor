@@ -62,8 +62,8 @@ public class LoggedController {
         h = 0.1;
 
         String username = Main.getLoggedUser().getFirstname() + " " + Main.getLoggedUser().getLastname();
-        nameLabel.setText(Bundles.getString("logged.beforeuser") + " " + username );
-        nameLabel.setText( Bundles.getString("logged") + username );
+        //nameLabel.setText(Bundles.getString("logged.beforeuser") + " " + username );
+        nameLabel.setText( Bundles.getString("logged") + " " + username );
         titleLabel.setText( Bundles.getString("logged.welcome") );
 
         createMenu();
@@ -126,9 +126,10 @@ public class LoggedController {
         TreeItem<String> readyMenu = new TreeItem<>(Bundles.getString("menu.cash.ready"));
         TreeItem<String> accountsMenu = new TreeItem<>(Bundles.getString("menu.cash.account"));
         TreeItem<String> propertiesMenu = new TreeItem<>(Bundles.getString("menu.cash.property"));
-        TreeItem<String> listPocketsMenu = new TreeItem<>(Bundles.getString("menu.cash.pocket"));
+        TreeItem<String> listPocketSelectMenu = new TreeItem<>(Bundles.getString("menu.cash.pocket"));
+        TreeItem<String> listPocketsMenu = new TreeItem<>(Bundles.getString("menu.cash.pockets"));
         TreeItem<String> debitMenu = new TreeItem<>(Bundles.getString("menu.debit.title"));
-        cashMenu.getChildren().addAll(summaryMenu, readyMenu, accountsMenu, propertiesMenu, listPocketsMenu, debitMenu);
+        cashMenu.getChildren().addAll(summaryMenu, readyMenu, accountsMenu, propertiesMenu, listPocketSelectMenu, listPocketsMenu, debitMenu);
 
         TreeItem<String> orderMenu = new TreeItem<>(Bundles.getString("menu.transaction"));
         orderMenu.expandedProperty().addListener(expandedListener);
@@ -262,9 +263,11 @@ public class LoggedController {
             final String value = newValue.getValue();
             if( value.equals(Bundles.getString("menu.cash.account")) ) {
                 readAccountListLayout();
-            } else if( value.equals(Bundles.getString("menu.cash.pocket")) ) {
+            } else if( value.equals(Bundles.getString("menu.cash.pockets")) ) {
                 readListPockets();
-            } else if( value.equals(Bundles.getString("menu.transaction.transactions")) ) {
+            } else if( value.equals(Bundles.getString("menu.cash.pocket")) ) {
+                readListPocketSelect();
+            }else if( value.equals(Bundles.getString("menu.transaction.transactions")) ) {
                 readListTransactions();
             } else if( value.equals(Bundles.getString("menu.transaction.report")) ) {
                 readListMonth();
@@ -400,6 +403,18 @@ public class LoggedController {
         private void readListPockets() {
             try {
                 FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/Pocket.fxml") );
+                AnchorPane pane = loader.load();
+
+                layout.setCenter(pane);
+                titleLabel.setText(Bundles.getString("menu.cash") + " / " + Bundles.getString("menu.cash.pocket"));
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+
+        private void readListPocketSelect() {
+            try {
+                FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/PocketSelect.fxml") );
                 AnchorPane pane = loader.load();
 
                 layout.setCenter(pane);

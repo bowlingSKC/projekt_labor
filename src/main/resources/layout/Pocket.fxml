@@ -29,13 +29,16 @@
             <TableColumn fx:id="accountTableColumn" prefWidth="254.0" text="Számla" />
         </columns>
       </TableView>
-      <TableView fx:id="remainedTableView" layoutX="23.0" layoutY="416.0" prefHeight="250.0" prefWidth="231.0">
+      <TableView fx:id="remainedTableView" layoutX="23.0" layoutY="416.0" prefHeight="160.0" prefWidth="231.0">
         <columns>
           <TableColumn fx:id="szamlaTableColumn" prefWidth="133.0" text="Számla" />
           <TableColumn fx:id="egyenlegTableColumn" prefWidth="92.0" text="Fentmaradt" />
         </columns>
       </TableView>
-      <Button layoutX="23.0" layoutY="374.0" mnemonicParsing="false" onAction="#exportCSV" text="Export to CSV" />
+      <Button fx:id="csvButton" layoutX="23.0" layoutY="374.0" mnemonicParsing="false" onAction="#exportCSV" text="Export to CSV" />
       <Label fx:id="errorLabel" layoutX="14.0" layoutY="308.0" prefHeight="17.0" prefWidth="256.0" text="ErrorLabel" textFill="RED" />
+      <Label fx:id="totalLabel" layoutX="22.0" layoutY="596.0" text="Összes fentmaradf:" />
+      <Label fx:id="totalLabelValue" layoutX="140.0" layoutY="596.0" text="Label" />
+      <Label fx:id="totalLabel11" layoutX="203.0" layoutY="596.0" text="Ft" />
     </children>
 </AnchorPane>

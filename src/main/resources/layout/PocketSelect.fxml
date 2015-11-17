@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.effect.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.chart.*?>
+<?import impl.org.controlsfx.skin.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane stylesheets="@../styles/login.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pl.controllers.PocketSelectController">
+    <children>
+        <PieChart fx:id="pocketPie" layoutX="270.0" layoutY="16.0" title="Zsebek" />
+        <ComboBox fx:id="szamlaCombo" layoutX="21.0" layoutY="115.0" prefHeight="27.0" prefWidth="239.0" />
+        <Label fx:id="addpocketLabel" layoutX="14.0" layoutY="77.0" text="Zsebhez hozzáadás/elvétel:" />
+        <TextField fx:id="moneyText" layoutX="23.0" layoutY="223.0" prefHeight="30.0" prefWidth="206.0" />
+        <ComboBox fx:id="pocketCombo" layoutX="21.0" layoutY="167.0" prefHeight="27.0" prefWidth="239.0" />
+        <Label fx:id="chooseaccLabel" layoutX="21.0" layoutY="94.0" text="Számla kiválasztása:" />
+        <Label fx:id="choosepocketLabel" layoutX="18.0" layoutY="150.0" text="Zseb kiválasztása:" />
+        <Label fx:id="moneyLabel" layoutX="20.0" layoutY="199.0" text="Összeg:" />
+        <Button fx:id="inButton" layoutX="22.0" layoutY="263.0" mnemonicParsing="false" onAction="#handleIn" text="Betesz" />
+        <Button fx:id="outButton" layoutX="176.0" layoutY="263.0" mnemonicParsing="false" onAction="#handleOut" text="Kivesz" />
+        <Label layoutX="243.0" layoutY="230.0" text="Ft" />
+        <TableView fx:id="pocketTableView" layoutX="260.0" layoutY="416.0" prefHeight="250.0" prefWidth="508.0">
+            <columns>
+                <TableColumn fx:id="pocketTableColumn" prefWidth="137.0" text="Zseb" />
+                <TableColumn fx:id="moneyTableColumn" prefWidth="112.0" text="Összeg" />
+                <TableColumn fx:id="accountTableColumn" prefWidth="254.0" text="Számla" />
+            </columns>
+        </TableView>
+        <TableView fx:id="remainedTableView" layoutX="23.0" layoutY="416.0" prefHeight="250.0" prefWidth="231.0">
+            <columns>
+                <TableColumn fx:id="szamlaTableColumn" prefWidth="133.0" text="Számla" />
+                <TableColumn fx:id="egyenlegTableColumn" prefWidth="92.0" text="Fentmaradt" />
+            </columns>
+        </TableView>
+        <Button fx:id="csvButton" layoutX="23.0" layoutY="374.0" mnemonicParsing="false" onAction="#exportCSV" text="Export to CSV" />
+        <Label fx:id="errorLabel" layoutX="14.0" layoutY="308.0" prefHeight="17.0" prefWidth="256.0" text="ErrorLabel" textFill="RED" />
+    </children>
+</AnchorPane>
