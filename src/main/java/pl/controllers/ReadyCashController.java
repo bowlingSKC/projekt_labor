@@ -212,8 +212,10 @@ public class ReadyCashController {
 
             if( transactionTypeComboBox.getSelectionModel().getSelectedItem().equals(Bundles.getString("out")) ) {
                 handleOutTransactions();
+                System.out.println(Bundles.getString("out"));
             } else {
                 handleInTransaction();
+                System.out.println(Bundles.getString("in"));
             }
             updateTableData();
             updateTransactionTableItems();
