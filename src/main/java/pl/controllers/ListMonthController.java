@@ -19,6 +19,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import pl.CurrencyExchange;
 import pl.Main;
 import pl.bundles.Bundles;
 import pl.jpa.SessionUtil;
@@ -235,6 +236,7 @@ public class ListMonthController {
                                 (cashTra.getDate().before(toDate) || cashTra.getDate().equals(toDate)) &&
                                 validCash.containsValue(cashTra.getId())){
                             Float tmp = countCashMoney(cash, cashTra);
+                            tmp = (float) Math.floor(CurrencyExchange.getValue(cashTra.getCurrency()) * tmp);
                             allseries.get(allseries.size() - 1).getData().add(new XYChart.Data(cashTra.getDate().toString(), tmp));
                         }
 

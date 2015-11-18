@@ -290,7 +290,7 @@ public class ListTransactionController {
                 editPane.setOpacity(0);
                 new FadeInUpTransition(tablePane).play();
             } catch (Throwable ex) {
-                MessageBox.showErrorMessage("Hiba", "A tranzakciót nem lehet végrehajtani!", ex.getMessage(), false);
+                MessageBox.showErrorMessage(Bundles.getString("error.nodb.title"), Bundles.getString("error.transaction"), ex.getMessage(), false);
             }
         }
         editAccountTransaction = null;
@@ -321,11 +321,21 @@ public class ListTransactionController {
             fillEmptyFields(accountTransaction);
             fillPrevTransaction(accountTransaction);
 
+            if(betweenCheck.isSelected()){
+                accountTransaction.setAnotherAccount(anotheraccCombo.getSelectionModel().getSelectedItem().getAccountNumber());
+            }
+
             saveTransactionToDatabase(accountTransaction);
 
             if(betweenCheck.isSelected()){
+                accountTransaction.setBeforeAccountTransaction(null);
                 accountTransaction.setAccount(anotheraccCombo.getSelectionModel().getSelectedItem());
                 accountTransaction.setType(newTransactionTypeComboBox.getItems().get(7));
+                accountTransaction.setAnotherAccount(newAccountComboBox.getSelectionModel().getSelectedItem().getAccountNumber());
+                AccountTransaction prev = anotheraccCombo.getSelectionModel().getSelectedItem().getLatestTransaction();
+                if(prev != null){
+                    accountTransaction.setBeforeAccountTransaction(prev);
+                }
                 saveTransactionToDatabase(accountTransaction);
                 if(pocketCombo.getSelectionModel().getSelectedItem() != null &&
                         pocketCombo2.getSelectionModel().getSelectedItem() != null){
@@ -333,7 +343,7 @@ public class ListTransactionController {
                 }
                 if(pocketCombo.getSelectionModel().getSelectedItem() != null &&
                         pocketCombo2.getSelectionModel().getSelectedItem() == null){
-                    n2wPocketToDatabase(pocketCombo.getSelectionModel().getSelectedItem());
+                    newPocketToDatabase(pocketCombo.getSelectionModel().getSelectedItem());
                 }
             }
 
@@ -343,7 +353,7 @@ public class ListTransactionController {
             editPane.setOpacity(0);
             new FadeInUpTransition(tablePane).play();
         } catch (Throwable ex) {
-            MessageBox.showErrorMessage("Hiba", "A tranzakciót nem lehet végrehajtani!", ex.getMessage(), false);
+            MessageBox.showErrorMessage(Bundles.getString("error.nodb.title"), Bundles.getString("error.transaction"), ex.getMessage(), false);
         }
     }
 
@@ -400,7 +410,7 @@ public class ListTransactionController {
             session.update(readyCash);
             session.update(account);
         } else {
-            MessageBox.showErrorMessage("Hiba", "A tranzakciót nem lehet végrehajtani!", "Nincs készpénzben ilyen valuta regisztrálva!", false);
+            MessageBox.showErrorMessage(Bundles.getString("error.nodb.title"), Bundles.getString("error.transaction"), Bundles.getString("nocashcurrency"), false);
             session.close();
         }
     }
@@ -470,7 +480,7 @@ public class ListTransactionController {
         }
     }
 
-    private void n2wPocketToDatabase(Pocket poc1){
+    private void newPocketToDatabase(Pocket poc1){
         poc1.setMoney(poc1.getMoney() - Float.valueOf(newTransactionAmountTextField.getText()));
         Pocket poc2 = new Pocket(Float.valueOf(newTransactionAmountTextField.getText()), Main.getLoggedUser(), poc1.getCategory(),
                 anotheraccCombo.getSelectionModel().getSelectedItem());
@@ -513,7 +523,7 @@ public class ListTransactionController {
 
         if( newTransactionTypeComboBox.getSelectionModel().getSelectedItem().getSign().equals("-") ) {
             if( Float.valueOf( newTransactionAmountTextField.getText() ) > newAccountComboBox.getSelectionModel().getSelectedItem().getMoney()  ) {
-                buffer.append("Nincs elég pénz a számládon!\n");
+                buffer.append(Bundles.getString("notenoughmoney") + "\n");
             }
         }
 
@@ -534,19 +544,19 @@ public class ListTransactionController {
         StringBuilder buffer = new StringBuilder();
 
         if( newAccountComboBox.getSelectionModel().getSelectedItem() == null  ) {
-            buffer.append("Számla választása kötelező!\n");
+            buffer.append(Bundles.getString("selectaccount") + "\n");
         }
 
         if( newTransactionTypeComboBox.getSelectionModel().getSelectedItem() == null ) {
-            buffer.append("Tranzakció típusa választása kötelező!\n");
+            buffer.append(Bundles.getString("selecttype") + "\n");
         }
 
         try {
             if( Float.valueOf(newTransactionAmountTextField.getText()) < 0 ) {
-                buffer.append("Nullánál nagyobb számot lehet megadni csak összegnek!\n");
+                buffer.append(Bundles.getString("gtzero") + "\n");
             }
         } catch (NumberFormatException ex) {
-            buffer.append("Összegnek csak számot lehet megadni!\n");
+            buffer.append(Bundles.getString("moneynumber") + "\n");
         }
 
         // TODO: itt kell ellenőrizni a további feltételeket is
@@ -660,9 +670,9 @@ public class ListTransactionController {
             cellButtonDelete.setOnAction((ActionEvent t) -> {
                 int row = getTableRow().getIndex();
                 Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-                alert.setTitle("Biztos benne?");
-                alert.setHeaderText("Biztosan törölni szeretné a kiválasztott tételt?");
-                alert.setContentText("A törlés következtében az adat elveszik.");
+                alert.setTitle(Bundles.getString("sure"));
+                alert.setHeaderText(Bundles.getString("suredelete"));
+                alert.setContentText(Bundles.getString("deletedata"));
                 Optional<ButtonType> result = alert.showAndWait();
                 if( result.get() == ButtonType.OK ) {
                     AccountTransaction accountTransaction = transactionTableView.getItems().get(row);

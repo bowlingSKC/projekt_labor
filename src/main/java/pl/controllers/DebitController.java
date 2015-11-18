@@ -207,7 +207,7 @@ public class DebitController {
             Main.getLoggedUser().getDebits().add(debit);
             handleBackToTablePane();
         } catch (Throwable ex) {
-            MessageBox.showErrorMessage("Hiba", "A tartozást nem lehet elmeneteni!", ex.getMessage(), false);
+            MessageBox.showErrorMessage(Bundles.getString("error.nodb.title"), Bundles.getString("nodebitsave"), ex.getMessage(), false);
         }
     }
 
@@ -231,10 +231,10 @@ public class DebitController {
 
         try {
             if( Float.valueOf(moneyField.getText()) < 0 ) {
-                builder.append("0-nál nagyobb számot lehet megani az összeg mezőben!\n");
+                builder.append(Bundles.getString("gtzero") + "\n");
             }
         } catch (NumberFormatException ex) {
-            builder.append("Csak számot lehet beírni az összeg mezőbe!\n");
+            builder.append(Bundles.getString("moneynumber") + "\n");
         }
 
         if( currencyComboBox.getSelectionModel().getSelectedItem() == null ) {
@@ -259,7 +259,7 @@ public class DebitController {
     private class ButtonCell extends TableCell<Object, Boolean> {
         final Hyperlink editLink = new Hyperlink(Bundles.getString("menu.debit.edit"));
         final Hyperlink deleteLink = new Hyperlink(Bundles.getString("menu.debit.delete"));
-        final Hyperlink payLink = new Hyperlink("Kiegyenlítés");
+        final Hyperlink payLink = new Hyperlink(Bundles.getString("balancA"));
         final HBox hbox = new HBox(payLink, editLink, deleteLink);
 
         ButtonCell(final TableView tbl) {
@@ -373,7 +373,7 @@ public class DebitController {
 
             handleBackToTablePane();
         } catch (Exception ex) {
-            MessageBox.showErrorMessage("Hiba", "Hiba történt a feldolgozás közben!", ex.getMessage(), false);
+            MessageBox.showErrorMessage(Bundles.getString("error.nodb.title"), "Hiba történt a feldolgozás közben!", ex.getMessage(), false);
         }
     }
 
