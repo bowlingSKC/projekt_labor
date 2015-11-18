@@ -17,7 +17,7 @@
                 <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
             </columnResizePolicy>
         </TableView>
-        <Button layoutX="722.0" layoutY="14.0" mnemonicParsing="false" onAction="#handleToCSV" text="%csv" />
+        <Button layoutX="491.0" layoutY="74.0" mnemonicParsing="false" onAction="#handleToCSV" text="%csv" />
         <TableView fx:id="transactionTableView" layoutX="62.0" layoutY="400.0" prefHeight="164.0" prefWidth="589.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="385.0">
             <columns>
                 <TableColumn fx:id="dateTableColumn" prefWidth="75.0" text="%date" />
@@ -67,10 +67,11 @@
         </AnchorPane>
       <HBox alignment="CENTER_RIGHT" layoutX="442.0" layoutY="351.0" prefHeight="17.0" prefWidth="197.0" spacing="10.0">
          <children>
-            <Label text="Összesen:" />
+            <Label text="%total" />
             <Label fx:id="sumLabel" text="Label" />
             <Label text="Ft" />
          </children>
       </HBox>
+      <Button layoutX="491.0" layoutY="371.0" mnemonicParsing="false" onAction="#handleToCSV2" text="%csv" />
     </children>
 </AnchorPane>

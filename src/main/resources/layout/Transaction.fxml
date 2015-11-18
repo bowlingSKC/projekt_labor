@@ -26,7 +26,7 @@
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <Label text="%currencyL" />
+            <Label text="%accountL" />
             <Label text="%transactiontypeL" GridPane.rowIndex="1" />
             <Label text="%money" GridPane.rowIndex="2" />
             <Label text="%dateL" GridPane.rowIndex="3" />

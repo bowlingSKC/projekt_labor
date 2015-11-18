@@ -76,6 +76,8 @@ public class AccountListController {
 
     // ============= MÓDOSÍTÁS/TÖRLÉS ============
 
+    private Map<String,Float> hufvalues = new HashMap<>();
+
     @FXML
     public void initialize() {
         tablePane.setOpacity(1);
@@ -118,8 +120,10 @@ public class AccountListController {
                                 Account account = accountTableView.getItems().get(this.getTableRow().getIndex());
                                 if( account.getCurrency().getCode().equals("HUF") ) {
                                     setText( Constant.getNumberFormat().format(account.getMoney()) );
+                                    hufvalues.put(account.getAccountNumber(), account.getMoney());
                                 } else if(CurrencyExchange.isContainsKey(account.getCurrency())) {
                                     setText( Constant.getNumberFormat().format( CurrencyExchange.getValue(account.getCurrency()) * account.getMoney() ) );
+                                    hufvalues.put(account.getAccountNumber(), CurrencyExchange.getValue(account.getCurrency()) * account.getMoney());
                                 } else {
                                     setText("???");
                                 }
@@ -368,7 +372,7 @@ public class AccountListController {
             if(file != null){
 
                 writer = new FileWriter(file);
-                writer.append("Name;Account number;Money;Currency;Bank;Created date\n");
+                writer.append("Name;Account number;Money;Currency;Bank;Created date;HUF value\n");
                 for(int i = 0; i < accountTableView.getItems().size(); i++){
                     writer.append(accountTableView.getItems().get(i).getName());
                     writer.append(';');
@@ -381,6 +385,9 @@ public class AccountListController {
                     writer.append(accountTableView.getItems().get(i).getBank().toString());
                     writer.append(';');
                     writer.append(accountTableView.getItems().get(i).getCreatedDate().toString());
+                    writer.append(';');
+                    String tmp = accountTableView.getColumns().get(0).getCellData(i).toString();
+                    writer.append(String.valueOf(hufvalues.get(tmp)));
                     writer.append('\n');
                     writer.flush();
                 }
