@@ -100,7 +100,7 @@
             </Button>
          </children>
       </AnchorPane>
-      <AnchorPane fx:id="editPane" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="34.0" AnchorPane.leftAnchor="25.0" AnchorPane.rightAnchor="25.0" AnchorPane.topAnchor="34.0">
+      <AnchorPane fx:id="editPane" opacity="0.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="34.0" AnchorPane.leftAnchor="25.0" AnchorPane.rightAnchor="25.0" AnchorPane.topAnchor="34.0">
          <children>
             <GridPane layoutX="57.0" layoutY="146.0" prefHeight="139.0" prefWidth="354.0">
               <columnConstraints>

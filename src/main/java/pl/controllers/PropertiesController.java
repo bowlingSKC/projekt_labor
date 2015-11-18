@@ -430,6 +430,7 @@ public class PropertiesController {
     private void setUnvisibleAllPanes() {
         editPane.setOpacity(0);
         sellPane.setOpacity(0);
+        newPane.setOpacity(0);
     }
 
     private void loadPropertyToEditPane(Property property) {
