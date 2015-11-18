@@ -101,9 +101,14 @@ public class Property {
         for(PropertyValue pvalue : values) {
             if( last == null ) {
                 last = pvalue;
-            }
-            if( last.getDate().before(pvalue.getDate()) ) {
-                last = pvalue;
+            } else {
+                if( pvalue.getDate().compareTo(last.getDate()) == 0 ) {
+                    if( pvalue.getId() > last.getId() ) {
+                        last = pvalue;
+                    }
+                } else if( pvalue.getDate().compareTo(last.getDate()) == 1 ) {
+                    last = pvalue;
+                }
             }
         }
         return (last == null) ? null : last.getValue();

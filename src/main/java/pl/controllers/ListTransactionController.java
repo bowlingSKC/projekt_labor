@@ -102,7 +102,6 @@ public class ListTransactionController {
 
     private AccountTransaction editAccountTransaction = null;
 
-
     @FXML
     public void initialize() {
 
@@ -120,8 +119,8 @@ public class ListTransactionController {
             @Override
             protected void updateItem(AccountTransaction item, boolean empty) {
                 super.updateItem(item, empty);
-                if( item != null && !empty ) {
-                    if( item.getType().getSign().equals("-") ) {
+                if (item != null && !empty) {
+                    if (item.getType().getSign().equals("-")) {
                         setStyle("-fx-background-color: lightcoral;");
                     } else {
                         setStyle("");
@@ -135,25 +134,35 @@ public class ListTransactionController {
             protected void updateItem(Float item, boolean empty) {
                 super.updateItem(item, empty);
 
-                if( item != null && !empty ) {
-                    setText( Constant.getNumberFormat().format(item) );
-                } else {
-                    setText("");
-                }
-            }
-        });
-
-        beforeMoneyColumn.setCellFactory(col -> new TableCell<AccountTransaction, Float>() {
-            @Override
-            protected void updateItem(Float item, boolean empty) {
-                super.updateItem(item, empty);
-                if( item != null && !empty ) {
+                if (item != null && !empty) {
                     setText(Constant.getNumberFormat().format(item));
                 } else {
                     setText("");
                 }
             }
         });
+
+        beforeMoneyColumn.setCellFactory(new Callback<TableColumn<AccountTransaction, Float>, TableCell<AccountTransaction, Float>>() {
+            @Override
+            public TableCell<AccountTransaction, Float> call(TableColumn<AccountTransaction, Float> param) {
+                return new TableCell<AccountTransaction, Float>() {
+                    @Override
+                    protected void updateItem(Float item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if( item != null && !empty ) {
+                            setText(Constant.getNumberFormat().format(item));
+                        } else {
+                            setText("");
+                        }
+                    }
+                };
+            }
+        });
+        beforeMoneyColumn.setCellValueFactory(new PropertyValueFactory<>("balance"));
+
+        for( Account account : Main.getLoggedUser().getAccounts() ) {
+            account.tickAllTransactions();
+        }
 
         dateTableColumn.setCellFactory(column -> new TableCell<AccountTransaction, Date>() {
             @Override
@@ -198,6 +207,8 @@ public class ListTransactionController {
         searcMoneyFromField.textProperty().addListener(listener);
         searcMoneyToField.textProperty().addListener(listener);
 
+        dateTableColumn.setSortType(TableColumn.SortType.DESCENDING);
+
         initEditTransaction();
     }
 
@@ -208,14 +219,6 @@ public class ListTransactionController {
 
         newAccountComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> newTransactionFromPocket.getItems().setAll(newValue.getPockets()));
         newTransactionFromPocket.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> amointInPocketsLabel.setText( newValue.getMoney() + " " + newAccountComboBox.getSelectionModel().getSelectedItem().getCurrency()));
-
-//        newTransactionTypeComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-//            hideAllTypePane();
-//            if( newValue.getId() == 1 ) {
-//                new FadeInUpTransition(transferPane).play();
-//            }
-//        });
-
     }
 
     private void hideAllTypePane() {
@@ -303,61 +306,15 @@ public class ListTransactionController {
         org.hibernate.Transaction tx = session.beginTransaction();
 
         if( newTransactionTypeComboBox.getSelectionModel().getSelectedItem().getId() == 1 ) {
-            account.setMoney( account.getMoney() - accountTransaction.getMoney() );
-            session.update(account);
+            saveOutTransfer(accountTransaction, account, session);
         }
 
         if( newTransactionTypeComboBox.getSelectionModel().getSelectedItem().getId() == 2) {
-            ReadyCash readyCash = null;
-            for(ReadyCash tmp : Main.getLoggedUser().getReadycash()) {
-                if( currencyComboBox.getSelectionModel().getSelectedItem().equals(tmp.getCurrency()) ) {
-                    readyCash = tmp;
-                    break;
-                }
-            }
-
-            if( readyCash == null ) {
-                readyCash = new ReadyCash();
-                readyCash.setCurrency(currencyComboBox.getSelectionModel().getSelectedItem());
-                readyCash.setMoney(accountTransaction.getMoney());
-                readyCash.setOwner(Main.getLoggedUser());
-                session.save(readyCash);
-
-                Main.getLoggedUser().getReadycash().add(readyCash);
-            } else {
-                readyCash.setMoney( readyCash.getMoney() + accountTransaction.getMoney() );
-                session.update(readyCash);
-            }
-            account.setMoney( account.getMoney() - accountTransaction.getMoney() );
-            session.update(account);
-
+            saveCashFromAccount(accountTransaction, account, session);
         }
 
         if( newTransactionTypeComboBox.getSelectionModel().getSelectedItem().getId() == 3 ) {
-            ReadyCash readyCash = null;
-            for(ReadyCash tmp : Main.getLoggedUser().getReadycash()) {
-                if( tmp.getCurrency().equals(currencyComboBox.getSelectionModel().getSelectedItem()) ) {
-                    readyCash = tmp;
-                    break;
-                }
-            }
-
-            if( readyCash != null ) {
-                readyCash.setMoney( readyCash.getMoney() - accountTransaction.getMoney() );
-                account.setMoney( account.getMoney() + accountTransaction.getMoney() );
-
-                session.update(account);
-                if( readyCash.getMoney() == 0.0f ) {
-                    session.delete(readyCash);
-                } else {
-                    session.update(readyCash);
-                }
-                session.update(account);
-            } else {
-                MessageBox.showErrorMessage("Hiba", "A tranzakciót nem lehet végrehajtani!", "Nincs készpénzben ilyen valuta regisztrálva!", false);
-                session.close();
-                return;
-            }
+            saveAccountToCash(accountTransaction, account, session);
         }
 
         session.save(accountTransaction);
@@ -368,12 +325,86 @@ public class ListTransactionController {
         account.getAccountTransactions().add(accountTransaction);
     }
 
+    private void saveAccountToCash(AccountTransaction accountTransaction, Account account, Session session) {
+        ReadyCash readyCash = null;
+        for(ReadyCash tmp : Main.getLoggedUser().getReadycash()) {
+            if( tmp.getCurrency().equals(currencyComboBox.getSelectionModel().getSelectedItem()) ) {
+                readyCash = tmp;
+                break;
+            }
+        }
+
+        if( readyCash != null ) {
+            readyCash.setMoney( readyCash.getMoney() - accountTransaction.getMoney() );
+            account.setMoney( account.getMoney() + accountTransaction.getMoney() );
+
+            CashTransaction cashTransaction = new CashTransaction();
+            cashTransaction.setCash(readyCash);
+            cashTransaction.setMoney(accountTransaction.getMoney());
+            cashTransaction.setComment(accountTransaction.getComment());
+            cashTransaction.setCurrency(accountTransaction.getCurrency());
+            cashTransaction.setType(accountTransaction.getType());
+            cashTransaction.setDate(accountTransaction.getDate());
+            cashTransaction.setBeforeTransaction(readyCash.getLatestTransaction());
+            readyCash.getCashTransaction().add(cashTransaction);
+
+            session.save(cashTransaction);
+
+            session.update(readyCash);
+            session.update(account);
+        } else {
+            MessageBox.showErrorMessage("Hiba", "A tranzakciót nem lehet végrehajtani!", "Nincs készpénzben ilyen valuta regisztrálva!", false);
+            session.close();
+        }
+    }
+
+    private void saveCashFromAccount(AccountTransaction accountTransaction, Account account, Session session) {
+        ReadyCash readyCash = null;
+        for(ReadyCash tmp : Main.getLoggedUser().getReadycash()) {
+            if( currencyComboBox.getSelectionModel().getSelectedItem().equals(tmp.getCurrency()) ) {
+                readyCash = tmp;
+                break;
+            }
+        }
+
+        if( readyCash == null ) {
+            readyCash = new ReadyCash();
+            readyCash.setCurrency(currencyComboBox.getSelectionModel().getSelectedItem());
+            readyCash.setMoney(accountTransaction.getMoney());
+            readyCash.setOwner(Main.getLoggedUser());
+            session.save(readyCash);
+
+            Main.getLoggedUser().getReadycash().add(readyCash);
+        } else {
+            readyCash.setMoney( readyCash.getMoney() + accountTransaction.getMoney() );
+            session.update(readyCash);
+        }
+
+        CashTransaction cashTransaction = new CashTransaction();
+        cashTransaction.setCash(readyCash);
+        cashTransaction.setMoney(accountTransaction.getMoney());
+        cashTransaction.setComment(accountTransaction.getComment());
+        cashTransaction.setCurrency(accountTransaction.getCurrency());
+        cashTransaction.setType(accountTransaction.getType());
+        cashTransaction.setDate(accountTransaction.getDate());
+        cashTransaction.setBeforeTransaction(readyCash.getLatestTransaction());
+        session.save(cashTransaction);
+        readyCash.getCashTransaction().add(cashTransaction);
+
+        account.setMoney( account.getMoney() - accountTransaction.getMoney() );
+        session.update(account);
+    }
+
+    private void saveOutTransfer(AccountTransaction accountTransaction, Account account, Session session) {
+        account.setMoney( account.getMoney() - accountTransaction.getMoney() );
+        session.update(account);
+    }
+
     private void fillTransactionFromFields(AccountTransaction accountTransaction) {
         accountTransaction.setAccount(newAccountComboBox.getSelectionModel().getSelectedItem());
         accountTransaction.setType(newTransactionTypeComboBox.getSelectionModel().getSelectedItem());
         accountTransaction.setMoney( Float.valueOf(newTransactionAmountTextField.getText()) );
         accountTransaction.setComment(newTransactionCommentField.getText());
-        //New
         accountTransaction.setCurrency(currencyComboBox.getSelectionModel().getSelectedItem());
         if(newTransactionDatePicker.getValue() != null){
             LocalDate localDate = newTransactionDatePicker.getValue();
@@ -386,8 +417,10 @@ public class ListTransactionController {
     private void checkValidTransaction() throws Exception {
         StringBuilder buffer = new StringBuilder();
 
-        if( Float.valueOf( newTransactionAmountTextField.getText() ) > newAccountComboBox.getSelectionModel().getSelectedItem().getMoney()  ) {
-            buffer.append("Nincs elég pénz a számládon!\n");
+        if( newTransactionTypeComboBox.getSelectionModel().getSelectedItem().getSign().equals("-") ) {
+            if( Float.valueOf( newTransactionAmountTextField.getText() ) > newAccountComboBox.getSelectionModel().getSelectedItem().getMoney()  ) {
+                buffer.append("Nincs elég pénz a számládon!\n");
+            }
         }
 
         if( buffer.toString().length() != 0 ) {
@@ -466,6 +499,7 @@ public class ListTransactionController {
         transactionTableView.getItems().clear();
         User loggedUser = Main.getLoggedUser();
         for( Account account : loggedUser.getAccounts() ) {
+            account.tickAllTransactions();
             transactionTableView.getItems().addAll(account.getAccountTransactions());
         }
     }

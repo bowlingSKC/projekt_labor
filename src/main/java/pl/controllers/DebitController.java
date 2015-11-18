@@ -120,6 +120,26 @@ public class DebitController {
         currencyColumn.setCellValueFactory(new PropertyValueFactory<>("currency"));
         dateColumn.setCellValueFactory(new PropertyValueFactory<>("deadline"));
 
+        // TODO
+        debitTableView.setRowFactory(row -> new TableRow<Debit>() {
+            @Override
+            protected void updateItem(Debit item, boolean empty) {
+                super.updateItem(item, empty);
+                if( item != null & !empty ) {
+                    long nowTime = new Date().getTime();
+                    long deadlineTime = item.getDeadline().getTime();
+                    int diffDays = (int)((deadlineTime - nowTime) / (1000 * 60 * 60 * 24));
+                    if( diffDays == 0 ) {
+                        setStyle("-fx-background-color: lightcoral;");
+                    } else if( diffDays < 7 ) {
+                        setStyle("-fx-background-color: coral;");
+                    } else if( diffDays < 3 ) {
+                        setStyle("-fx-background-color: yellow;");
+                    }
+                }
+            }
+        });
+
         amountColumn.setCellFactory(col -> new TableCell<Debit, Float>() {
             @Override
             protected void updateItem(Float item, boolean empty) {

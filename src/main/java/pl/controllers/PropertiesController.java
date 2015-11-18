@@ -37,6 +37,8 @@ public class PropertiesController {
     private AnchorPane editPane;
     @FXML
     private AnchorPane sellPane;
+    @FXML
+    private AnchorPane newPane;
 
     @FXML
     private TableView<Property> propertyTableView;
@@ -52,11 +54,24 @@ public class PropertiesController {
     @FXML
     private TextField nameField;
     @FXML
-    private TextField moneyField;
-    @FXML
     private DatePicker datePicker;
     @FXML
     private TextField commentField;
+    @FXML
+    private TextField newValueValueTextField;
+    @FXML
+    private DatePicker newValueDatePicker;
+    @FXML
+    private TextField newValueCommentField;
+    @FXML
+    private TableView<PropertyValue> propertyValueTable;
+    @FXML
+    private TableColumn<PropertyValue, Date> propertyValueDateTableColumn;
+    @FXML
+    private TableColumn<PropertyValue, Float> propertyValueFloatTableColumn;
+    @FXML
+    private TableColumn<PropertyValue, String> propertyValueStringTableColumn;
+
 
     // ====== SELL PANE ======
     @FXML
@@ -73,13 +88,67 @@ public class PropertiesController {
     private ComboBox<Account> sellPropertyAccounts;
     // ====== SELL PANE VÉGE ======
 
+    // ====== NEW PANE ======
+    @FXML
+    private TextField newNameField;
+    @FXML
+    private DatePicker newDatePicker;
+    @FXML
+    private TextField newMoneyField;
+    @FXML
+    private TextField newCommentField;
+    // ====== NEW PANE VÉGE ======
+
     @FXML
     public void initialize() {
         loadPropertiesToTable();
         initPropertyTable();
         initTableLayout();
+        initNewValuePane();
 
         initSellPane();
+    }
+
+    private void initNewValuePane() {
+        propertyValueDateTableColumn.setCellFactory(new Callback<TableColumn<PropertyValue, Date>, TableCell<PropertyValue, Date>>() {
+            @Override
+            public TableCell<PropertyValue, Date> call(TableColumn<PropertyValue, Date> param) {
+                return new TableCell<PropertyValue, Date>() {
+                    @Override
+                    protected void updateItem(Date item, boolean empty) {
+                        super.updateItem(item, empty);
+
+                        if( item != null && !empty ) {
+                            setText(Constant.getDateFormat().format(item));
+                        } else {
+                            setText("");
+                        }
+                    }
+                };
+            }
+        });
+        propertyValueDateTableColumn.setCellValueFactory(new PropertyValueFactory<>("date"));
+
+        propertyValueFloatTableColumn.setCellFactory(new Callback<TableColumn<PropertyValue, Float>, TableCell<PropertyValue, Float>>() {
+            @Override
+            public TableCell<PropertyValue, Float> call(TableColumn<PropertyValue, Float> param) {
+                return new TableCell<PropertyValue, Float>() {
+                    @Override
+                    protected void updateItem(Float item, boolean empty) {
+                        super.updateItem(item, empty);
+
+                        if( item != null && !empty ) {
+                            setText( Constant.getNumberFormat().format(item) );
+                        } else {
+                            setText("");
+                        }
+                    }
+                };
+            }
+        });
+        propertyValueFloatTableColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
+
+        propertyValueStringTableColumn.setCellValueFactory(new PropertyValueFactory<>("comment"));
     }
 
     private void initSellPane() {
@@ -161,7 +230,7 @@ public class PropertiesController {
     @FXML
     private void handleNewProperty() {
         tablePane.setOpacity(0);
-        new FadeInUpTransition(editPane).play();
+        new FadeInUpTransition(newPane).play();
     }
 
     @FXML
@@ -174,6 +243,62 @@ public class PropertiesController {
 
         loadPropertiesToTable();
         handleBackToTablePane();
+    }
+
+    @FXML
+    private void newValueSubmitButton() {
+        try {
+            checkNewValueFields();
+
+            PropertyValue value = new PropertyValue();
+            value.setProperty(editedProperty);
+            value.setComment(newValueCommentField.getText());
+            value.setValue(Float.valueOf(newValueValueTextField.getText()));
+            if( newValueDatePicker.getValue() != null ) {
+                value.setDate(Constant.dateFromLocalDate(newValueDatePicker.getValue()));
+            } else {
+                value.setDate(new Date());
+            }
+
+            editedProperty.getValues().add(value);
+
+            refreshValuesTable();
+
+            Session session = SessionUtil.getSession();
+            Transaction tx = session.beginTransaction();
+            session.save(value);
+            tx.commit();
+            session.close();
+
+        } catch (Exception e) {
+            MessageBox.showErrorMessage("Hiba", "Az új értéket nem lehet felvinni!", e.getMessage(), false);
+        }
+    }
+
+    private void refreshValuesTable() {
+        propertyValueTable.getItems().setAll(editedProperty.getValues());
+    }
+
+    private void checkNewValueFields() throws Exception {
+        StringBuffer buffer = new StringBuffer();
+
+        try {
+            if( Float.valueOf(newValueValueTextField.getText()) < 0 ) {
+                buffer.append("Az érték nem lehet negatív!\n");
+            }
+        } catch (NumberFormatException ex) {
+            buffer.append("Az érték mezőbe csak számot lehet írni!\n");
+        }
+
+        if( newValueDatePicker.getValue() != null ) {
+            if( Constant.dateFromLocalDate(newValueDatePicker.getValue()).after(new Date()) ) {
+                buffer.append("A dátum nem lehet a mai napnál később!\n");
+            }
+        }
+
+        if( buffer.toString().length() != 0 ) {
+            throw new Exception(buffer.toString());
+        }
     }
 
     private void updatePropertyInDatabase() {
@@ -189,12 +314,16 @@ public class PropertiesController {
             checkAllField();
 
             Property property = new Property();
-            property.setName(nameField.getText());
-            property.setBought(Constant.dateFromLocalDate(datePicker.getValue()));
-            property.setComment(commentField.getText());
+            property.setName(newNameField.getText());
+            if(newDatePicker.getValue() != null) {
+                property.setBought(Constant.dateFromLocalDate(newDatePicker.getValue()));
+            } else {
+                property.setBought(new Date());
+            }
+            property.setComment(newCommentField.getText());
             property.setOwner(Main.getLoggedUser());
 
-            PropertyValue value = new PropertyValue(property, Float.valueOf(moneyField.getText()), new Date(), null);
+            PropertyValue value = new PropertyValue(property, Float.valueOf(newMoneyField.getText()), new Date(), null);
             property.getValues().add(value);
 
             Session session = SessionUtil.getSession();
@@ -269,16 +398,16 @@ public class PropertiesController {
     private void checkAllField() throws Exception {
         StringBuffer buffer = new StringBuffer();
 
-        if( nameField.getText().length() == 0 ) {
+        if( newNameField.getText().length() == 0 ) {
             buffer.append("Kötelező nevet adni a vagyonelemnek!\n");
         }
 
         try {
-            if( Float.valueOf(moneyField.getText()) <= 0 ) {
-                buffer.append("A vagyonelem értéke nem lehet 0 vagy annál kisebb értékű!\n");
+            if( Float.valueOf(newMoneyField.getText()) < 1 ) {
+                buffer.append("A beszerzési érték nem lehet negatív!\n");
             }
         } catch (NumberFormatException ex) {
-            buffer.append("Az érték mezőbe csak számot lehet beírni!\n");
+            buffer.append("A beszerzési érték csak számot tartalmazhat!\n");
         }
 
         if( buffer.toString().length() != 0 ) {
@@ -306,9 +435,10 @@ public class PropertiesController {
     private void loadPropertyToEditPane(Property property) {
         editedProperty = property;
         nameField.setText( property.getName() );
-        moneyField.setText( Float.toString(property.getLatestValue()) );
         datePicker.setValue(Constant.localDateFromDate(property.getBought()));
         commentField.setText( property.getComment() );
+
+        refreshValuesTable();
     }
 
     private class ButtonCell extends TableCell<Object, Boolean> {
@@ -343,7 +473,8 @@ public class PropertiesController {
             cellButtonSell.setOnAction((ActionEvent t) -> {
                 Property selected = propertyTableView.getItems().get( getTableRow().getIndex() );
                 sellPropertyNameLabel.setText( selected.getName() );
-                propertyTableView.getSelectionModel().select( selected );
+                sellPropertyValueField.setText( selected.getLatestValue() + "" );
+                propertyTableView.getSelectionModel().select(selected);
                 tablePane.setOpacity(0);
                 new FadeInUpTransition(sellPane).play();
             });

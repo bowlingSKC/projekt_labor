@@ -1,5 +1,7 @@
 package pl.model;
 
+import pl.Constant;
+
 import javax.persistence.*;
 import java.util.Date;
 import java.util.HashSet;
@@ -7,7 +9,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "account_transaction")
-public class AccountTransaction extends Transaction {
+public class AccountTransaction extends Transaction implements Comparable<AccountTransaction> {
 
     @ManyToOne
     @JoinColumn(name = "account_id", nullable = true)
@@ -22,6 +24,9 @@ public class AccountTransaction extends Transaction {
 
     @OneToMany(mappedBy = "beforeAccountTransaction")
     private Set<AccountTransaction> tmp = new HashSet<>(0);
+
+    @Transient
+    private float balance;
 
     public AccountTransaction() {
 
@@ -124,6 +129,37 @@ public class AccountTransaction extends Transaction {
         this.tmp = tmp;
     }
 
+    public float getBalance() {
+        return balance;
+    }
+
+    public void setBalance(float balance) {
+        this.balance = balance;
+    }
+
+    public void tick() {
+        AccountTransaction first = beforeAccountTransaction;
+        if( first == null ) {
+            balance = money;
+        } else {
+            float sum = 0;
+            while( first != null ) {
+                if( first.getType().getSign().equals("-") ) {
+                    sum -= first.getMoney();
+                } else {
+                    sum += first.getMoney();
+                }
+                first = first.beforeAccountTransaction;
+            }
+            if( getType().getSign().equals("+") ) {
+                balance = sum + money;
+            } else {
+                balance = sum - money;
+            }
+        }
+        System.out.println(balance);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -142,4 +178,27 @@ public class AccountTransaction extends Transaction {
         return true;
     }
 
+    @Override
+    public String toString() {
+        return "AccountTransaction{" +
+                "account=" + account + ", " +
+                "money=" + money + ", " +
+                "date=" + Constant.getDateFormat().format(date) +
+                '}';
+    }
+
+    @Override
+    public int compareTo(AccountTransaction other) {
+        if( date.compareTo(other.getDate()) == -1 ) {
+            return -1;
+        } else if(date.compareTo(other.getDate()) == 0) {
+            if( getId() > other.getId() ) {
+                return -1;
+            } else {
+                return 1;
+            }
+        } else {
+            return 1;
+        }
+    }
 }

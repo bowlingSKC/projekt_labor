@@ -94,4 +94,22 @@ public class ReadyCash {
         result = 31 * result + (money != +0.0f ? Float.floatToIntBits(money) : 0);
         return result;
     }
+
+    public CashTransaction getLatestTransaction() {
+        CashTransaction transaction = null;
+        for( CashTransaction tra : cashTransaction ) {
+            if( transaction == null ) {
+                transaction = tra;
+            } else {
+                if( tra.getDate().compareTo(transaction.getDate()) == 0 ) {
+                    if( tra.getId() > transaction.getId() ) {
+                        transaction = tra;
+                    }
+                } else if(tra.getDate().compareTo(transaction.getDate()) == 1) {
+                    transaction = tra;
+                }
+            }
+        }
+        return transaction;
+    }
 }

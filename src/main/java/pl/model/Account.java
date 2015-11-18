@@ -149,12 +149,22 @@ public class Account {
             if( tmp == null ) {
                 tmp = tra;
             } else {
-                if( tra.getDate().after(tmp.getDate()) ) {
-                    tmp = tra;
+                if( tra.getDate().compareTo(tmp.getDate()) == 0 ) {
+                    if( tra.getId() > tmp.getId() ) {
+                        tmp = tra;
+                    }
+                } else if(tra.getDate().compareTo(tmp.getDate()) == 1) {
+                        tmp = tra;
                 }
             }
         }
         return tmp;
+    }
+
+    public void tickAllTransactions() {
+        for(AccountTransaction transaction : accountTransactions) {
+            transaction.tick();
+        }
     }
 
     @Override
@@ -180,4 +190,6 @@ public class Account {
     public String toString() {
         return name + " [" + accountNumber.substring(0, 8) + "-" + accountNumber.substring(8, 16) + "-" + accountNumber.substring(17) + "]";
     }
+
+
 }
