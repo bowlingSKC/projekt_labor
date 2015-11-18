@@ -96,10 +96,10 @@ public class Pocket {
         int result = accountNumber != null ? accountNumber.hashCode() : 0;
         result = 31 * result + (money != +0.0f ? Float.floatToIntBits(money) : 0);
         return result;
-    }
+    }*/
 
     @Override
     public String toString() {
-        return name + " [" + accountNumber + "]";
-    }*/
+        return category.getName() + "(" + money + " Ft) - " + account;
+    }
 }

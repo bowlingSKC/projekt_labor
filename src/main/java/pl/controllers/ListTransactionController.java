@@ -93,6 +93,15 @@ public class ListTransactionController {
     private Label amointInPocketsLabel;
 
     @FXML
+    private ComboBox<Pocket> pocketCombo;
+    @FXML
+    private ComboBox<Pocket> pocketCombo2;
+    @FXML
+    private ComboBox<Account> anotheraccCombo;
+    @FXML
+    private CheckBox betweenCheck;
+
+    @FXML
     private TextField anotherAccNum1;
     @FXML
     private TextField anotherAccNum2;
@@ -199,6 +208,28 @@ public class ListTransactionController {
         searcMoneyToField.textProperty().addListener(listener);
 
         initEditTransaction();
+
+
+
+        betweenCheck.setOnAction((event) -> {
+            if(betweenCheck.isSelected()){
+                newTransactionTypeComboBox.getSelectionModel().select(newTransactionTypeComboBox.getItems().get(0));
+                anotheraccCombo.setDisable(false);
+                pocketCombo.setDisable(false);
+                pocketCombo2.setDisable(false);
+                for(Account acc : Main.getLoggedUser().getAccounts()){
+                    anotheraccCombo.getItems().add(acc);
+                    for(Pocket poc : acc.getPockets()){
+                        pocketCombo.getItems().add(poc);
+                        pocketCombo2.getItems().add(poc);
+                    }
+                }
+            }else{
+                anotheraccCombo.setDisable(true);
+                pocketCombo.setDisable(true);
+                pocketCombo2.setDisable(true);
+            }
+        });
     }
 
     private void initEditTransaction() {
@@ -233,6 +264,7 @@ public class ListTransactionController {
     @FXML
     private void handleNewTransaction() {
         tablePane.setOpacity(0);
+
         new FadeInUpTransition(editPane).play();
     }
 
@@ -287,6 +319,21 @@ public class ListTransactionController {
             fillPrevTransaction(accountTransaction);
 
             saveTransactionToDatabase(accountTransaction);
+
+            if(betweenCheck.isSelected()){
+                accountTransaction.setAccount(anotheraccCombo.getSelectionModel().getSelectedItem());
+                accountTransaction.setType(newTransactionTypeComboBox.getItems().get(7));
+                saveTransactionToDatabase(accountTransaction);
+                if(pocketCombo.getSelectionModel().getSelectedItem() != null &&
+                        pocketCombo2.getSelectionModel().getSelectedItem() != null){
+                    updatePocketsInDatabase(pocketCombo.getSelectionModel().getSelectedItem(), pocketCombo2.getSelectionModel().getSelectedItem());
+                }
+                if(pocketCombo.getSelectionModel().getSelectedItem() != null &&
+                        pocketCombo2.getSelectionModel().getSelectedItem() == null){
+                    n2wPocketToDatabase(pocketCombo.getSelectionModel().getSelectedItem());
+                }
+            }
+
 
             loadTransactionsToTable();
             clearAllFieldsOnEditPane();
@@ -366,6 +413,53 @@ public class ListTransactionController {
         session.close();
 
         account.getAccountTransactions().add(accountTransaction);
+    }
+
+    private void updatePocketsInDatabase(Pocket poc1, Pocket poc2){
+        poc1.setMoney(poc1.getMoney() - Float.valueOf(newTransactionAmountTextField.getText()));
+        poc2.setMoney(poc2.getMoney() + Float.valueOf(newTransactionAmountTextField.getText()));
+
+        Session session = SessionUtil.getSession();
+        org.hibernate.Transaction tx = session.beginTransaction();
+
+        try{
+            if(poc1.getMoney() == 0){
+                session.delete(poc1);
+                session.update(poc2);
+            } else if(poc1.getMoney() > 0){
+                session.update(poc1);
+                session.update(poc2);
+            }
+            tx.commit();
+            session.close();
+        } catch (Throwable ex) {
+            tx.rollback();
+            ex.printStackTrace();
+        }
+    }
+
+    private void n2wPocketToDatabase(Pocket poc1){
+        poc1.setMoney(poc1.getMoney() - Float.valueOf(newTransactionAmountTextField.getText()));
+        Pocket poc2 = new Pocket(Float.valueOf(newTransactionAmountTextField.getText()), Main.getLoggedUser(), poc1.getCategory(),
+                anotheraccCombo.getSelectionModel().getSelectedItem());
+
+        Session session = SessionUtil.getSession();
+        org.hibernate.Transaction tx = session.beginTransaction();
+
+        try{
+            if(poc1.getMoney() == 0){
+                session.delete(poc1);
+                session.save(poc2);
+            } else if(poc1.getMoney() > 0){
+                session.update(poc1);
+                session.save(poc2);
+            }
+            tx.commit();
+            session.close();
+        } catch (Throwable ex) {
+            tx.rollback();
+            ex.printStackTrace();
+        }
     }
 
     private void fillTransactionFromFields(AccountTransaction accountTransaction) {
