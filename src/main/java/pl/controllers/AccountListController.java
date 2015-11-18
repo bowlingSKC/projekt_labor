@@ -20,6 +20,7 @@ import pl.animations.FadeInUpTransition;
 import pl.bundles.Bundles;
 import pl.jpa.SessionUtil;
 import pl.model.Account;
+import pl.model.AccountTransaction;
 import pl.model.Bank;
 import pl.model.Currency;
 
@@ -271,8 +272,17 @@ public class AccountListController {
     }
 
     private void saveAccountToDatabase(Account account) throws Exception {
+        AccountTransaction transaction = new AccountTransaction();
+        transaction.setMoney(account.getMoney());
+        transaction.setDate(account.getCreatedDate());
+        transaction.setCurrency(account.getCurrency());
+        transaction.setAccount(account);
+        transaction.setType(Constant.getAccountInType());
+        account.getAccountTransactions().add(transaction);
+
         Session session = SessionUtil.getSession();
         org.hibernate.Transaction tx = session.beginTransaction();
+        session.save(transaction);
         session.save(account);
         tx.commit();
         session.close();

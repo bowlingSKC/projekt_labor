@@ -34,6 +34,7 @@ public class Constant {
 
     private static TransactionType cashInType;
     private static TransactionType cashOutType;
+    private static TransactionType accountInType;
 
     public static void init() {
         Session session = SessionUtil.getSession();
@@ -51,6 +52,8 @@ public class Constant {
                 cashOutType = type;
             } else if( type.getId() == 5 ) {
                 cashInType = type;
+            } else if( type.getId() == 7 ) {
+                accountInType = type;
             }
         }
     }
@@ -125,4 +128,7 @@ public class Constant {
         return cashOutType;
     }
 
+    public static TransactionType getAccountInType() {
+        return accountInType;
+    }
 }
