@@ -430,12 +430,13 @@ public class PocketSelectController {
         FileWriter writer = null;
         try {
             FileChooser fileChooser = new FileChooser();
-            FileChooser.ExtensionFilter extFilter =
+            FileChooser.ExtensionFilter extFilter1 =
                     new FileChooser.ExtensionFilter("CSV file (*.csv)", "*.csv");
-            fileChooser.getExtensionFilters().add(extFilter);
+            fileChooser.getExtensionFilters().add(extFilter1);
+            FileChooser.ExtensionFilter extFilter2 = new FileChooser.ExtensionFilter("Excel file (*.xls)", "*.xls");
+            fileChooser.getExtensionFilters().add(extFilter2);
             File file = fileChooser.showSaveDialog(Main.getPrimaryStage());
-            if(file != null){
-
+            if(file != null && fileChooser.getSelectedExtensionFilter() == extFilter1){
                 writer = new FileWriter(file);
                 writer.append("Account;Money;Pocket\n");
                 for(Pocket poc : pockets){
@@ -443,6 +444,20 @@ public class PocketSelectController {
                     writer.append(';');
                     writer.append(String.valueOf(poc.getMoney()));
                     writer.append(';');
+                    writer.append(poc.getCategory().toString());
+                    writer.append('\n');
+                    writer.flush();
+                }
+                writer.close();
+            }
+            if(file != null && fileChooser.getSelectedExtensionFilter() == extFilter2){
+                writer = new FileWriter(file);
+                writer.append("Account\tMoney\tPocket\n");
+                for(Pocket poc : pockets){
+                    writer.append(poc.getAccount().toString());
+                    writer.append('\t');
+                    writer.append(String.valueOf(poc.getMoney()));
+                    writer.append('\t');
                     writer.append(poc.getCategory().toString());
                     writer.append('\n');
                     writer.flush();

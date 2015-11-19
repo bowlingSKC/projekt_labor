@@ -357,11 +357,13 @@ public class ReadyCashController {
         //Write first table
         try {
             FileChooser fileChooser = new FileChooser();
-            FileChooser.ExtensionFilter extFilter =
+            FileChooser.ExtensionFilter extFilter1 =
                     new FileChooser.ExtensionFilter("CSV file (*.csv)", "*.csv");
-            fileChooser.getExtensionFilters().add(extFilter);
+            fileChooser.getExtensionFilters().add(extFilter1);
+            FileChooser.ExtensionFilter extFilter2 = new FileChooser.ExtensionFilter("Excel file (*.xls)", "*.xls");
+            fileChooser.getExtensionFilters().add(extFilter2);
             File file = fileChooser.showSaveDialog(Main.getPrimaryStage());
-            if(file != null){
+            if(file != null && fileChooser.getSelectedExtensionFilter() == extFilter1){
 
                 writer = new FileWriter(file);
                 writer.append("Currency;Money;HUF value\n");
@@ -377,7 +379,27 @@ public class ReadyCashController {
                 }
                 writer.append('\n');
                 writer.append('\n');
-                writer.append("Total\n");
+                writer.append("Total;");
+                writer.append(sumLabel.getText());
+                writer.close();
+            }
+            if(file != null && fileChooser.getSelectedExtensionFilter() == extFilter2){
+
+                writer = new FileWriter(file);
+                writer.append("Currency\tMoney\tHUF value\n");
+                for(int i = 0; i < readyCashTableView.getItems().size(); i++){
+                    writer.append(readyCashTableView.getItems().get(i).getCurrency().toString());
+                    writer.append('\t');
+                    writer.append(String.valueOf(readyCashTableView.getItems().get(i).getMoney()));
+                    writer.append('\t');
+                    String tmp = readyCashTableView.getColumns().get(0).getCellData(i).toString();
+                    writer.append(String.valueOf(hufvalues.get(tmp)));
+                    writer.append('\n');
+                    writer.flush();
+                }
+                writer.append('\n');
+                writer.append('\n');
+                writer.append("Total\t");
                 writer.append(sumLabel.getText());
                 writer.close();
             }
@@ -392,11 +414,13 @@ public class ReadyCashController {
         //Write second table
         try {
             FileChooser fileChooser = new FileChooser();
-            FileChooser.ExtensionFilter extFilter =
+            FileChooser.ExtensionFilter extFilter1 =
                     new FileChooser.ExtensionFilter("CSV file (*.csv)", "*.csv");
-            fileChooser.getExtensionFilters().add(extFilter);
+            fileChooser.getExtensionFilters().add(extFilter1);
+            FileChooser.ExtensionFilter extFilter2 = new FileChooser.ExtensionFilter("Excel file (*.xls)", "*.xls");
+            fileChooser.getExtensionFilters().add(extFilter2);
             File file = fileChooser.showSaveDialog(Main.getPrimaryStage());
-            if(file != null){
+            if(file != null && fileChooser.getSelectedExtensionFilter() == extFilter1){
 
                 writer = new FileWriter(file);
                 writer.append("Date;Currency;Money;Type;Comment\n");
@@ -409,6 +433,25 @@ public class ReadyCashController {
                     writer.append(';');
                     writer.append(String.valueOf(transactionTableView.getItems().get(i).getType().toString()));
                     writer.append(';');
+                    writer.append(String.valueOf(transactionTableView.getItems().get(i).getComment()));
+                    writer.append('\n');
+                    writer.flush();
+                }
+                writer.close();
+            }
+            if(file != null && fileChooser.getSelectedExtensionFilter() == extFilter2){
+
+                writer = new FileWriter(file);
+                writer.append("Date\tCurrency\tMoney\tType\tComment\n");
+                for(int i = 0; i < transactionTableView.getItems().size(); i++){
+                    writer.append(transactionTableView.getItems().get(i).getDate().toString());
+                    writer.append('\t');
+                    writer.append(transactionTableView.getItems().get(i).getCurrency().toString());
+                    writer.append('\t');
+                    writer.append(String.valueOf(transactionTableView.getItems().get(i).getMoney()));
+                    writer.append('\t');
+                    writer.append(String.valueOf(transactionTableView.getItems().get(i).getType().toString()));
+                    writer.append('\t');
                     writer.append(String.valueOf(transactionTableView.getItems().get(i).getComment()));
                     writer.append('\n');
                     writer.flush();

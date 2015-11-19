@@ -61,6 +61,7 @@ public class ListMonthController {
 
     private List<CheckBox> checkBoxes = new ArrayList<>();
     private ArrayList<XYChart.Series> allseries;
+    private Map<String,Map<String,Float>> ultimate = new HashMap<>();
 
     @FXML
     public void initialize() {
@@ -70,6 +71,8 @@ public class ListMonthController {
         endLabel.setText(Bundles.getString("endintervall"));
         csvButton.setText(Bundles.getString("csv"));
         errorLabel.setVisible(false);
+        searchToDate.setValue(searchToDate.getValue().now());
+        searchFromDate.setValue(searchToDate.getValue().minusMonths(1));
         searchFromDate.valueProperty().addListener((obs, oldDate, newDate) -> {
             //Date date = Date.from(newDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
             refreshAreaChart();
@@ -138,6 +141,7 @@ public class ListMonthController {
                             }
                             if(!checkBox.isSelected() && areaChart.getData().contains(ser)) {
                                 areaChart.getData().remove(ser);
+                                break;
                             }
                         }
                     }
@@ -146,9 +150,9 @@ public class ListMonthController {
             vbox.getChildren().add(checkBox);
         }
 
+
+        buildUltimate();
         allseries = new ArrayList<>();
-        searchToDate.setValue(searchToDate.getValue().now().minusDays(1));
-        searchFromDate.setValue(searchToDate.getValue().minusMonths(1));
         refreshAreaChart();
 
     }
@@ -169,7 +173,6 @@ public class ListMonthController {
         Map<Date, Long> valid = new HashMap<>();
         for(Account acc : Main.getLoggedUser().getAccounts()){
             for(AccountTransaction tra : acc.getAccountTransactions()){
-                Float tmp = countMoney(acc, tra);
                 if(valid.containsKey(tra.getDate()) && tra.getId() > valid.get(tra.getDate())){
                     valid.replace(tra.getDate(), tra.getId());
                 }else{
@@ -180,7 +183,6 @@ public class ListMonthController {
         Map<Date, Long> validCash = new HashMap<>();
         for (ReadyCash cash : Main.getLoggedUser().getReadycash()) {
             for (CashTransaction cashTra : cash.getCashTransaction()) {
-                Float tmp = countCashMoney(cash, cashTra);
                 if(validCash.containsKey(cashTra.getDate())){
                     if(cashTra.getId() > validCash.get(cashTra.getDate())){
                         validCash.replace(cashTra.getDate(), cashTra.getId());
@@ -193,7 +195,6 @@ public class ListMonthController {
         Map<Date, Long> validAsset = new HashMap<>();
         for (Property prop : Main.getLoggedUser().getProperties()) {
             for (PropertyValue pv : prop.getValues()) {
-                Float tmp = pv.getValue();
                 if(validAsset.containsKey(pv.getDate())){
                     if(pv.getId() > validAsset.get(pv.getDate())){
                         validAsset.replace(pv.getDate(), pv.getId());
@@ -218,6 +219,7 @@ public class ListMonthController {
             try{
                 fromDate = Date.from(searchFromDate.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
                 toDate = Date.from(searchToDate.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
+                toDate.setTime(toDate.getTime() + 1000*60*60*24);
                 CashTransaction first = null;
                 for (CashTransaction cashTra : cash.getCashTransaction()){
                     if(validNames.contains(cashTra.getCurrency().toString())){
@@ -227,7 +229,7 @@ public class ListMonthController {
                             seriesID.put(cashTra.getCurrency().toString(), "Cash");
                             while (!fromDate.after(toDate)) {
                                 allseries.get(allseries.size() - 1).getData().add(new XYChart.Data(formatter.format(fromDate), 0.0f));
-                                fromDate.setHours(fromDate.getHours() + 24);
+                                fromDate.setTime(fromDate.getTime() + 1000 * 60 * 60 * 24);
                             }
                             fromDate = Date.from(searchFromDate.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
                             added = true;
@@ -237,7 +239,7 @@ public class ListMonthController {
                                 validCash.containsValue(cashTra.getId())){
                             Float tmp = countCashMoney(cash, cashTra);
                             tmp = (float) Math.floor(CurrencyExchange.getValue(cashTra.getCurrency()) * tmp);
-                            allseries.get(allseries.size() - 1).getData().add(new XYChart.Data(cashTra.getDate().toString(), tmp));
+                            //allseries.get(allseries.size() - 1).getData().add(new XYChart.Data(cashTra.getDate().toString(), tmp));
                         }
 
                     }
@@ -260,25 +262,25 @@ public class ListMonthController {
             if(validNames.contains(acc.toString())){
                 allseries.add(new XYChart.Series());
                 allseries.get(allseries.size() - 1).setName(acc.toString());
-                seriesID.put(acc.toString(), "Account");
+                //seriesID.put(acc.toString(), "Account");
                 try {
                     fromDate = Date.from(searchFromDate.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
                     toDate = Date.from(searchToDate.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
+                    toDate.setTime(toDate.getTime() + 1000*60*60*24);
                     while (!fromDate.after(toDate)) {
                         allseries.get(allseries.size() - 1).getData().add(new XYChart.Data(formatter.format(fromDate), 0.0f));
-                        fromDate.setHours(fromDate.getHours() + 24);
+                        fromDate.setTime(fromDate.getTime() + 1000 * 60 * 60 * 24);
                     }
                     fromDate = Date.from(searchFromDate.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
 
                     for (AccountTransaction tr : acc.getAccountTransactions()) {
+
                         if ((tr.getDate().after(fromDate) || tr.getDate().equals(fromDate)) &&
                                 (tr.getDate().before(toDate) || tr.getDate().equals(toDate)) &&
                                 valid.containsValue(tr.getId())) {
-                            //System.out.println(tr.getId() + " - " + tr.getDate().toString());
-                            Float tmp = countMoney(acc, tr);
-                            allseries.get(allseries.size() - 1).getData().add(new XYChart.Data(tr.getDate().toString(), tmp));
-
-                            //allseries.get(allseries.size() - 1).getData().add(new XYChart.Data(tr.getDate().toString(), tr.getBeforeMoney()));
+                                //System.out.println(tr.getId() + " - " + tr.getDate().toString());
+                                Float tmp = countMoney(acc, tr);
+                                //allseries.get(allseries.size() - 1).getData().add(new XYChart.Data(tr.getDate().toString(), tmp));
                         }
                     }
 
@@ -296,9 +298,10 @@ public class ListMonthController {
                 try {
                     fromDate = Date.from(searchFromDate.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
                     toDate = Date.from(searchToDate.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
+                    toDate.setTime(toDate.getTime() + 1000*60*60*24);
                     while (!fromDate.after(toDate)) {
                         allseries.get(allseries.size() - 1).getData().add(new XYChart.Data(formatter.format(fromDate), 0.0f));
-                        fromDate.setHours(fromDate.getHours() + 24);
+                        fromDate.setTime(fromDate.getTime() + 1000 * 60 * 60 * 24);
                     }
                     fromDate = Date.from(searchFromDate.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
 
@@ -327,7 +330,7 @@ public class ListMonthController {
         }
 
         for (XYChart.Series<String, Float> s : areaChart.getData()) {
-            float ertek = 0;
+            /*float ertek = 0;
             for (XYChart.Data<String, Float> d : s.getData()) {
                 if (ertek > 0 && d.getYValue() == 0) {
                     d.setYValue(ertek);
@@ -335,9 +338,9 @@ public class ListMonthController {
                 if (d.getYValue() > 0) {
                     ertek = d.getYValue();
                 }
-            }
+            }*/
             //Set null values
-            boolean was = false;
+            /*boolean was = false;
             boolean wasCash = false;
             boolean wasAss = false;
             for (int i = s.getData().size() - 2; i >= 0; i--) {
@@ -380,9 +383,26 @@ public class ListMonthController {
                             s.getData().get(i).setYValue(s.getData().get(i + 1).getYValue());
                         }
                     }
-
                 }
-            }
+            }*/
+
+            //ULTIMATE
+            //if(ultimate.containsValue(s.getName())){
+                //System.out.println("Here.");
+                for (int i = 0; i < s.getData().size(); i++) {
+                    for(Map.Entry<String, Map<String,Float>> entry : ultimate.entrySet()){
+                        if(entry.getKey().equals(s.getName())){
+                            s.getData().get(i).setYValue(entry.getValue().get(s.getData().get(i).getXValue()));
+                            if(s.getData().get(i).getYValue() == null && i > 0){
+                                s.getData().get(i).setYValue(s.getData().get(i-1).getYValue());
+                            }
+                            if(s.getData().get(i).getYValue() == null && i == 0){
+                                s.getData().get(i).setYValue(0.0f);
+                            }
+                        }
+                    }
+                }
+            //}
         }
 
         //Error handling
@@ -390,7 +410,7 @@ public class ListMonthController {
             //boolean empty = true;
             for (XYChart.Data<String, Float> d : s.getData()) {
                 //Correct accountTransactions
-                if(seriesID.get(s.getName()).equals("Account") && d.getYValue() == 0){
+                /*if(seriesID.get(s.getName()).equals("Account") && d.getYValue() == 0){
                     AccountTransaction before = null;
                     for(Account acc : Main.getLoggedUser().getAccounts()) {
                         if(acc.toString().equals(s.getName())){
@@ -407,9 +427,9 @@ public class ListMonthController {
                     if(before != null){
                         d.setYValue(countMoney(before.getAccount(), before));
                     }
-                }
+                }*/
                 //Correct cashTransactions
-                if(seriesID.get(s.getName()).equals("Cash") && d.getYValue() == 0){
+                /*if(seriesID.get(s.getName()).equals("Cash") && d.getYValue() == 0){
                     CashTransaction before = null;
                     for(ReadyCash red : Main.getLoggedUser().getReadycash()) {
                         if(red.getCurrency().toString().equals(s.getName())){
@@ -426,9 +446,9 @@ public class ListMonthController {
                     if(before != null){
                         d.setYValue(countCashMoney(before.getCash(), before));
                     }
-                }
+                }*/
                 //Correct assets
-                if(seriesID.get(s.getName()).equals("Asset") && d.getYValue() == 0){
+                /*if(seriesID.get(s.getName()).equals("Asset") && d.getYValue() == 0){
                     PropertyValue before = null;
                     for(Property prop : Main.getLoggedUser().getProperties()) {
                         if(prop.getName().equals(s.getName())){
@@ -445,10 +465,11 @@ public class ListMonthController {
                     if(before != null){
                         d.setYValue(before.getValue());
                     }
-                }
-                /*if(d.getYValue() > 0){
-                    empty = false;
                 }*/
+                //if(d.getYValue() > 0){
+                //    empty = false;
+                //}
+
             }
             /*if(empty && !errorLabel.isVisible()){
                 errorLabel.setVisible(true);
@@ -488,6 +509,20 @@ public class ListMonthController {
         return tmp;
     }
 
+    public Float countMoney2(Account acc, AccountTransaction tra){
+        Float tmp = 0.0f;
+        for(AccountTransaction tr : acc.getAccountTransactions()){
+            if(tra.getId() >= tr.getId()){
+                Float tmpMoney = tr.getMoney();
+                if(tr.getType().getSign().equals("-")){
+                    tmpMoney = tmpMoney *-1;
+                }
+                tmp += tmpMoney;
+            }
+        }
+        return tmp;
+    }
+
     public Float countCashMoney(ReadyCash ready, CashTransaction tra){
         Float tmp = ready.getMoney();
         for(CashTransaction tr : ready.getCashTransaction()){
@@ -501,17 +536,160 @@ public class ListMonthController {
         }
         return tmp;
     }
+    public Float countCashMoney2(ReadyCash ready, CashTransaction tra){
+        Float tmp = 0.0f;
+        for(CashTransaction tr : ready.getCashTransaction()){
+            if(tra.getId() >= tr.getId()){
+                Float tmpMoney = tr.getMoney();
+                if(tr.getType().getSign().equals("-")){
+                    tmpMoney = tmpMoney *-1;
+                }
+                if(tra.getCurrency().toString() != "HUF"){
+                    tmpMoney = (float) Math.floor(CurrencyExchange.getValue(tra.getCurrency()) * tmpMoney);
+                }
+                tmp += tmpMoney;
+            }
+        }
+        return tmp;
+    }
+
+    private void buildUltimate(){
+        Format formatter = new SimpleDateFormat("yyyy-MM-dd");
+        for(Account acc : Main.getLoggedUser().getAccounts()) {
+            Date first = null;
+            Date last = new Date();
+            Map<String, Float> tmp = new HashMap<>();
+            for (AccountTransaction tra : acc.getAccountTransactions()) {
+                System.out.println(tra.getDate() + " - " + countMoney2(acc, tra));
+                if(tmp.containsKey(formatter.format(tra.getDate()))){
+                    for(AccountTransaction before : acc.getAccountTransactions()){
+                        if(before.getDate().equals(tra.getDate()) && tmp.get(formatter.format(tra.getDate())) == countMoney2(acc,before)
+                                && before.getId() < tra.getId()){
+                            tmp.replace(formatter.format(tra.getDate()), countMoney2(acc, tra));
+                            break;
+                        }
+                    }
+                }
+                //if(tmp.containsKey(formatter.format(tra.getDate())) && tra.getId() > tmp.get(formatter.format(tra.getDate()))){
+                //    tmp.replace(formatter.format(tra.getDate()), countMoney2(acc, tra));
+                //}
+                else{
+                    tmp.put(formatter.format(tra.getDate()), countMoney2(acc, tra));
+                }
+                if(first == null){
+                    first = new Date();
+                    first.setTime(tra.getDate().getTime());
+                }
+                if(tra.getDate().before(first)){
+                    first.setTime(tra.getDate().getTime());
+                }
+            }
+            last.setTime(last.getTime() + 1000*60*60*24);
+            while(!formatter.format(first).equals(formatter.format(last))){
+                if(tmp.get(formatter.format(first)) == null){
+                    tmp.put(formatter.format(first), tmp.get(formatter.format(first.getTime() - 1000 * 60 * 60 * 24)));
+                }
+                first.setTime(first.getTime() + 1000 * 60 * 60 * 24);
+            }
+
+            ultimate.put(acc.toString(), tmp);
+            for(Map.Entry<String, Map<String,Float>> entry : ultimate.entrySet()){
+                for(Map.Entry<String, Float> entry2 : entry.getValue().entrySet()){
+                    //System.out.println(entry.getKey() + " - " + entry2.getKey() + " - " + entry2.getValue());
+                }
+                //System.out.printf("Key : %s \n", entry.getKey());
+            }
+        }
+        for (ReadyCash cash : Main.getLoggedUser().getReadycash()) {
+            Date first = null;
+            Date last = new Date();
+            Map<String, Float> tmp = new HashMap<>();
+            for (CashTransaction cashTra : cash.getCashTransaction()) {
+                if(tmp.containsKey(formatter.format(cashTra.getDate()))){
+                    for(CashTransaction before : cash.getCashTransaction()){
+                        if(before.getDate().equals(cashTra.getDate()) && tmp.get(formatter.format(cashTra.getDate())) == countCashMoney2(cash,before)
+                                && before.getId() < cashTra.getId()){
+                            tmp.replace(formatter.format(cashTra.getDate()), countCashMoney2(cash, cashTra));
+                            break;
+                        }
+                    }
+                }
+                //if (tmp.containsKey(formatter.format(cashTra.getDate())) && cashTra.getId() > tmp.get(formatter.format(cashTra.getDate()))) {
+                //    tmp.replace(formatter.format(cashTra.getDate()), countCashMoney2(cash, cashTra));
+                //}
+                else {
+                    tmp.put(formatter.format(cashTra.getDate()), countCashMoney2(cash, cashTra));
+                }
+                if (first == null) {
+                    first = new Date();
+                    first.setTime(cashTra.getDate().getTime());
+                }
+                if (cashTra.getDate().before(first)) {
+                    first.setTime(cashTra.getDate().getTime());
+                }
+            }
+            last.setTime(last.getTime() + 1000*60*60*24);
+            while(!formatter.format(first).equals(formatter.format(last))){
+                if(tmp.get(formatter.format(first)) == null){
+                    tmp.put(formatter.format(first), tmp.get(formatter.format(first.getTime() - 1000 * 60 * 60 * 24)));
+                }
+                //System.out.println(formatter.format(first) + " - " + tmp.get(formatter.format(first)));
+                first.setTime(first.getTime() + 1000 * 60 * 60 * 24);
+            }
+            ultimate.put(cash.getCurrency().toString(), tmp);
+        }
+        for (Property prop : Main.getLoggedUser().getProperties()) {
+            Date first = null;
+            Date last = new Date();
+            Map<String, Float> tmp = new HashMap<>();
+            for (PropertyValue pv : prop.getValues()) {
+                if(tmp.containsKey(formatter.format(pv.getDate()))){
+                    for(PropertyValue before : prop.getValues()){
+                        if(before.getDate().equals(pv.getDate()) && tmp.get(formatter.format(pv.getDate())) == pv.getValue()
+                                && before.getId() < pv.getId()){
+                            tmp.replace(formatter.format(pv.getDate()), pv.getValue());
+                            break;
+                        }
+                    }
+                }
+                //if(tmp.containsKey(formatter.format(pv.getDate())) && pv.getId() > tmp.get(formatter.format(pv.getDate()))){
+                //    tmp.replace(formatter.format(pv.getDate()), pv.getValue());
+                //}
+                else{
+                    tmp.put(formatter.format(pv.getDate()), pv.getValue());
+                }
+                if(first == null){
+                    first = new Date();
+                    first.setTime(pv.getDate().getTime());
+                }
+                if(pv.getDate().before(first)){
+                    first.setTime(pv.getDate().getTime());
+                }
+            }
+            last.setTime(last.getTime() + 1000*60*60*24);
+            while(!formatter.format(first).equals(formatter.format(last))){
+                if(tmp.get(formatter.format(first)) == null){
+                    tmp.put(formatter.format(first), tmp.get(formatter.format(first.getTime() - 1000 * 60 * 60 * 24)));
+                }
+                //System.out.println(formatter.format(first) + " - " + tmp.get(formatter.format(first)));
+                first.setTime(first.getTime() + 1000 * 60 * 60 * 24);
+            }
+            ultimate.put(prop.getName().toString(), tmp);
+        }
+    }
 
     public void exportCSV(){
         FileWriter writer = null;
         try {
+            //CSV
             FileChooser fileChooser = new FileChooser();
-            FileChooser.ExtensionFilter extFilter =
+            FileChooser.ExtensionFilter extFilter1 =
                     new FileChooser.ExtensionFilter("CSV file (*.csv)", "*.csv");
-            fileChooser.getExtensionFilters().add(extFilter);
+            fileChooser.getExtensionFilters().add(extFilter1);
+            FileChooser.ExtensionFilter extFilter2 = new FileChooser.ExtensionFilter("Excel file (*.xls)", "*.xls");
+            fileChooser.getExtensionFilters().add(extFilter2);
             File file = fileChooser.showSaveDialog(Main.getPrimaryStage());
-            if(file != null){
-
+            if(file != null && fileChooser.getSelectedExtensionFilter() == extFilter1){
                 writer = new FileWriter(file);
                 writer.append("Account;Money;Date\n");
                 for (XYChart.Series<String, Float> se : areaChart.getData()) {
@@ -527,7 +705,23 @@ public class ListMonthController {
                 }
                 writer.close();
             }
-
+            //XLS
+            if(file != null && fileChooser.getSelectedExtensionFilter() == extFilter2){
+                writer = new FileWriter(file);
+                writer.append("Account\tMoney\tDate\n");
+                for (XYChart.Series<String, Float> se : areaChart.getData()) {
+                    for (XYChart.Data<String, Float> d : se.getData()) {
+                        writer.append(se.getName());
+                        writer.append('\t');
+                        writer.append(String.valueOf(d.getYValue()));
+                        writer.append('\t');
+                        writer.append(d.getXValue());
+                        writer.append('\n');
+                        writer.flush();
+                    }
+                }
+                writer.close();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

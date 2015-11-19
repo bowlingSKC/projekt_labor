@@ -409,12 +409,13 @@ public class AccountListController {
         FileWriter writer = null;
         try {
             FileChooser fileChooser = new FileChooser();
-            FileChooser.ExtensionFilter extFilter =
+            FileChooser.ExtensionFilter extFilter1 =
                     new FileChooser.ExtensionFilter("CSV file (*.csv)", "*.csv");
-            fileChooser.getExtensionFilters().add(extFilter);
+            fileChooser.getExtensionFilters().add(extFilter1);
+            FileChooser.ExtensionFilter extFilter2 = new FileChooser.ExtensionFilter("Excel file (*.xls)", "*.xls");
+            fileChooser.getExtensionFilters().add(extFilter2);
             File file = fileChooser.showSaveDialog(Main.getPrimaryStage());
-            if(file != null){
-
+            if(file != null && fileChooser.getSelectedExtensionFilter() == extFilter1){
                 writer = new FileWriter(file);
                 writer.append("Name;Account number;Money;Currency;Bank;Created date;HUF value\n");
                 for(int i = 0; i < accountTableView.getItems().size(); i++){
@@ -435,6 +436,38 @@ public class AccountListController {
                     writer.append('\n');
                     writer.flush();
                 }
+                writer.append('\n');
+                writer.append('\n');
+                writer.append("Total;");
+                writer.append(sumLabel.getText());
+                writer.flush();
+                writer.close();
+            }
+            if(file != null && fileChooser.getSelectedExtensionFilter() == extFilter2){
+                writer = new FileWriter(file);
+                writer.append("Name\tAccount number\tMoney\tCurrency\tBank\tCreated date\tHUF value\n");
+                for(int i = 0; i < accountTableView.getItems().size(); i++){
+                    writer.append(accountTableView.getItems().get(i).getName());
+                    writer.append('\t');
+                    writer.append(accountTableView.getItems().get(i).getAccountNumber());
+                    writer.append('\t');
+                    writer.append(String.valueOf(accountTableView.getItems().get(i).getMoney()));
+                    writer.append('\t');
+                    writer.append(accountTableView.getItems().get(i).getCurrency().toString());
+                    writer.append('\t');
+                    writer.append(accountTableView.getItems().get(i).getBank().toString());
+                    writer.append('\t');
+                    writer.append(accountTableView.getItems().get(i).getCreatedDate().toString());
+                    writer.append('\t');
+                    String tmp = accountTableView.getColumns().get(0).getCellData(i).toString();
+                    writer.append(String.valueOf(hufvalues.get(tmp)));
+                    writer.append('\n');
+                    writer.flush();
+                }
+                writer.append('\n');
+                writer.append("Total\t");
+                writer.append(sumLabel.getText());
+                writer.flush();
                 writer.close();
             }
 
