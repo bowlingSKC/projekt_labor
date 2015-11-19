@@ -13,9 +13,8 @@ import pl.jpa.SessionUtil;
 import pl.model.*;
 import pl.model.Currency;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.Charset;
 import java.text.NumberFormat;
 import java.util.*;
 
@@ -435,12 +434,13 @@ public class PocketController {
         FileWriter writer = null;
         try {
             FileChooser fileChooser = new FileChooser();
-            FileChooser.ExtensionFilter extFilter =
+            FileChooser.ExtensionFilter extFilter1 =
                     new FileChooser.ExtensionFilter("CSV file (*.csv)", "*.csv");
-            fileChooser.getExtensionFilters().add(extFilter);
+            fileChooser.getExtensionFilters().add(extFilter1);
+            FileChooser.ExtensionFilter extFilter2 = new FileChooser.ExtensionFilter("Excel file (*.xls)", "*.xls");
+            fileChooser.getExtensionFilters().add(extFilter2);
             File file = fileChooser.showSaveDialog(Main.getPrimaryStage());
-            if(file != null){
-
+            if(file != null && fileChooser.getSelectedExtensionFilter() == extFilter1){
                 writer = new FileWriter(file);
                 writer.append("Account;Money;Pocket\n");
                 for(Pocket poc : pockets){
@@ -453,6 +453,23 @@ public class PocketController {
                     writer.flush();
                 }
                 writer.close();
+            }
+            if(file != null && fileChooser.getSelectedExtensionFilter() == extFilter2){
+                OutputStreamWriter char_output = new OutputStreamWriter(
+                        new FileOutputStream(file),
+                        Charset.forName("UTF-8").newEncoder()
+                );
+                char_output.append("Account\tMoney\tPocket\n");
+                for(Pocket poc : pockets){
+                    char_output.append(poc.getAccount().toString());
+                    char_output.append('\t');
+                    char_output.append(String.valueOf(poc.getMoney()));
+                    char_output.append('\t');
+                    char_output.append(poc.getCategory().toString());
+                    char_output.append('\n');
+                    char_output.flush();
+                }
+                char_output.close();
             }
 
         } catch (IOException e) {

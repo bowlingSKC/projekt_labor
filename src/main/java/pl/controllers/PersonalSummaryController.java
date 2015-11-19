@@ -57,12 +57,13 @@ public class PersonalSummaryController {
         //Write first table
         try {
             FileChooser fileChooser = new FileChooser();
-            FileChooser.ExtensionFilter extFilter =
+            FileChooser.ExtensionFilter extFilter1 =
                     new FileChooser.ExtensionFilter("CSV file (*.csv)", "*.csv");
-            fileChooser.getExtensionFilters().add(extFilter);
+            fileChooser.getExtensionFilters().add(extFilter1);
+            FileChooser.ExtensionFilter extFilter2 = new FileChooser.ExtensionFilter("Excel file (*.xls)", "*.xls");
+            fileChooser.getExtensionFilters().add(extFilter2);
             File file = fileChooser.showSaveDialog(Main.getPrimaryStage());
-            if (file != null) {
-
+            if (file != null && fileChooser.getSelectedExtensionFilter() == extFilter1) {
                 writer = new FileWriter(file);
                 writer.append("Sum_of_Money;");
                 writer.append(sumOfMoneyLabel.getText() + "\n");
@@ -73,8 +74,22 @@ public class PersonalSummaryController {
                 writer.append("Sum_of_Asset;");
                 writer.append(inPropertiesLabel.getText() + "\n");
                 writer.append("Sum_of_Debit;");
-                writer.append(debitLabel.getText());
-                writer.append('\n');
+                writer.append(debitLabel.getText() + "\n");
+                writer.flush();
+                writer.close();
+            }
+            if (file != null && fileChooser.getSelectedExtensionFilter() == extFilter2) {
+                writer = new FileWriter(file);
+                writer.append("Sum_of_Money\t");
+                writer.append(sumOfMoneyLabel.getText() + "\n");
+                writer.append("Sum_of_Cash\t");
+                writer.append(inReadyCashLabel.getText() + "\n");
+                writer.append("Sum_of_Accounts\t");
+                writer.append(inAccountsLabel.getText() + "\n");
+                writer.append("Sum_of_Asset\t");
+                writer.append(inPropertiesLabel.getText() + "\n");
+                writer.append("Sum_of_Debit\t");
+                writer.append(debitLabel.getText() + "\n");
                 writer.flush();
                 writer.close();
             }

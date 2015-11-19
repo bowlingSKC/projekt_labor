@@ -328,15 +328,20 @@ public class ListTransactionController {
             saveTransactionToDatabase(accountTransaction);
 
             if(betweenCheck.isSelected()){
-                accountTransaction.setBeforeAccountTransaction(null);
-                accountTransaction.setAccount(anotheraccCombo.getSelectionModel().getSelectedItem());
-                accountTransaction.setType(newTransactionTypeComboBox.getItems().get(7));
-                accountTransaction.setAnotherAccount(newAccountComboBox.getSelectionModel().getSelectedItem().getAccountNumber());
+                AccountTransaction newAcc = new AccountTransaction();
+                newAcc.setComment(accountTransaction.getComment());
+                newAcc.setBeforeAccountTransaction(null);
+                newAcc.setMoney(accountTransaction.getMoney());
+                newAcc.setCurrency(accountTransaction.getCurrency());
+                newAcc.setAccount(anotheraccCombo.getSelectionModel().getSelectedItem());
+                newAcc.setType(newTransactionTypeComboBox.getItems().get(7));
+                newAcc.setAnotherAccount(newAccountComboBox.getSelectionModel().getSelectedItem().getAccountNumber());
+                newAcc.setDate(accountTransaction.getDate());
                 AccountTransaction prev = anotheraccCombo.getSelectionModel().getSelectedItem().getLatestTransaction();
                 if(prev != null){
-                    accountTransaction.setBeforeAccountTransaction(prev);
+                    newAcc.setBeforeAccountTransaction(prev);
                 }
-                saveTransactionToDatabase(accountTransaction);
+                saveTransactionToDatabase(newAcc);
                 if(pocketCombo.getSelectionModel().getSelectedItem() != null &&
                         pocketCombo2.getSelectionModel().getSelectedItem() != null){
                     updatePocketsInDatabase(pocketCombo.getSelectionModel().getSelectedItem(), pocketCombo2.getSelectionModel().getSelectedItem());
@@ -710,14 +715,16 @@ public class ListTransactionController {
         FileWriter writer = null;
         try {
             FileChooser fileChooser = new FileChooser();
-            FileChooser.ExtensionFilter extFilter =
+            FileChooser.ExtensionFilter extFilter1 =
                     new FileChooser.ExtensionFilter("CSV file (*.csv)", "*.csv");
-            fileChooser.getExtensionFilters().add(extFilter);
+            fileChooser.getExtensionFilters().add(extFilter1);
+            FileChooser.ExtensionFilter extFilter2 = new FileChooser.ExtensionFilter("Excel file (*.xls)", "*.xls");
+            fileChooser.getExtensionFilters().add(extFilter2);
             File file = fileChooser.showSaveDialog(Main.getPrimaryStage());
-            if(file != null){
+            if(file != null && fileChooser.getSelectedExtensionFilter() == extFilter1){
 
                 writer = new FileWriter(file);
-                writer.append("Account number;Money;Money on acount;Currency;Date;Type;Another account number;Comment\n");
+                writer.append("Account number;Money;Money on account;Currency;Date;Type;Another account number;Comment\n");
                 for(int i = 0; i < transactionTableView.getItems().size(); i++){
                     writer.append(transactionTableView.getItems().get(i).getAccount().toString());
                     writer.append(';');
@@ -736,6 +743,35 @@ public class ListTransactionController {
                     } else {
                         writer.append("null");
                         writer.append(';');
+                    }
+                    writer.append(transactionTableView.getItems().get(i).getComment());
+                    writer.append('\n');
+                    writer.flush();
+                }
+                writer.close();
+            }
+            if(file != null && fileChooser.getSelectedExtensionFilter() == extFilter2){
+
+                writer = new FileWriter(file);
+                writer.append("Account number\tMoney\tMoney on account\tCurrency\tDate\tType\tAnother account number\tComment\n");
+                for(int i = 0; i < transactionTableView.getItems().size(); i++){
+                    writer.append(transactionTableView.getItems().get(i).getAccount().toString());
+                    writer.append('\t');
+                    writer.append(String.valueOf(transactionTableView.getItems().get(i).getMoney()));
+                    writer.append('\t');
+                    writer.append(String.valueOf(transactionTableView.getItems().get(i).getCurrency()));
+                    writer.append('\t');
+                    writer.append(transactionTableView.getItems().get(i).getDate().toString());
+                    writer.append('\t');
+                    writer.append(transactionTableView.getItems().get(i).getType().toString());
+                    writer.append('\t');
+                    if( transactionTableView.getItems().get(i).getAnotherAccount() != null ) {
+                        writer.append(transactionTableView.getItems().get(i).getAnotherAccount());
+                        writer.append('\t');
+
+                    } else {
+                        writer.append("null");
+                        writer.append('\t');
                     }
                     writer.append(transactionTableView.getItems().get(i).getComment());
                     writer.append('\n');
