@@ -379,6 +379,21 @@ public class ListTransactionController {
             saveAccountToCash(accountTransaction, account, session);
         }
 
+        if( newTransactionTypeComboBox.getSelectionModel().getSelectedItem().getId() == 6 ) {
+            account.setMoney(account.getMoney() - accountTransaction.getMoney());
+            session.update(account);
+        }
+
+        if( newTransactionTypeComboBox.getSelectionModel().getSelectedItem().getId() == 7 ) {
+            account.setMoney(account.getMoney() + accountTransaction.getMoney());
+            session.update(account);
+        }
+
+        if( newTransactionTypeComboBox.getSelectionModel().getSelectedItem().getId() == 8 ) {
+            account.setMoney(account.getMoney() + accountTransaction.getMoney());
+            session.update(account);
+        }
+
         session.save(accountTransaction);
 
         tx.commit();
