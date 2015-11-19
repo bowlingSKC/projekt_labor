@@ -40,8 +40,6 @@ public class ListTransactionController {
     @FXML
     private TableView<AccountTransaction> transactionTableView;
     @FXML
-    private TableColumn crudColumn;
-    @FXML
     private TableColumn<AccountTransaction, Account> accountTableColumn;
     @FXML
     private TableColumn<AccountTransaction, Float> moneyTableColumn;
@@ -188,15 +186,6 @@ public class ListTransactionController {
 
             }
         });
-
-        crudColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures, ObservableValue>() {
-            @Override
-            public ObservableValue call(TableColumn.CellDataFeatures param) {
-                return new SimpleBooleanProperty(param.getValue() != null);
-            }
-        });
-
-        crudColumn.setCellFactory(param -> new ButtonCell(transactionTableView));
 
         // keres?hez sz?mlasz?mok kiv?laszt?sa
         VBox vbox = new VBox();
@@ -672,52 +661,6 @@ public class ListTransactionController {
 
             transactionTableView.getItems().setAll(accountTransactions);
 
-        }
-    }
-
-    private class ButtonCell extends TableCell<Object, Boolean> {
-        final Hyperlink cellButtonDelete = new Hyperlink(Bundles.getString("delete"));
-        final Hyperlink cellButtonEdit = new Hyperlink(Bundles.getString("edit"));
-        final HBox hb = new HBox(cellButtonDelete, cellButtonEdit);
-
-        ButtonCell(final TableView tblView) {
-            hb.setSpacing(4);
-            cellButtonDelete.setOnAction((ActionEvent t) -> {
-                int row = getTableRow().getIndex();
-                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-                alert.setTitle(Bundles.getString("sure"));
-                alert.setHeaderText(Bundles.getString("suredelete"));
-                alert.setContentText(Bundles.getString("deletedata"));
-                Optional<ButtonType> result = alert.showAndWait();
-                if( result.get() == ButtonType.OK ) {
-                    AccountTransaction accountTransaction = transactionTableView.getItems().get(row);
-                    transactionTableView.getItems().remove(accountTransaction);
-
-                    Session session = SessionUtil.getSession();
-                    org.hibernate.Transaction tx = session.beginTransaction();
-                    session.delete(accountTransaction);
-                    tx.commit();
-                    session.close();
-                }
-            });
-
-            cellButtonEdit.setOnAction((ActionEvent t) -> {
-                int row = getTableRow().getIndex();
-                transactionTableView.getSelectionModel().select(row);
-                tablePane.setOpacity(0);
-                loadTransactionToFrom( transactionTableView.getItems().get(row) );
-                new FadeInUpTransition(editPane).play();
-            });
-        }
-
-        @Override
-        protected void updateItem(Boolean item, boolean empty) {
-            super.updateItem(item, empty);
-            if(!empty) {
-                setGraphic(hb);
-            } else {
-                setGraphic(null);
-            }
         }
     }
 
