@@ -55,7 +55,6 @@
             </AnchorPane>
             <TableView fx:id="transactionTableView" layoutY="71.0" prefHeight="248.0" prefWidth="665.0" AnchorPane.bottomAnchor="180.0" AnchorPane.leftAnchor="35.0" AnchorPane.rightAnchor="35.0" AnchorPane.topAnchor="106.0">
               <columns>
-                  <TableColumn fx:id="crudColumn" prefWidth="84.0" text="%action" />
                 <TableColumn fx:id="accountTableColumn" prefWidth="182.0" text="%accountC" />
                 <TableColumn fx:id="moneyTableColumn" prefWidth="75.0" styleClass="money-cell" text="%moneyC" />
                   <TableColumn fx:id="beforeMoneyColumn" prefWidth="101.0" styleClass="money-cell" text="%balance" />

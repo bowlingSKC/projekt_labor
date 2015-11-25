@@ -1,5 +1,7 @@
 package pl.model;
 
+import org.hibernate.*;
+
 import javax.persistence.*;
 import java.util.Date;
 import java.util.HashSet;
@@ -165,6 +167,11 @@ public class Account {
         for(AccountTransaction transaction : accountTransactions) {
             transaction.tick();
         }
+    }
+
+    public void delete(Session session) {
+        accountTransactions.forEach(session::delete);
+        session.delete(this);
     }
 
     @Override

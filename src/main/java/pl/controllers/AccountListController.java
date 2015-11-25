@@ -1,17 +1,18 @@
 package pl.controllers;
 
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
-import javafx.stage.Stage;
 import javafx.util.Callback;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 import pl.Constant;
 import pl.CurrencyExchange;
 import pl.Main;
@@ -48,7 +49,9 @@ public class AccountListController {
     @FXML
     private TableColumn<Account, String> valutaColumn;
     @FXML
-    private TableColumn inHufColumn;
+    private TableColumn<Account, Float> inHufColumn;
+    @FXML
+    private TableColumn crudColumn;
     @FXML
     private Label sumLabel;
     // ============= TÁBLÁZAT VÉGE =============
@@ -74,8 +77,25 @@ public class AccountListController {
     private DatePicker newAccDatePicker;
     // ============= ÚJ SZÁMLA LÉTREHOZÁSA VÉGE =============
 
+    private Account editedAccount = null;
 
     // ============= MÓDOSÍTÁS/TÖRLÉS ============
+    @FXML
+    private AnchorPane editAccountPane;
+    @FXML
+    private TextField editAccountName;
+    @FXML
+    private TextField editAccNum1;
+    @FXML
+    private TextField editAccNum2;
+    @FXML
+    private TextField editAccNum3;
+    @FXML
+    private ComboBox<Bank> editBanks;
+    @FXML
+    private Label editAmountLabel;
+    @FXML
+    private Label editCreatedLabel;
 
     private Map<String,Float> hufvalues = new HashMap<>();
 
@@ -87,6 +107,11 @@ public class AccountListController {
         accountTableView.getItems().setAll(Main.getLoggedUser().getAccounts());
         computeSumMoneyOnAccounts();
         initNewAccountPanel();
+        initEditedPane();
+    }
+
+    private void initEditedPane() {
+        editBanks.getItems().setAll(Constant.getBanks());
     }
 
     private void initNewAccountPanel() {
@@ -108,14 +133,13 @@ public class AccountListController {
         accountMoneyColumn.setCellValueFactory(new PropertyValueFactory<>("money"));
         valutaColumn.setCellValueFactory(new PropertyValueFactory<>("currency"));
 
-        inHufColumn.setCellFactory(new Callback<TableColumn, TableCell>() {
+        inHufColumn.setCellFactory(new Callback<TableColumn<Account, Float>, TableCell<Account, Float>>() {
             @Override
-            public TableCell call(TableColumn param) {
-                return new TableCell() {
+            public TableCell<Account, Float> call(TableColumn<Account, Float> param) {
+                return new TableCell<Account, Float>() {
                     @Override
-                    protected void updateItem(Object item, boolean empty) {
+                    protected void updateItem(Float item, boolean empty) {
                         super.updateItem(item, empty);
-
                         try {
                             if( this.getTableRow() != null ) {
                                 Account account = accountTableView.getItems().get(this.getTableRow().getIndex());
@@ -164,6 +188,15 @@ public class AccountListController {
             }
         });
 
+        crudColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures, ObservableValue>() {
+            @Override
+            public ObservableValue call(TableColumn.CellDataFeatures param) {
+                return new SimpleBooleanProperty(param.getValue() != null);
+            }
+        });
+
+        crudColumn.setCellFactory(param -> new ButtonCell(accountTableView));
+
     }
 
     private void computeSumMoneyOnAccounts() {
@@ -193,6 +226,7 @@ public class AccountListController {
         refershTableItems();
         computeSumMoneyOnAccounts();
         editPane.setOpacity(0);
+        editAccountPane.setOpacity(0);
         new FadeInUpTransition(tablePane).play();
     }
 
@@ -439,6 +473,109 @@ public class AccountListController {
 
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void loadAccountToEditPane() {
+        editAccountName.setText( editedAccount.getName() );
+        editAccNum1.setText( editedAccount.getAccountNumber().substring(0, 8) );
+        editAccNum2.setText( editedAccount.getAccountNumber().substring(8, 16) );
+        editAccNum3.setText( editedAccount.getAccountNumber().substring(16) );
+        editBanks.getSelectionModel().select(editedAccount.getBank());
+        editAmountLabel.setText( Constant.getNumberFormat().format(editedAccount.getMoney()) + " " + editedAccount.getCurrency().getCode() );
+        editCreatedLabel.setText( Constant.getDateFormat().format(editedAccount.getCreatedDate()) );
+    }
+
+    @FXML
+    private void handleEditAccount() {
+        try {
+            checkEditFields();
+
+            String newAccNum = editAccNum1.getText() + editAccNum2.getText() + editAccNum3.getText();
+            editedAccount.setAccountNumber(newAccNum);
+            editedAccount.setName(editAccountName.getText());
+            editedAccount.setBank(editBanks.getSelectionModel().getSelectedItem());
+
+            Session session = SessionUtil.getSession();
+            Transaction tx = session.beginTransaction();
+            session.update(editedAccount);
+            tx.commit();
+            session.close();
+
+            handleBackToTableView();
+        } catch (Exception ex) {
+            MessageBox.showErrorMessage(Bundles.getString("error.nodb.title"), "Nem lehet módosítani a számlát!", ex.getMessage(), false);
+        }
+    }
+
+    private void checkEditFields() throws Exception {
+        StringBuilder buffer = new StringBuilder();
+
+        if( editAccountName.getText().length() == 0 ) {
+            editAccountName.setText(Bundles.getString("accountC"));
+        }
+
+        if( editAccNum1.getText().length() != 8 || editAccNum2.getText().length() != 8 || editAccNum3.getText().length() != 8 ) {
+            buffer.append("A számlaszámnak hátomszor nyolc számjegyből kell álllnia!\n");
+        }
+
+        try {
+            Double.valueOf( editAccNum1.getText() );
+            Double.valueOf( editAccNum2.getText() );
+            Double.valueOf( editAccNum3.getText() );
+        } catch (NumberFormatException ex) {
+            buffer.append("A számlaszám csak számokat tartalmazhat!\n");
+        }
+
+        if( buffer.toString().length() != 0 ) {
+            throw new Exception(buffer.toString());
+        }
+    }
+
+    private class ButtonCell extends TableCell<Object, Boolean> {
+        final Hyperlink editLink = new Hyperlink(Bundles.getString("edit"));
+        final Hyperlink deleteLink = new Hyperlink(Bundles.getString("delete"));
+        final HBox hbox = new HBox(editLink, deleteLink);
+
+        ButtonCell(TableView tableView) {
+            hbox.setSpacing(4);
+
+            editLink.setOnAction((ActionEvent event) -> {
+                Account selected = accountTableView.getItems().get(this.getTableRow().getIndex());
+                editedAccount = selected;
+                loadAccountToEditPane();
+                tablePane.setOpacity(0);
+                new FadeInUpTransition(editAccountPane).play();
+            });
+
+            deleteLink.setOnAction((ActionEvent event) -> {
+                Account selected = accountTableView.getItems().get(this.getTableRow().getIndex());
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                alert.setTitle(Bundles.getString("sure"));
+                alert.setHeaderText(Bundles.getString("suredelete"));
+                alert.setContentText(Bundles.getString("deletedata"));
+                Optional<ButtonType> result = alert.showAndWait();
+                if( result.get() == ButtonType.OK ) {
+                    Session session = SessionUtil.getSession();
+                    org.hibernate.Transaction tx = session.beginTransaction();
+                    selected.delete(session);
+                    tx.commit();
+                    session.close();
+
+                    Main.getLoggedUser().getAccounts().remove(selected);
+                    refershTableItems();
+                }
+            });
+        }
+
+        @Override
+        protected void updateItem(Boolean item, boolean empty) {
+            super.updateItem(item, empty);
+            if( !empty ) {
+                setGraphic(hbox);
+            } else {
+                setGraphic(null);
+            }
         }
     }
 
