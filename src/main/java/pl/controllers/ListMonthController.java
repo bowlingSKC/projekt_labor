@@ -106,7 +106,7 @@ public class ListMonthController {
         scrollPane.setContent(vbox);
         //Készpénz hozzáadása
         for (ReadyCash cash : Main.getLoggedUser().getReadycash()) {
-            CheckBox checkBox = new CheckBox(cash.getCurrency().toString());
+            CheckBox checkBox = new CheckBox(cash.getCurrency().getCode());
             checkBox.setSelected(true);
             checkBoxes.add(checkBox);
             checkBox.setOnAction(new EventHandler<ActionEvent>() {
@@ -222,11 +222,11 @@ public class ListMonthController {
                 toDate.setTime(toDate.getTime() + 1000*60*60*24);
                 CashTransaction first = null;
                 for (CashTransaction cashTra : cash.getCashTransaction()){
-                    if(validNames.contains(cashTra.getCurrency().toString())){
+                    if(validNames.contains(cashTra.getCurrency().getCode())){
                         if(!added){
                             allseries.add(new XYChart.Series());
-                            allseries.get(allseries.size() - 1).setName(cashTra.getCurrency().toString());
-                            seriesID.put(cashTra.getCurrency().toString(), "Cash");
+                            allseries.get(allseries.size() - 1).setName(cashTra.getCurrency().getCode());
+                            seriesID.put(cashTra.getCurrency().getCode(), "Cash");
                             while (!fromDate.after(toDate)) {
                                 allseries.get(allseries.size() - 1).getData().add(new XYChart.Data(formatter.format(fromDate), 0.0f));
                                 fromDate.setTime(fromDate.getTime() + 1000 * 60 * 60 * 24);
@@ -252,7 +252,7 @@ public class ListMonthController {
                         }
                     }
                 }
-                firstCashDates.put(first.getCurrency().toString(), formatter.format(first.getDate()));
+                firstCashDates.put(first.getCurrency().getCode(), formatter.format(first.getDate()));
             }catch (NullPointerException e){
                 //e.printStackTrace();
             }
@@ -365,7 +365,7 @@ public class ListMonthController {
                     for(ReadyCash red : Main.getLoggedUser().getReadycash()){
                         for(CashTransaction cash : red.getCashTransaction()){
                             if (formatter.format(cash.getDate()).equals(s.getData().get(i + 1).getXValue()) && s.getData().get(i).getYValue() == 0
-                                    && cash.getCurrency().toString().equals(s.getName()) && !wasCash) {
+                                    && cash.getCurrency().getCode().equals(s.getName()) && !wasCash) {
                                 Float tmp;
                                 tmp = cash.getMoney();
                                 if (cash.getType().getSign().equals("+")) {
@@ -432,7 +432,7 @@ public class ListMonthController {
                 /*if(seriesID.get(s.getName()).equals("Cash") && d.getYValue() == 0){
                     CashTransaction before = null;
                     for(ReadyCash red : Main.getLoggedUser().getReadycash()) {
-                        if(red.getCurrency().toString().equals(s.getName())){
+                        if(red.getCurrency().getCode().equals(s.getName())){
                             for (CashTransaction tra : red.getCashTransaction()) {
                                 if(before == null && validCash.containsValue(tra.getId()) && formatter.format(tra.getDate()).compareTo(d.getXValue()) < 0){
                                     before = tra;
@@ -544,7 +544,7 @@ public class ListMonthController {
                 if(tr.getType().getSign().equals("-")){
                     tmpMoney = tmpMoney *-1;
                 }
-                if(tra.getCurrency().toString() != "HUF"){
+                if(!tra.getCurrency().getCode().equals("HUF")){
                     tmpMoney = (float) Math.floor(CurrencyExchange.getValue(tra.getCurrency()) * tmpMoney);
                 }
                 tmp += tmpMoney;
@@ -560,7 +560,7 @@ public class ListMonthController {
             Date last = new Date();
             Map<String, Float> tmp = new HashMap<>();
             for (AccountTransaction tra : acc.getAccountTransactions()) {
-                System.out.println(tra.getDate() + " - " + countMoney2(acc, tra));
+                //System.out.println(tra.getDate() + " - " + countMoney2(acc, tra));
                 if(tmp.containsKey(formatter.format(tra.getDate()))){
                     for(AccountTransaction before : acc.getAccountTransactions()){
                         if(before.getDate().equals(tra.getDate()) && tmp.get(formatter.format(tra.getDate())) == countMoney2(acc,before)
@@ -613,10 +613,10 @@ public class ListMonthController {
                             break;
                         }
                     }
-                }
-                //if (tmp.containsKey(formatter.format(cashTra.getDate())) && cashTra.getId() > tmp.get(formatter.format(cashTra.getDate()))) {
-                //    tmp.replace(formatter.format(cashTra.getDate()), countCashMoney2(cash, cashTra));
-                //}
+                }/*
+                if (tmp.containsKey(formatter.format(cashTra.getDate())) && cashTra.getId() > tmp.get(formatter.format(cashTra.getDate()))) {
+                    tmp.replace(formatter.format(cashTra.getDate()), countCashMoney2(cash, cashTra));
+                }*/
                 else {
                     tmp.put(formatter.format(cashTra.getDate()), countCashMoney2(cash, cashTra));
                 }
@@ -636,7 +636,7 @@ public class ListMonthController {
                 //System.out.println(formatter.format(first) + " - " + tmp.get(formatter.format(first)));
                 first.setTime(first.getTime() + 1000 * 60 * 60 * 24);
             }
-            ultimate.put(cash.getCurrency().toString(), tmp);
+            ultimate.put(cash.getCurrency().getCode(), tmp);
         }
         for (Property prop : Main.getLoggedUser().getProperties()) {
             Date first = null;
