@@ -13,10 +13,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -130,5 +127,12 @@ public class Constant {
 
     public static TransactionType getAccountInType() {
         return accountInType;
+    }
+
+    public static List<TransactionType> getAccountTransactions() {
+        List<TransactionType> list = new ArrayList<>(getTransactionTypes());
+        list.remove(cashInType);
+        list.remove(cashOutType);
+        return list;
     }
 }

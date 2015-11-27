@@ -144,10 +144,11 @@ public class Main extends Application {
             FXMLLoader loader = new FXMLLoader(Main.class.getResource("../layout/Logged.fxml"), Bundles.getBundle());
             Parent loggedpane = loader.load();
             LoggedController controller = loader.getController();
-            controller.setDialogStage(loginStage);
 
             Scene scene = new Scene(loggedpane);
             loginStage.setScene(scene);
+            controller.setDialogStage(loginStage);
+
             loginStage.initStyle(StageStyle.UNDECORATED);
             loginStage.show();
 

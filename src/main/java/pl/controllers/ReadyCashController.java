@@ -232,6 +232,10 @@ public class ReadyCashController {
         ReadyCash selected = new ReadyCash(Main.getLoggedUser(), 0.0f);
         boolean was = false;
         selected.setCurrency(currencyComboBox.getSelectionModel().getSelectedItem());
+        if( !CurrencyExchange.isContainsKey(currencyComboBox.getSelectionModel().getSelectedItem()) ) {
+            CurrencyExchange.addCurrenciesToMap(currencyComboBox.getSelectionModel().getSelectedItem(), 0.0f);
+            new Thread(CurrencyExchange::updateZeroCurrencies).start();
+        }
         if( Main.getLoggedUser().getReadycash() != null ) {
             for(ReadyCash tmp : Main.getLoggedUser().getReadycash()) {
                 if( tmp.getCurrency().equals(currencyComboBox.getSelectionModel().getSelectedItem()) ) {
