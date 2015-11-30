@@ -271,6 +271,8 @@ public class SyncDataController {
                                     System.out.println("OK!");
                                 }
                             }*/
+
+                            acc.getAccountTransactions().add(myAccountTransactions.get(index));
                             session.save( myAccountTransactions.get(index));
 
                         }

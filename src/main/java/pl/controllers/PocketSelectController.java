@@ -213,6 +213,7 @@ public class PocketSelectController {
                                     sumMoney -= Float.valueOf(moneyText.getText());
                                     System.out.println("1");
                                     poc.setMoney(poc.getMoney() + Float.valueOf(moneyText.getText()));
+                                    refreshData(poc, 2);
                                     session.update(poc);
                                 }
                                 if (acc.getKey() == poc.getAccount().getId() && acc.getValue() < Float.valueOf(moneyText.getText())){
@@ -234,6 +235,7 @@ public class PocketSelectController {
                         pockets.add(0, pocket);
                         pocketPie.getData().add(new PieChart.Data(pocketCombo.getSelectionModel().getSelectedItem().toString(), Float.valueOf(moneyText.getText())));
                         sumMoney -= Float.valueOf(moneyText.getText());
+                        refreshData(pocket, 1);
                         session.save(pocket);
                         System.out.println("2");
                     }
@@ -257,6 +259,7 @@ public class PocketSelectController {
                             }
                         }
                         sumMoney -= Float.valueOf(moneyText.getText());
+                        refreshData(pocket, 1);
                         session.save(pocket);
                         System.out.println("3");
                     }
@@ -304,6 +307,7 @@ public class PocketSelectController {
                                         acc.setValue(acc.getValue() + Float.valueOf(moneyText.getText()));
                                     }
                                 }
+                                refreshData(poc, 3);
                                 session.delete(poc);
                                 remove = poc;
                                 pocketPie.getData().remove(i);
@@ -327,6 +331,7 @@ public class PocketSelectController {
                                     }
                                     pocketPie.getData().get(i).setPieValue(pocketPie.getData().get(i).getPieValue() - Double.valueOf(moneyText.getText()));
                                     sumMoney += Float.valueOf(moneyText.getText());
+                                    refreshData(poc, 3);
                                     session.delete(poc);
                                     remove = poc;
                                     System.out.println("2");
@@ -338,6 +343,7 @@ public class PocketSelectController {
                                         }
                                     }
                                     poc.setMoney(poc.getMoney() - Float.valueOf(moneyText.getText()));
+                                    refreshData(poc, 2);
                                     session.update(poc);
                                     pocketPie.getData().get(i).setPieValue(pocketPie.getData().get(i).getPieValue() - Double.valueOf(moneyText.getText()));
                                     sumMoney += Float.valueOf(moneyText.getText());
@@ -501,6 +507,22 @@ public class PocketSelectController {
         if(pockets != null){
             updateArea();
         }
+    }
 
+    void refreshData(Pocket pocket, int mode){
+        for (Account acc : Main.getLoggedUser().getAccounts()) {
+            if(mode == 1 && pocket.getAccount().getId() == acc.getId()){
+                acc.getPockets().add(pocket);
+            }
+            for (Pocket poc : acc.getPockets()) {
+                if(mode == 2 && poc.getId() == pocket.getId()){
+                    poc = pocket;
+                }
+                if(mode == 3  && poc.getId() == pocket.getId()){
+                    acc.getPockets().remove(poc);
+                    break;
+                }
+            }
+        }
     }
 }

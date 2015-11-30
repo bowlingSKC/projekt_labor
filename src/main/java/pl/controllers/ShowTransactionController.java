@@ -18,6 +18,7 @@ import pl.model.TransactionType;
 
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -215,11 +216,11 @@ public class ShowTransactionController {
         updateData();
 
         Account tempAcc = new Account();
-        Session session = SessionUtil.getSession();
-        Query query = session.createQuery("from Account");
-        List<Account> tempAccounts;
-        tempAccounts = query.list();
-        session.close();
+        Session session;
+        List<Account> tempAccounts = new ArrayList<>();
+        for(Account acc : Main.getLoggedUser().getAccounts()){
+            tempAccounts.add(acc);
+        }
         for(Account ac : tempAccounts) {
             /*if(ac.getAccountNumber().toString().equals(szamlaText.getText()) ){
                 tempAcc = ac;
@@ -253,6 +254,7 @@ public class ShowTransactionController {
                     //myTransaction.setType(tempType);
                     session.save(myAccountTransaction);
                     System.out.println("OK");
+                    acc.getAccountTransactions().add(myAccountTransaction);
                     session.save(myAccountTransaction);
                     //System.out.println("OK");
                 }

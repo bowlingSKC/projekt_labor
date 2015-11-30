@@ -219,7 +219,7 @@ public class ListMonthController {
             try{
                 fromDate = Date.from(searchFromDate.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
                 toDate = Date.from(searchToDate.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
-                toDate.setTime(toDate.getTime() + 1000*60*60*24);
+                toDate.setTime(toDate.getTime());
                 CashTransaction first = null;
                 for (CashTransaction cashTra : cash.getCashTransaction()){
                     if(validNames.contains(cashTra.getCurrency().getCode())){
@@ -266,7 +266,7 @@ public class ListMonthController {
                 try {
                     fromDate = Date.from(searchFromDate.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
                     toDate = Date.from(searchToDate.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
-                    toDate.setTime(toDate.getTime() + 1000*60*60*24);
+                    toDate.setTime(toDate.getTime());
                     while (!fromDate.after(toDate)) {
                         allseries.get(allseries.size() - 1).getData().add(new XYChart.Data(formatter.format(fromDate), 0.0f));
                         fromDate.setTime(fromDate.getTime() + 1000 * 60 * 60 * 24);
@@ -298,7 +298,7 @@ public class ListMonthController {
                 try {
                     fromDate = Date.from(searchFromDate.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
                     toDate = Date.from(searchToDate.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
-                    toDate.setTime(toDate.getTime() + 1000*60*60*24);
+                    toDate.setTime(toDate.getTime());
                     while (!fromDate.after(toDate)) {
                         allseries.get(allseries.size() - 1).getData().add(new XYChart.Data(formatter.format(fromDate), 0.0f));
                         fromDate.setTime(fromDate.getTime() + 1000 * 60 * 60 * 24);
@@ -584,15 +584,16 @@ public class ListMonthController {
                     first.setTime(tra.getDate().getTime());
                 }
             }
-            last.setTime(last.getTime() + 1000*60*60*24);
-            while(!formatter.format(first).equals(formatter.format(last))){
-                if(tmp.get(formatter.format(first)) == null){
-                    tmp.put(formatter.format(first), tmp.get(formatter.format(first.getTime() - 1000 * 60 * 60 * 24)));
+            if(first != null){
+                last.setTime(last.getTime());
+                while(!formatter.format(first).equals(formatter.format(last))){
+                    if(tmp.get(formatter.format(first)) == null){
+                        tmp.put(formatter.format(first), tmp.get(formatter.format(first.getTime() - 1000 * 60 * 60 * 24)));
+                    }
+                    first.setTime(first.getTime() + 1000 * 60 * 60 * 24);
                 }
-                first.setTime(first.getTime() + 1000 * 60 * 60 * 24);
+                ultimate.put(acc.toString(), tmp);
             }
-
-            ultimate.put(acc.toString(), tmp);
             for(Map.Entry<String, Map<String,Float>> entry : ultimate.entrySet()){
                 for(Map.Entry<String, Float> entry2 : entry.getValue().entrySet()){
                     //System.out.println(entry.getKey() + " - " + entry2.getKey() + " - " + entry2.getValue());
@@ -628,15 +629,17 @@ public class ListMonthController {
                     first.setTime(cashTra.getDate().getTime());
                 }
             }
-            last.setTime(last.getTime() + 1000*60*60*24);
-            while(!formatter.format(first).equals(formatter.format(last))){
-                if(tmp.get(formatter.format(first)) == null){
-                    tmp.put(formatter.format(first), tmp.get(formatter.format(first.getTime() - 1000 * 60 * 60 * 24)));
+            if(first != null){
+                last.setTime(last.getTime());
+                while(!formatter.format(first).equals(formatter.format(last))){
+                    if(tmp.get(formatter.format(first)) == null){
+                        tmp.put(formatter.format(first), tmp.get(formatter.format(first.getTime() - 1000 * 60 * 60 * 24)));
+                    }
+                    //System.out.println(formatter.format(first) + " - " + tmp.get(formatter.format(first)));
+                    first.setTime(first.getTime() + 1000 * 60 * 60 * 24);
                 }
-                //System.out.println(formatter.format(first) + " - " + tmp.get(formatter.format(first)));
-                first.setTime(first.getTime() + 1000 * 60 * 60 * 24);
+                ultimate.put(cash.getCurrency().getCode(), tmp);
             }
-            ultimate.put(cash.getCurrency().getCode(), tmp);
         }
         for (Property prop : Main.getLoggedUser().getProperties()) {
             Date first = null;
@@ -666,15 +669,17 @@ public class ListMonthController {
                     first.setTime(pv.getDate().getTime());
                 }
             }
-            last.setTime(last.getTime() + 1000*60*60*24);
-            while(!formatter.format(first).equals(formatter.format(last))){
-                if(tmp.get(formatter.format(first)) == null){
-                    tmp.put(formatter.format(first), tmp.get(formatter.format(first.getTime() - 1000 * 60 * 60 * 24)));
+            if(first != null){
+                last.setTime(last.getTime());
+                while(!formatter.format(first).equals(formatter.format(last))){
+                    if(tmp.get(formatter.format(first)) == null){
+                        tmp.put(formatter.format(first), tmp.get(formatter.format(first.getTime() - 1000 * 60 * 60 * 24)));
+                    }
+                    //System.out.println(formatter.format(first) + " - " + tmp.get(formatter.format(first)));
+                    first.setTime(first.getTime() + 1000 * 60 * 60 * 24);
                 }
-                //System.out.println(formatter.format(first) + " - " + tmp.get(formatter.format(first)));
-                first.setTime(first.getTime() + 1000 * 60 * 60 * 24);
+                ultimate.put(prop.getName().toString(), tmp);
             }
-            ultimate.put(prop.getName().toString(), tmp);
         }
     }
 
