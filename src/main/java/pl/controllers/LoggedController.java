@@ -5,11 +5,13 @@ import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.css.PseudoClass;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Cursor;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Screen;
@@ -251,6 +253,39 @@ public class LoggedController {
             maximizeButton.getStylesheets().add("decoration-button-restore");
             resizeButton.setVisible(false);
         });
+
+        createShortcutEvents();
+    }
+
+    private void createShortcutEvents() {
+        dialogStage.getScene().setOnKeyPressed(event -> {
+            switch (event.getCode()) {
+                case F1:
+                    listener.handleShortKey(1);
+                    break;
+                case F2:
+                    listener.handleShortKey(2);
+                    break;
+                case F3:
+                    listener.handleShortKey(3);
+                    break;
+                case F4:
+                    listener.handleShortKey(4);
+                    break;
+                case F5:
+                    listener.handleShortKey(5);
+                    break;
+                case F6:
+                    listener.handleShortKey(6);
+                    break;
+                case F7:
+                    listener.handleShortKey(7);
+                    break;
+                case F8:
+                    listener.handleShortKey(8);
+                    break;
+            }
+        });
     }
 
     public void setLayout(BorderPane layout) {
@@ -258,6 +293,36 @@ public class LoggedController {
     }
 
     private class TreeSelectionListener implements ChangeListener<TreeItem<String>> {
+
+        public void handleShortKey(int key) {
+            switch (key) {
+                case 1:
+                    readSummaryPane();
+                    break;
+                case 2:
+                    readReadyCashPane();
+                    break;
+                case 3:
+                    readAccountListLayout();
+                    break;
+                case 4:
+                    readPropertiesPanel();
+                    break;
+                case 5:
+                    readDebitPanel();
+                    break;
+                case 6:
+                    readListTransactions();
+                    break;
+                case 7:
+                    readSyncData();
+                    break;
+                case 8:
+                    readPersonalSettingsPane();
+                    break;
+            }
+        }
+
         @Override
         public void changed(ObservableValue<? extends TreeItem<String>> observable, TreeItem<String> oldValue, TreeItem<String> newValue) {
             final String value = newValue.getValue();

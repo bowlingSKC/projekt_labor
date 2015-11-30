@@ -10,6 +10,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
 import javafx.util.Callback;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import pl.Constant;
@@ -25,6 +26,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 public class PropertiesController {
@@ -323,7 +325,7 @@ public class PropertiesController {
             property.setComment(newCommentField.getText());
             property.setOwner(Main.getLoggedUser());
 
-            PropertyValue value = new PropertyValue(property, Float.valueOf(newMoneyField.getText()), new Date(), null);
+            PropertyValue value = new PropertyValue(property, Float.valueOf(newMoneyField.getText()), Constant.dateFromLocalDate(newDatePicker.getValue()), null);
             property.getValues().add(value);
 
             Session session = SessionUtil.getSession();
@@ -354,6 +356,7 @@ public class PropertiesController {
             accountTransaction.setDate(Constant.dateFromLocalDate(sellPropertyDate.getValue()));
             accountTransaction.setType(Constant.getTransactionTypes().get(Constant.getTransactionTypes().size() - 1));
             accountTransaction.setComment("Vagyontargy eladasabol szarmazo jovedelem: " + property.getName() + "");
+            accountTransaction.setCurrency(Constant.getHufCurrency());
 
             Account selected = sellPropertyAccounts.getSelectionModel().getSelectedItem();
             selected.setMoney(selected.getMoney() + Float.valueOf(sellPropertyValueField.getText()));
@@ -386,6 +389,11 @@ public class PropertiesController {
             }
         }
 
+        while( property.getValues().size() != 0 ) {
+            PropertyValue value = property.getLatestPropertyValue();
+            property.getValues().remove(value);
+            session.delete(value);
+        }
         session.delete(property);
 
         tx.commit();

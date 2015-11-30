@@ -1,19 +1,17 @@
 package pl.controllers;
 
 
-import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.util.Callback;
-import org.hibernate.*;
+import org.hibernate.Session;
 import pl.Constant;
 import pl.Main;
 import pl.MessageBox;
@@ -21,7 +19,6 @@ import pl.animations.FadeInUpTransition;
 import pl.bundles.Bundles;
 import pl.jpa.SessionUtil;
 import pl.model.*;
-import pl.model.AccountTransaction;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -107,6 +104,8 @@ public class ListTransactionController {
     private TextField anotherAccNum3;
     // ========= EDIT PANE VÉGE =========
 
+    private List<CheckBox> accountCheckBox = new ArrayList<>();
+
     private AccountTransaction editAccountTransaction = null;
 
     @FXML
@@ -118,7 +117,6 @@ public class ListTransactionController {
         // TableView
         accountTableColumn.setCellValueFactory(new PropertyValueFactory<>("account"));
         moneyTableColumn.setCellValueFactory(new PropertyValueFactory<>("money"));
-        // TODO: itt volt a beforeMoney
         dateTableColumn.setCellValueFactory(new PropertyValueFactory<>("date"));
         transactionTypeColumn.setCellValueFactory(new PropertyValueFactory<>("type"));
 
@@ -127,10 +125,11 @@ public class ListTransactionController {
             protected void updateItem(AccountTransaction item, boolean empty) {
                 super.updateItem(item, empty);
                 if (item != null && !empty) {
+                    setTooltip(new Tooltip( item.getComment() ));
                     if (item.getType().getSign().equals("-")) {
                         setStyle("-fx-background-color: lightcoral;");
                     } else {
-                        setStyle("");
+                        setStyle("-fx-background-color: transparent");
                     }
                 }
             }
@@ -192,6 +191,7 @@ public class ListTransactionController {
         for( Account acc : Main.getLoggedUser().getAccounts() ) {
             CheckBox checkBox = new CheckBox( acc.toString() );
             checkBox.setSelected(true);
+            accountCheckBox.add(checkBox);
             checkBox.selectedProperty().addListener(listener);
             vbox.getChildren().add( checkBox );
         }
@@ -234,7 +234,7 @@ public class ListTransactionController {
 
     private void initEditTransaction() {
         newAccountComboBox.getItems().setAll(Main.getLoggedUser().getAccounts());
-        newTransactionTypeComboBox.getItems().setAll(Constant.getTransactionTypes());
+        newTransactionTypeComboBox.getItems().setAll(Constant.getAccountTransactions());
         currencyComboBox.getItems().setAll(Constant.getCurrencies());
 
         newAccountComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> newTransactionFromPocket.getItems().setAll(newValue.getPockets()));
@@ -624,11 +624,8 @@ public class ListTransactionController {
             Set<AccountTransaction> accountTransactions = new HashSet<>(allAccountTransactions);
 
             if( searcMoneyFromField.getText().length() > 0 ) {
-                for( AccountTransaction accountTransaction : allAccountTransactions) {
-                    if( accountTransaction.getMoney() < Float.valueOf(searcMoneyFromField.getText()) ) {
-                        accountTransactions.remove(accountTransaction);
-                    }
-                }
+                allAccountTransactions.stream().filter(
+                        accountTransaction -> accountTransaction.getMoney() < Float.valueOf(searcMoneyFromField.getText())).forEach(accountTransactions::remove);
             }
 
             if( searcMoneyToField.getText().length() > 0 ) {
@@ -637,35 +634,42 @@ public class ListTransactionController {
                                 accountTransaction.getMoney() > Float.valueOf(searcMoneyToField.getText())).forEach(accountTransactions::remove);
             }
 
-            if(searchFromDate.getValue() != null) {
-                Date from = Constant.dateFromLocalDate(searchFromDate.getValue());
-                new HashSet<>(allAccountTransactions).stream().filter(
-                        accountTransaction ->
-                                accountTransaction.getDate().before(from)).forEach(allAccountTransactions::remove);
+            if( searchFromDate.getValue() != null ) {
+                new HashSet<>(accountTransactions).stream().filter(
+                        transaction ->
+                                transaction.getDate().before(Constant.dateFromLocalDate(searchFromDate.getValue()))).forEach(accountTransactions::remove);
             }
 
-            if(searchToDate.getValue() != null) {
-                Date to = Constant.dateFromLocalDate(searchToDate.getValue());
-                new HashSet<>(allAccountTransactions).stream().filter(
-                        accountTransaction ->
-                                accountTransaction.getDate().after(to)).forEach(allAccountTransactions::remove);
+            if( searchToDate.getValue() != null ) {
+                new HashSet<>(accountTransactions).stream().filter(
+                        transaction ->
+                                transaction.getDate().after(Constant.dateFromLocalDate(searchToDate.getValue()))).forEach(accountTransactions::remove);
             }
 
             if( searchCommentField.getText().length() != 0 ) {
-                new HashSet<>(allAccountTransactions).stream().filter(
-                        accountTransaction ->
-                                accountTransaction.getComment().toLowerCase().contains(searchCommentField.getText().trim().toLowerCase())).forEach(allAccountTransactions::remove);
+                for( AccountTransaction transaction : new HashSet<>(accountTransactions) ) {
+                    if( transaction.getComment() != null ) {
+                        if( !transaction.getComment().toLowerCase().contains( searchCommentField.getText().trim().toLowerCase() ) ) {
+                            accountTransactions.remove(transaction);
+                        }
+                    } else {
+                        accountTransactions.remove(transaction);
+                    }
+                }
             }
 
-            if( newValue instanceof Boolean ) {
-                System.out.println("checkbox");
+            for( CheckBox checkBox : accountCheckBox ) {
+                if( !checkBox.isSelected() ) {
+                    String accNumber = checkBox.getText().substring( checkBox.getText().indexOf("[")+1, checkBox.getText().lastIndexOf("]") ).replaceAll("-", "");
+                    for( AccountTransaction transaction : new HashSet<>(accountTransactions) ) {
+                        if( transaction.getAccount().getAccountNumber().equals(accNumber) ) {
+                            accountTransactions.remove(transaction);
+                        }
+                    }
+                }
             }
-
-            System.out.println(searchFromDate.getValue());
-            System.out.println(searchToDate.getValue());
 
             transactionTableView.getItems().setAll(accountTransactions);
-
         }
     }
 

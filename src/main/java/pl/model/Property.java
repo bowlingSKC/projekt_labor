@@ -114,6 +114,24 @@ public class Property {
         return (last == null) ? null : last.getValue();
     }
 
+    public PropertyValue getLatestPropertyValue() {
+        PropertyValue last = null;
+        for(PropertyValue pvalue : values) {
+            if( last == null ) {
+                last = pvalue;
+            } else {
+                if( pvalue.getDate().compareTo(last.getDate()) == 0 ) {
+                    if( pvalue.getId() > last.getId() ) {
+                        last = pvalue;
+                    }
+                } else if( pvalue.getDate().compareTo(last.getDate()) == 1 ) {
+                    last = pvalue;
+                }
+            }
+        }
+        return (last == null) ? null : last;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
