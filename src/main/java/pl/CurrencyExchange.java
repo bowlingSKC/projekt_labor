@@ -19,7 +19,7 @@ public class CurrencyExchange {
     private static final String WEB_URL = "http://www.webservicex.com/currencyconvertor.asmx/ConversionRate?";
 
     // replace karakterek: <!>
-    private static final String JSON_URL = "http://globalcurrencies.xignite.com/xGlobalCurrencies.json/ConvertRealTimeValue?From=<!>&To=<!>&Amount=1&_fields=FromCurrencySymbol,ToCurrencySymbol,Rate&_token=E843B6BA874C4283B6147F12D78544B6";
+    private static final String JSON_URL = "http://globalcurrencies.xignite.com/xGlobalCurrencies.json/ConvertRealTimeValue?From=<!>&To=<!>&Amount=1&_fields=FromCurrencySymbol,ToCurrencySymbol,Rate&_token=D9A2DCCFA25B4799BB9191BE6FAF2CD2";
 
     private static Map<Currency, Float> currencies = new HashMap<>();
 
@@ -66,38 +66,6 @@ public class CurrencyExchange {
     public static float toHuf(Currency currency) {
         return toHuf(currency, 1.0f);
     }
-
-    /*
-    public static float xToY(Currency from, Currency to, float amount) {
-        try {
-            long start = System.currentTimeMillis();
-
-            String actualWebUrl = WEB_URL + "FromCurrency="+ from.getCode() +"&ToCurrency=" + to.getCode();
-            URL obj = new URL(actualWebUrl);
-            HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-
-            con.setRequestMethod("GET");
-            con.setRequestProperty("User-Agent", "Mozilla/5.0");
-
-            StringBuffer buffer = new StringBuffer();
-            BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream()));
-            String line;
-            while( (line = br.readLine()) != null ) {
-                buffer.append(line);
-            }
-            br.close();
-
-            float value = Float.valueOf( buffer.toString().substring(82, buffer.toString().lastIndexOf("<")) );
-
-            long end = System.currentTimeMillis();
-            System.out.println("Egy arfolyam lekerdezes ideje: " + (end-start) + " ms");
-
-            return value * amount;
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            return 1.0f;
-        }
-    */
 
     public static float xToY(Currency from, Currency to, float amount) {
         if( from.equals(to) ) {

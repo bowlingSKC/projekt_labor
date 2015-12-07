@@ -33,23 +33,23 @@ public class PersonalSummaryController {
     }
 
     private void computeSumOfMoney() {
-        sumOfMoneyLabel.setText( Constant.getNumberFormat().format(Main.getLoggedUser().getAllMoney() - Main.getLoggedUser().getAllDebitsInValue()) );
+        sumOfMoneyLabel.setText( Constant.getNumberFormat().format(Math.floor(Main.getLoggedUser().getAllMoney() - Main.getLoggedUser().getAllDebitsInValue())) );
     }
 
     private void computeAccountsLabel() {
-        inAccountsLabel.setText( Constant.getNumberFormat().format(Main.getLoggedUser().getAllMoneyFromAccounts()) );
+        inAccountsLabel.setText( Constant.getNumberFormat().format(Math.floor(Main.getLoggedUser().getAllMoneyFromAccounts())) );
     }
 
     private void computeReadyCash() {
-        inReadyCashLabel.setText(Constant.getNumberFormat().format(Main.getLoggedUser().getAllMoneyInReadyCash()));
+        inReadyCashLabel.setText(Constant.getNumberFormat().format(Math.floor(Main.getLoggedUser().getAllMoneyInReadyCash())));
     }
 
     private void computePropertyCash() {
-        inPropertiesLabel.setText(Constant.getNumberFormat().format(Main.getLoggedUser().getAllMoneyInProperties()));
+        inPropertiesLabel.setText(Constant.getNumberFormat().format(Math.floor(Main.getLoggedUser().getAllMoneyInProperties())));
     }
 
     private void computeDepit() {
-        debitLabel.setText( Constant.getNumberFormat().format(Main.getLoggedUser().getAllDebitsInValue()) );
+        debitLabel.setText( Constant.getNumberFormat().format(Math.floor(Main.getLoggedUser().getAllDebitsInValue())) );
     }
 
     public void handleToCSV() {

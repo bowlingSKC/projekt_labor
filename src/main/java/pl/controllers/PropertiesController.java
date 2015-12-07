@@ -357,6 +357,7 @@ public class PropertiesController {
             accountTransaction.setType(Constant.getTransactionTypes().get(Constant.getTransactionTypes().size() - 1));
             accountTransaction.setComment("Vagyontargy eladasabol szarmazo jovedelem: " + property.getName() + "");
             accountTransaction.setCurrency(Constant.getHufCurrency());
+            accountTransaction.setBeforeAccountTransaction( sellPropertyAccounts.getSelectionModel().getSelectedItem().getLatestTransaction() );
 
             Account selected = sellPropertyAccounts.getSelectionModel().getSelectedItem();
             selected.setMoney(selected.getMoney() + Float.valueOf(sellPropertyValueField.getText()));
@@ -387,6 +388,7 @@ public class PropertiesController {
                 Main.getLoggedUser().getReadycash().add(readyCash);
                 session.save(readyCash);
             }
+            Main.getLoggedUser().getProperties().remove(property);
         }
 
         while( property.getValues().size() != 0 ) {

@@ -226,7 +226,7 @@ public class DebitController {
         StringBuilder builder = new StringBuilder();
 
         if( toField.getText().length() == 0 ) {
-            builder.append("Kedvezményezett kitöltése kötelető!\n");
+            builder.append(Bundles.getString("error.payee") + "\n");
         }
 
         try {

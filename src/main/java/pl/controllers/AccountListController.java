@@ -144,10 +144,10 @@ public class AccountListController {
                             if( this.getTableRow() != null ) {
                                 Account account = accountTableView.getItems().get(this.getTableRow().getIndex());
                                 if( account.getCurrency().getCode().equals("HUF") ) {
-                                    setText( Constant.getNumberFormat().format(account.getMoney()) );
+                                    setText( Constant.getNumberFormat().format(Math.floor(account.getMoney())) );
                                     hufvalues.put(account.getAccountNumber(), account.getMoney());
                                 } else if(CurrencyExchange.isContainsKey(account.getCurrency())) {
-                                    setText( Constant.getNumberFormat().format( CurrencyExchange.getValue(account.getCurrency()) * account.getMoney() ) );
+                                    setText( Constant.getNumberFormat().format( Math.floor(CurrencyExchange.getValue(account.getCurrency()) * account.getMoney()) ) );
                                     hufvalues.put(account.getAccountNumber(), CurrencyExchange.getValue(account.getCurrency()) * account.getMoney());
                                 } else {
                                     setText("???");
@@ -212,7 +212,7 @@ public class AccountListController {
         }
 
         NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.getDefault());
-        sumLabel.setText( numberFormat.format(money) + " Ft"  );
+        sumLabel.setText( numberFormat.format(Math.floor(money)) + " Ft"  );
     }
 
     @FXML
@@ -245,7 +245,10 @@ public class AccountListController {
             editPane.setOpacity(0);
             new FadeInUpTransition(tablePane).play();
         } catch (Throwable ex) {
-            MessageBox.showErrorMessage("Hiba", "Hiba a számla létrehozásakkor", ex.getMessage(), false);
+            MessageBox.showErrorMessage(
+                    Bundles.getString("error.nodb.title"),
+                    Bundles.getString("error.newaccount"),
+                    ex.getMessage(), false);
         }
     }
 
@@ -253,16 +256,16 @@ public class AccountListController {
         StringBuilder buffer = new StringBuilder();
 
         if( newAccBankComboBox.getSelectionModel().getSelectedItem() == null ) {
-            buffer.append("Bank választása kötelező!\n");
+            buffer.append(""+ Bundles.getString("bank.must") +"\n");
         }
 
         if( newAccNum1.getText().length() != 8 || newAccNum2.getText().length() != 8 || newAccNum3.getText().length() != 8 ) {
-            buffer.append("A számlaszámnak háromszor 8 számból kell állnia!\n");
+            buffer.append(Bundles.getString("account.number.false") + "\n");
         }
         // TODO: számokat ellenőrizni, ne legyenek benne betűk
 
         if( newAcccurrencyComboBox.getSelectionModel().getSelectedItem() == null ) {
-            buffer.append("Közelező valutát választani!\n");
+            buffer.append(Bundles.getString("currency.must") + "\n");
         }
 
         if( buffer.toString().length() != 0 ) {
@@ -336,27 +339,6 @@ public class AccountListController {
         }
     }
 
-    private boolean checkGiro() {
-        String typeGiro = newAccNum1.getText().substring(0, 3);
-        Bank selectedBank = newAccBankComboBox.getSelectionModel().getSelectedItem();
-        if( !selectedBank.getGiro().equals(typeGiro) ) {
-            if( getBankByGiro(typeGiro) != null ) {
-                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-                alert.setTitle( Bundles.getString("error.warning") );
-                alert.setHeaderText("A kiválasztott bank és a számlaszám nem összeegyeztethető!\nBiztosan így akarja elmenteni?");
-                alert.setContentText("A rendszer ehhez a számlaszámhoz a " + getBankByGiro(typeGiro).getName() + " bankot ajánlja.");
-
-                Optional<ButtonType> result = alert.showAndWait();
-                if( result.get() == ButtonType.OK ) {
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
     private void clearAllNewAccountField() {
         newAccBankComboBox.getSelectionModel().select(null);
         newAccNum1.setText("");
@@ -380,14 +362,14 @@ public class AccountListController {
         StringBuffer buffer = new StringBuffer();
 
         if( newAccBankComboBox.getSelectionModel().getSelectedItem() == null ) {
-            buffer.append("Bank kiválasztása kötelező!\n");
+            buffer.append(Bundles.getString("bank.must") + "\n");
         }
 
         if( newAccNum1.getText().equals("") || newAccNum2.getText().equals("") || newAccNum3.getText().equals("") ) {
-            buffer.append("A számlaszám mindegyik mezőjének kitöltése kötelező!\n");
+            buffer.append(Bundles.getString("account.number.false") + "\n");
         } else {
             if( newAccNum1.getText().length() != 8 || newAccNum2.getText().length() != 8 || newAccNum3.getText().length() != 8 ) {
-                buffer.append("A számlaszám mindegyik mezőjének 8 db számból kell állnia!\n");
+                buffer.append(Bundles.getString("account.number.false") + "\n");
             }
         }
 
@@ -516,7 +498,7 @@ public class AccountListController {
         }
 
         if( editAccNum1.getText().length() != 8 || editAccNum2.getText().length() != 8 || editAccNum3.getText().length() != 8 ) {
-            buffer.append("A számlaszámnak hátomszor nyolc számjegyből kell álllnia!\n");
+            buffer.append(Bundles.getString("account.number.false") + "\n");
         }
 
         try {
@@ -524,7 +506,7 @@ public class AccountListController {
             Double.valueOf( editAccNum2.getText() );
             Double.valueOf( editAccNum3.getText() );
         } catch (NumberFormatException ex) {
-            buffer.append("A számlaszám csak számokat tartalmazhat!\n");
+            buffer.append(Bundles.getString("account.number.false") + "\n");
         }
 
         if( buffer.toString().length() != 0 ) {
