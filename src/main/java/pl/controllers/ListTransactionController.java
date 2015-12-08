@@ -323,7 +323,7 @@ public class ListTransactionController {
                 newAcc.setMoney(accountTransaction.getMoney());
                 newAcc.setCurrency(accountTransaction.getCurrency());
                 newAcc.setAccount(anotheraccCombo.getSelectionModel().getSelectedItem());
-                newAcc.setType(newTransactionTypeComboBox.getItems().get(7));
+                newAcc.setType(newTransactionTypeComboBox.getSelectionModel().getSelectedItem());
                 newAcc.setAnotherAccount(newAccountComboBox.getSelectionModel().getSelectedItem().getAccountNumber());
                 newAcc.setDate(accountTransaction.getDate());
                 AccountTransaction prev = anotheraccCombo.getSelectionModel().getSelectedItem().getLatestTransaction();

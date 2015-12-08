@@ -273,7 +273,7 @@ public class PropertiesController {
             session.close();
 
         } catch (Exception e) {
-            MessageBox.showErrorMessage("Hiba", "Az új értéket nem lehet felvinni!", e.getMessage(), false);
+            MessageBox.showErrorMessage(Bundles.getString("error.nodb.title"), Bundles.getString("error.processing"), e.getMessage(), false);
         }
     }
 
@@ -286,15 +286,15 @@ public class PropertiesController {
 
         try {
             if( Float.valueOf(newValueValueTextField.getText()) < 0 ) {
-                buffer.append("Az érték nem lehet negatív!\n");
+                buffer.append(Bundles.getString("gtzero") +"\n");
             }
         } catch (NumberFormatException ex) {
-            buffer.append("Az érték mezőbe csak számot lehet írni!\n");
+            buffer.append(Bundles.getString("providenumber") +"\n");
         }
 
         if( newValueDatePicker.getValue() != null ) {
             if( Constant.dateFromLocalDate(newValueDatePicker.getValue()).after(new Date()) ) {
-                buffer.append("A dátum nem lehet a mai napnál később!\n");
+                buffer.append(Bundles.getString("dateafter") +"\n");
             }
         }
 
@@ -337,7 +337,7 @@ public class PropertiesController {
 
             Main.getLoggedUser().getProperties().add(property);
         } catch (Throwable ex) {
-            MessageBox.showErrorMessage("Hiba", "A vagyonelemet nem lehet létrehozni!", ex.getMessage(), false);
+            MessageBox.showErrorMessage(Bundles.getString("error.nodb.title"), Bundles.getString("error.processing"), ex.getMessage(), false);
         }
     }
 
@@ -409,15 +409,15 @@ public class PropertiesController {
         StringBuffer buffer = new StringBuffer();
 
         if( newNameField.getText().length() == 0 ) {
-            buffer.append("Kötelező nevet adni a vagyonelemnek!\n");
+            buffer.append(Bundles.getString("providename") +"\n");
         }
 
         try {
             if( Float.valueOf(newMoneyField.getText()) < 1 ) {
-                buffer.append("A beszerzési érték nem lehet negatív!\n");
+                buffer.append(Bundles.getString("gtzero") +"\n");
             }
         } catch (NumberFormatException ex) {
-            buffer.append("A beszerzési érték csak számot tartalmazhat!\n");
+            buffer.append(Bundles.getString("providenumber") +"\n");
         }
 
         if( buffer.toString().length() != 0 ) {
@@ -463,9 +463,9 @@ public class PropertiesController {
             cellButtonDelete.setOnAction((ActionEvent t) -> {
                 int row = getTableRow().getIndex();
                 Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-                alert.setTitle("Biztos benne?");
-                alert.setHeaderText("Biztosan törölni szeretné a kiválasztott vagyontárgyat?");
-                alert.setContentText("A törlés következtében az adat elveszik.");
+                alert.setTitle(Bundles.getString("sure"));
+                alert.setHeaderText(Bundles.getString("deleteprop"));
+                alert.setContentText(Bundles.getString("deleteloss"));
                 Optional<ButtonType> result = alert.showAndWait();
                 if( result.get() == ButtonType.OK ) {
                     PropertyDao.deleteProperty( (Property) tblView.getItems().get(row));

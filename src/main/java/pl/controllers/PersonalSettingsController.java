@@ -64,7 +64,7 @@ public class PersonalSettingsController {
 
             Main.logout();
         } catch (Exception ex) {
-            MessageBox.showErrorMessage("Hiba", "Hiba az adatok feldolgozása közben!", ex.getMessage(), false);
+            MessageBox.showErrorMessage(Bundles.getString("error.nodb.title"), Bundles.getString("error.processing"), ex.getMessage(), false);
         }
     }
 
@@ -72,19 +72,19 @@ public class PersonalSettingsController {
         StringBuilder builder = new StringBuilder();
 
         if( firstnameField.getText().length() == 0 ) {
-            builder.append("A vezetéknév mező kitöltése közelező!\n");
+            builder.append(Bundles.getString("missing input") + Bundles.getString("lastname") + "\n");
         }
 
         if( lastnameField.getText().length() == 0 ) {
-            builder.append("A keresztnév mező kitöltése kötelező!\n");
+            builder.append(Bundles.getString("missing input") + Bundles.getString("firstname") + "\n");
         }
 
         if( emailField.getText().length() == 0 ) {
-            builder.append("Az E-mail cím mező kitöltése kötelező!\n");
+            builder.append(Bundles.getString("missing input") +  "e-mail\n");
         }
 
         if(!Constant.isValidEmail(emailField.getText().trim())) {
-            builder.append("Az E-mail cím felépítése nem megfelelő!\n");
+            builder.append(Bundles.getString("emailwrongformat") + "\n");
         }
 
         if( builder.toString().length() != 0 ) {

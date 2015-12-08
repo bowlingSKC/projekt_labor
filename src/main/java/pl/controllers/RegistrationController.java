@@ -49,7 +49,7 @@ public class RegistrationController {
         try {
             checkFields();
 
-            SendMail.Send(emailField.getText(), "Regisztr�ci�", "Sikeresen regisztr�lt�l a rendszer�nkbe.\n Jelszavad: " + pswdField.getText());
+            SendMail.Send(emailField.getText(), Bundles.getString("registration.label"), Bundles.getString("registration.label") + "\n" +  Bundles.getString("password") + pswdField.getText());
 
             User newUser = creteUserFromFields();
             Session session = SessionUtil.getSession();
@@ -59,9 +59,9 @@ public class RegistrationController {
             session.close();
 
             dialogStage.close();
-            MessageBox.showInformationMessage("Regisztr?ci?", "Sikeres regisztr?ci?!", "Most m?r bejelentkezhetsz az E-mail c?meddel ?s jelzavaddal.", false);
+            MessageBox.showInformationMessage(Bundles.getString("registration.label"), Bundles.getString("registration.label"), Bundles.getString("canlogin"), false);
         } catch (Exception ex) {
-            MessageBox.showErrorMessage("Hiba", "Nem t?lt?tt?l ki minden mez?t helyesen!", ex.getMessage(), false);
+            MessageBox.showErrorMessage(Bundles.getString("error.nodb.title"), Bundles.getString("allfieldcorrectly"), ex.getMessage(), false);
         }
     }
 
@@ -92,39 +92,39 @@ public class RegistrationController {
         StringBuffer buffer = new StringBuffer();
 
         if (firstnameField.getText().length() == 0) {
-            buffer.append("Nem t?lt?tted ki a \'Vezet?kn?v\' mez?t!\n");
+            buffer.append(Bundles.getString("missing input") + Bundles.getString("lastname") + "\n");
         }
 
         if (lastnameField.getText().length() == 0) {
-            buffer.append("Nem t?lt?tted ki a \'Keresztn?v\' mez?t!\n");
+            buffer.append(Bundles.getString("missing input") + Bundles.getString("firstname") + "\n");
         }
 
         if (emailField.getText().length() == 0) {
-            buffer.append("Nem t?lt?tted ki a \'E-mail\' mez?t!\n");
+            buffer.append(Bundles.getString("missing input") +  "e-mail\n");
         }
 
         if (!Constant.isValidEmail(emailField.getText().trim())) {
-            buffer.append("Helytelen E-mail c?m form?tumot adt?l meg!\n");
+            buffer.append(Bundles.getString("emailwrongformat") +"\n");
         }
 
         if (existEmail()) {
-            buffer.append("Ez az email c?m m?r regisztr?lva van!\n");
+            buffer.append(Bundles.getString("emailcollosion") + "\n");
         }
 
         if (pswdField.getText().length() == 0) {
-            buffer.append("Nem t?lt?tted ki a \'Jelsz?\' mez?t!\n");
+            buffer.append(Bundles.getString("missing input") + Bundles.getString("passwordC") + "\n");
         }
 
         if (pswdCField.getText().length() == 0) {
-            buffer.append("Nem t?lt?tted ki a \'Jelsz? meger?s?t?se\' mez?t!\n");
+            buffer.append(Bundles.getString("missing input") + Bundles.getString("passwordC") + "\n");
         }
 
         if (pswdField.getText().length() < 8 || pswdField.getText().length() >= 20) {
-            buffer.append("A jelsz?nak 8 ?s 20 karakter k?z?tti hossz?s?g?nak kell lennie!\n");
+            buffer.append(Bundles.getString("passwordlen") + "\n");
         }
 
         if (!(pswdField.getText().equals(pswdCField.getText()))) {
-            buffer.append("A k?t beg?pelt jelsz? nem egyezik!");
+            buffer.append(Bundles.getString("passwordmismatch"));
         }
 
         if (buffer.toString().length() != 0) {

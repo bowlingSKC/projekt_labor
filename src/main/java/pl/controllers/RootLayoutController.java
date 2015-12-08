@@ -80,7 +80,7 @@ public class RootLayoutController {
     @FXML
     private void handleLogin() {
         if( emailTextField.getText().length() == 0 || pswdTextField.getText().length() == 0 ) {
-            MessageBox.showErrorMessage("Hiba", "Nem t�ltt�l ki minden mez?t!", "Minden mez? kit�lt�se k�telez?", false);
+            MessageBox.showErrorMessage(Bundles.getString("error.nodb.title"), Bundles.getString("allfield"),Bundles.getString("allfieldmust"), false);
             return;
         }
 
@@ -93,11 +93,11 @@ public class RootLayoutController {
             Login login = null;
             if( user == null ) {
                 login = new Login(null, InetAddress.getLocalHost().getHostAddress(), new Date(), false);
-                MessageBox.showErrorMessage("Hiba", "Rossz bejelentkez�si adatok", "Ilyen E-mail c�m nem tal�lhat� a rendszerben!", false);
+                MessageBox.showErrorMessage(Bundles.getString("error.nodb.title"), Bundles.getString("wronginput"), Bundles.getString("emailmissing"), false);
             } else {
                 if( !(Main.getSHA512Hash( pswdTextField.getText(), user.getSalt() ).equals(user.getPassword())) ) {
                     login = new Login(user, InetAddress.getLocalHost().getHostAddress(), new Date(), false);
-                    MessageBox.showErrorMessage("Hiba", "Rossz bejelentkez�si adatok", "Hib�s E-mail c�m �s jelsz� p�ros!", false);
+                    MessageBox.showErrorMessage(Bundles.getString("error.nodb.title"), Bundles.getString("wronginput"), Bundles.getString("emailwrong"), false);
                 } else {
                     login = new Login(user, InetAddress.getLocalHost().getHostAddress(), new Date(), true);
                     Main.login(user);
@@ -158,7 +158,7 @@ public class RootLayoutController {
             stage.initModality(Modality.WINDOW_MODAL);
             stage.initStyle(StageStyle.UNDECORATED);
 
-            FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/ForgotPassword.fxml") );
+            FXMLLoader loader = new FXMLLoader( Main.class.getResource("../layout/ForgotPassword.fxml"), Bundles.getBundle() );
             AnchorPane pane = loader.load();
 
             Scene scene = new Scene(pane);
@@ -179,7 +179,7 @@ public class RootLayoutController {
     private void handleRegistration() {
         try {
             Stage stage = new Stage();
-            stage.setTitle("Regisztr�ci�");
+            stage.setTitle(Bundles.getString("registration.label"));
             stage.initOwner( Main.getPrimaryStage() );
             stage.initModality(Modality.WINDOW_MODAL);
             stage.initStyle(StageStyle.UNDECORATED);

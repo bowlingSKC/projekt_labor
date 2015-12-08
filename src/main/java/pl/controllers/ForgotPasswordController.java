@@ -15,6 +15,7 @@ import org.hibernate.criterion.Restrictions;
 import pl.Main;
 import pl.MessageBox;
 import pl.SendMail;
+import pl.bundles.Bundles;
 import pl.jpa.SessionUtil;
 import pl.model.User;
 
@@ -32,7 +33,7 @@ public class ForgotPasswordController {
     private Label stageCloseLabel;
 
     String recipiantEmail;                              //destination
-    String title = "Új jelszó";                //subject
+    String title = Bundles.getString("newpassword");                //subject
     String message;                                     //message
     private SecureRandom random;
     public String nextSessionId() {
@@ -46,10 +47,10 @@ public class ForgotPasswordController {
 
     @FXML
     private void handleSend() {
-        message = "Új jelszavad: ";
+        message = Bundles.getString("newpassword") + " ";
         recipiantEmail = mailField.getText();
         if(mailField.getText().length() == 0) {
-            System.out.println("�res mez?.");
+            System.out.println("Üres mező.");
         }
         random = new SecureRandom();                    //generate random number
         String newpassword = nextSessionId();           //save password to a String
@@ -64,11 +65,11 @@ public class ForgotPasswordController {
             System.out.println(message);
             //mailField.setText("Kérlek várj!");
             SendMail.Send(recipiantEmail, title, message);
-            mailField.setText("E-mail elküldve!");
+            mailField.setText(Bundles.getString("emailsent"));
         } catch (Throwable ex) {
             ex.printStackTrace();
-            MessageBox.showErrorMessage("Hiba", "A jelsz�eml�keztet? elk�ld�se sikertelen volt!",
-                    "Pr�b�lja k�s?bb.", false);
+            MessageBox.showErrorMessage(Bundles.getString("error.nodb.title"), Bundles.getString("emailsentfail"),
+                    Bundles.getString("trylater"), false);
         }
 
     }

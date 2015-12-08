@@ -376,10 +376,10 @@ public class AccountListController {
         try {
             float money = Float.valueOf( newAccMoney.getText().trim() );
             if( money < 0 ) {
-                buffer.append("Az összeg 0-nál nagyobb számnak kell lennie!\n");
+                buffer.append(Bundles.getString("moneygt") +"!\n");
             }
         } catch (Exception e) {
-            buffer.append("Összegnek csak számot lehet beírni!\n");
+            buffer.append(Bundles.getString("providenumber") +"\n");
         }
 
         if( buffer.toString().length() != 0 ) {
@@ -486,7 +486,7 @@ public class AccountListController {
 
             handleBackToTableView();
         } catch (Exception ex) {
-            MessageBox.showErrorMessage(Bundles.getString("error.nodb.title"), "Nem lehet módosítani a számlát!", ex.getMessage(), false);
+            MessageBox.showErrorMessage(Bundles.getString("error.nodb.title"), Bundles.getString("error.processing"), ex.getMessage(), false);
         }
     }
 

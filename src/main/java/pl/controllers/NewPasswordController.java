@@ -6,6 +6,7 @@ import javafx.stage.Stage;
 import org.hibernate.Session;
 import pl.Main;
 import pl.MessageBox;
+import pl.bundles.Bundles;
 import pl.jpa.SessionUtil;
 import pl.model.User;
 
@@ -25,10 +26,10 @@ public class NewPasswordController {
     @FXML
     private void handleSave() {
         if( !newPasswordField.getText().equals(newPasswordConfirmField.getText()) ) {
-            MessageBox.showErrorMessage("Hiba", "A k�t jelsz� nem egyezik!", "", false);
+            MessageBox.showErrorMessage(Bundles.getString("error.nodb.title"), Bundles.getString("passwordmismatch"), "", false);
         } else if( newPasswordField.getText().length() < 8 || newPasswordField.getText().length() > 20 ) {
-            MessageBox.showErrorMessage("Hiba", "Az �j jelsz� nem felel meg a felt�teleknek!",
-                    "A jelszavaknak 8 �s 20 karakter k�z�tti hossz�s�g�nak kell lennie.", false);
+            MessageBox.showErrorMessage(Bundles.getString("error.nodb.title"), Bundles.getString("passwordlen"),
+                    Bundles.getString("passwordlen"), false);
         } else if( confirm() ) {
             try {
                 String newSalt = Main.getSalt();
@@ -36,8 +37,8 @@ public class NewPasswordController {
                 changePassword(newPass, newSalt);
             } catch (Throwable ex) {
                 ex.printStackTrace();
-                MessageBox.showErrorMessage("Hiba", "Bels? hiba miatt nem lehetett megv�ltozatatni a jelsz�t!",
-                        "Pr�b�lja k�s?bb.", false);
+                MessageBox.showErrorMessage(Bundles.getString("error.nodb.title"), Bundles.getString("error.processing"),
+                        Bundles.getString("trylater"), false);
             }
         }
     }
@@ -52,14 +53,14 @@ public class NewPasswordController {
         tx.commit();
         session.close();
 
-        MessageBox.showInformationMessage("Jelsz� megv�ltoztat�sa", "A jelsz� sikeresen megv�ltozott!",
-                "Legk�zelebb az �j jelsz�val l�phet be. Az �j jelsz� ki lett k�ldve a regisztr�lt E-mail c�mre.", false);
+        MessageBox.showInformationMessage(Bundles.getString("changepassword"), Bundles.getString("changepwok"),
+                Bundles.getString("pwsent"), false);
     }
 
     private boolean confirm() {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Jelsz� megv�ltoztat�sa");
-        alert.setHeaderText("Biztosan meg szeretn�d v�ltoztatni a jelenlegi jelszavad?");
+        alert.setTitle(Bundles.getString("changepassword"));
+        alert.setHeaderText(Bundles.getString("changepwsure"));
         Optional<ButtonType> result = alert.showAndWait();
         if( result.get() == ButtonType.OK ) {
             return true;

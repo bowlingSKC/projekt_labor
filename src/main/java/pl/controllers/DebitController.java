@@ -238,12 +238,12 @@ public class DebitController {
         }
 
         if( currencyComboBox.getSelectionModel().getSelectedItem() == null ) {
-            builder.append("Valuta kiválasztása kötelező!\n");
+            builder.append(Bundles.getString("havetocurrency") + "\n");
         }
 
         if( deadlinePicker.getValue() != null ) {
             if( deadlinePicker.getValue().isBefore(LocalDate.now()) ) {
-                builder.append("A határidő nem lehet a mai napnál korábban!\n");
+                builder.append(Bundles.getString("duebefore") + "\n");
             }
         }
 
@@ -272,8 +272,8 @@ public class DebitController {
             deleteLink.setOnAction((ActionEvent event) -> {
                 Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
                 alert.setTitle( Bundles.getString("confirmation") );
-                alert.setHeaderText("Biztosan tötölni szeretné a tartozást?");
-                alert.setContentText("A műveletet később nem lehet visszavonni.");
+                alert.setHeaderText(Bundles.getString("deletedebit"));
+                alert.setContentText(Bundles.getString("undone"));
 
                 Optional<ButtonType> result = alert.showAndWait();
                 if( result.get() == ButtonType.OK ) {
@@ -394,7 +394,7 @@ public class DebitController {
 
             handleBackToTablePane();
         } catch (Exception ex) {
-            MessageBox.showErrorMessage(Bundles.getString("error.nodb.title"), "Hiba történt a feldolgozás közben!", ex.getMessage(), false);
+            MessageBox.showErrorMessage(Bundles.getString("error.nodb.title"),Bundles.getString("error.processing"), ex.getMessage(), false);
         }
     }
 
@@ -402,7 +402,7 @@ public class DebitController {
         float amount = Float.valueOf(payAmountField.getText());
         if( payCashTypeComboBox.getSelectionModel().getSelectedItem().equals(Bundles.getString("account")) ) {
             if( (payAccountComboBox.getSelectionModel().getSelectedItem().getMoney() - amount) < 0 ) {
-                throw new Exception("Nincs elég pénz ezen a bankszámlán a tranzakció végrehajtásáhpz!");
+                throw new Exception(Bundles.getString("notenoughmoney"));
             }
         } else {
             ReadyCash selected = null;
@@ -413,11 +413,11 @@ public class DebitController {
                 }
             }
             if( selected == null ) {
-                throw new Exception("Nincs ilyen készpénz valutád regisztrálva!");
+                throw new Exception(Bundles.getString("noselectedcurr"));
             }
 
             if( selected.getMoney() < amount ) {
-                throw new Exception("Nincs elég készpénzed ebből a valutából!");
+                throw new Exception(Bundles.getString("notenmon"));
             }
         }
     }
@@ -427,14 +427,14 @@ public class DebitController {
 
         try {
             if( Float.valueOf(payAmountField.getText()) < 0 ) {
-                buffer.append("A tartozás mezőbe nem lehet mínusz összeg!\n");
+                buffer.append(Bundles.getString("providenumber") +"\n");
             }
             if( payDebit.getMoney() < Float.valueOf(payAmountField.getText()) ) {
-                buffer.append("A tartozás mezőben több pénz szerepel, mint az eredeti tartozás!\n");
-                buffer.append("Az eredeti tartozás összege: "+ payDebit.getMoney() +"\n");
+                buffer.append(Bundles.getString("debitmore")+"\n");
+                buffer.append(Bundles.getString("debitoriginal")+" "+ payDebit.getMoney() +"\n");
             }
         } catch (NumberFormatException ex ) {
-            buffer.append("A tartozás mezőbe csak számot írhat be!\n");
+            buffer.append(Bundles.getString("providenumber") +"\n");
         }
 
         if( buffer.toString().length() != 0 ) {

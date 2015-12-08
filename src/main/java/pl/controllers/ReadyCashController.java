@@ -220,7 +220,7 @@ public class ReadyCashController {
             updateTransactionTableItems();
             
         } catch (Throwable ex) {
-            MessageBox.showErrorMessage("Hiba", "Nem lehet létrehozni a tranzakciót!", ex.getMessage(), false);
+            MessageBox.showErrorMessage(Bundles.getString("error.nodb.title"), Bundles.getString("error.processing"), ex.getMessage(), false);
         }
     }
 
@@ -257,7 +257,7 @@ public class ReadyCashController {
 
     private void handleOutTransactions() throws Exception {
         if( Main.getLoggedUser().getReadycash() == null ) {
-            throw new Exception("Nincs regisztrált készpénzed, így nem tudsz kimenő pénzt felvenni!");
+            throw new Exception(Bundles.getString("noregistered"));
         }
 
         ReadyCash readyCash = null;
@@ -269,14 +269,14 @@ public class ReadyCashController {
         }
 
         if( readyCash == null ) {
-            throw new Exception("A kiválasztott valutából nincs ");
+            throw new Exception(Bundles.getString("noselectedcurr"));
         }
 
         if( readyCash.getMoney() < Float.valueOf(amountFiled.getText()) ) {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setTitle("Nincs elegendő pénzmennyiség");
-            alert.setHeaderText("Nincs elég pénz a megadott valután.");
-            alert.setContentText("Akarja az összes pénzt levenni a valutáról?");
+            alert.setTitle(Bundles.getString("notenmon"));
+            alert.setHeaderText(Bundles.getString("notenmon"));
+            alert.setContentText(Bundles.getString("alltakeoff"));
             Optional<ButtonType> result = alert.showAndWait();
             if( result.get() == ButtonType.OK ) {
                 transactionDelete(readyCash);
@@ -344,10 +344,10 @@ public class ReadyCashController {
 
         try {
             if( Float.valueOf(amountFiled.getText()) < 0 ) {
-                buffer.append("Nem lehet negatív számot megadni!\n");
+                buffer.append(Bundles.getString("gtzero")+"\n");
             }
         } catch (NumberFormatException ex) {
-            buffer.append("Csak számot lehet megadni a mezőben!\n");
+            buffer.append(Bundles.getString("providenumber")+"\n");
         }
 
         if( buffer.toString().length() != 0 ) {

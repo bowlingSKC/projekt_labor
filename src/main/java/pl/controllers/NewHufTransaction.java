@@ -8,6 +8,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import pl.Main;
 import pl.MessageBox;
+import pl.bundles.Bundles;
 import pl.jpa.SessionUtil;
 import pl.model.*;
 
@@ -40,7 +41,7 @@ public class NewHufTransaction {
         try {
             checkAllFields();
         } catch (Throwable ex) {
-            MessageBox.showErrorMessage("Hiba", "A megb?z?st nem lehet l?trehotni!", ex.getMessage(), false);
+            MessageBox.showErrorMessage(Bundles.getString("error.nodb.title"), Bundles.getString("error.processing"), ex.getMessage(), false);
             return;
         }
 
@@ -78,10 +79,10 @@ public class NewHufTransaction {
 
     private boolean confirmSendMoney() {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Meger?s?t?s");
-        alert.setHeaderText("Biztosan v?gre akarod hajtani a tranzakci?t?");
-        alert.setContentText("Kedvezm?nyezett: " + toAccountField.getText() + "\n?sszeg: " + moneyField.getText() + " forint\n" +
-                "Tranzakci? ut?n marad? ?sszeg: " + (accountComboBox.getSelectionModel().getSelectedItem().getMoney() - Float.valueOf(moneyField.getText())) + " forint");
+        alert.setTitle( Bundles.getString("confirmation"));
+        alert.setHeaderText(Bundles.getString("suretrans"));
+        alert.setContentText(Bundles.getString("anotheracc") + toAccountField.getText() + "\n" + Bundles.getString("moneyC") + moneyField.getText() + " forint\n" +
+                Bundles.getString("aftertrans") + (accountComboBox.getSelectionModel().getSelectedItem().getMoney() - Float.valueOf(moneyField.getText())) + " forint");
         Optional<ButtonType> result = alert.showAndWait();
         if( result.get() == ButtonType.OK ) {
             return true;
@@ -93,23 +94,23 @@ public class NewHufTransaction {
         StringBuffer buffer = new StringBuffer();
 
         if( accountComboBox.getSelectionModel().getSelectedItem() == null ) {
-            buffer.append("Nem v?lasztott?l ki sz?ml?t!\n");
+            buffer.append(Bundles.getString("accountselect")+"\n");
         }
 
         if( toAccountField.getText().length() != 24 ) {
-            buffer.append("A banksz?mlasz?mnak 24 sz?mnak kell lennie!\n");
+            buffer.append(Bundles.getString("account.number.false")+"\n");
         }
 
         try {
             float money = Float.valueOf(moneyField.getText());
             if( money < 0 ) {
-                buffer.append("Nem k?ldhetsz 0-n?l kisebb ?sszeget!\n");
+                buffer.append(Bundles.getString("moneygt")+"\n");
             }
             if( accountComboBox.getSelectionModel().getSelectedItem() != null && money > accountComboBox.getSelectionModel().getSelectedItem().getMoney()  ) {
-                buffer.append("Nincs el?g p?nz a sz?ml?don!\n");
+                buffer.append(Bundles.getString("notenoughmoney")+"\n");
             }
         } catch (NumberFormatException ex) {
-            buffer.append("Csak sz?mot ?rhatsz a banksz?mlasz?mhoz!\n");
+            buffer.append(Bundles.getString("providenumber")+"\n");
         }
 
         if( buffer.toString().length() != 0 ) {
@@ -150,7 +151,7 @@ public class NewHufTransaction {
                             }
                         }
                         if( !found ) {
-                            bankLabel.setText( "Ismeretlen bank" );
+                            bankLabel.setText( Bundles.getString("unknownbank") );
                         }
                     }
                 }
