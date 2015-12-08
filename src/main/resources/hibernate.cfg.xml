@@ -8,9 +8,9 @@
 
         <!-- Database connection settings -->
         <property name="connection.driver_class">com.mysql.jdbc.Driver</property>
-        <property name="connection.url">jdbc:mysql://localhost:3306/pl</property>
-        <property name="hibernate.connection.username">root</property>
-        <property name="hibernate.connection.password"></property>
+        <property name="connection.url">jdbc:mysql://193.6.33.64:3306/jf0u1y</property>
+        <property name="hibernate.connection.username">jf0u1y</property>
+        <property name="hibernate.connection.password">oephaiqu</property>
         <property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
 
         <!-- Create the database scheme on startup -->

@@ -4,7 +4,7 @@ import javax.persistence.*;
 import java.util.Date;
 
 @Entity
-@Table(name = "login")
+@Table(name = "pl_login")
 public class Login implements Comparable<Login> {
 
     @Id

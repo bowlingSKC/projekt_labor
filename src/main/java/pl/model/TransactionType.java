@@ -4,7 +4,7 @@ import javax.persistence.*;
 import java.io.Serializable;
 
 @Entity
-@Table(name = "transaction_type")
+@Table(name = "pl_transaction_type")
 public class TransactionType  implements Serializable {
 
     @Id

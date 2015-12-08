@@ -3,7 +3,7 @@ package pl.model;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "Currency")
+@Table(name = "pl_currency")
 public class Currency {
 
     @Id

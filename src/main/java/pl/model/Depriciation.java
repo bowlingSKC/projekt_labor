@@ -7,7 +7,7 @@ import javax.persistence.Table;
 import java.util.Date;
 
 @Entity
-@Table(name = "depriciation")
+@Table(name = "pl_depriciation")
 public abstract class Depriciation {
 
     @Id

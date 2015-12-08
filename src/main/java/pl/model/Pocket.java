@@ -5,7 +5,7 @@ import java.util.Date;
 import java.util.Set;
 
 @Entity
-@Table(name = "pocket")
+@Table(name = "pl_pocket")
 public class Pocket {
 
     @Id

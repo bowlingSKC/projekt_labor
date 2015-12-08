@@ -6,6 +6,7 @@ import java.util.Set;
 
 @Entity
 @DiscriminatorValue("C")
+@Table(name = "pl_readycash")
 public class ReadyCash {
 
     @Id

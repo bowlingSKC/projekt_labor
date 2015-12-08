@@ -5,7 +5,7 @@ import java.util.Date;
 import java.util.Set;
 
 @Entity
-@Table(name = "category")
+@Table(name = "pl_category")
 public class myCategory {
 
     @Id

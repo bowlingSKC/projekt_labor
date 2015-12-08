@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "cash_transaction")
+@Table(name = "pl_cash_transaction")
 public class CashTransaction extends Transaction {
 
     @ManyToOne

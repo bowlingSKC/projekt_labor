@@ -8,7 +8,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "account_transaction")
+@Table(name = "pl_account_transaction")
 public class AccountTransaction extends Transaction implements Comparable<AccountTransaction> {
 
     @ManyToOne
