@@ -9,9 +9,9 @@ import java.util.ResourceBundle;
 public final class Bundles {
 
     private static ResourceBundle bundle;
-    private static Locale locale = new Locale(Locale.getDefault().getLanguage(), Locale.getDefault().getCountry());
+    //private static Locale locale = new Locale(Locale.getDefault().getLanguage(), Locale.getDefault().getCountry());
 //    private static Locale locale = new Locale("en", "EN");
-//    private static Locale locale = new Locale("hu", "HU");
+    private static Locale locale = new Locale("hu", "HU");
 
     public static String getString(String key) {
         return getBundle().getString(key);
@@ -25,7 +25,7 @@ public final class Bundles {
     public static synchronized ResourceBundle getBundle() {
         if (bundle == null) {
             final String packageName = Bundles.class.getPackage().getName();
-            bundle = ResourceBundle.getBundle(packageName + ".bundle", locale, new UTF8Control()); //NOI18N
+            bundle = ResourceBundle.getBundle("pl.bundles.bundle", locale, new UTF8Control()); //NOI18N
         }
         return bundle;
     }
